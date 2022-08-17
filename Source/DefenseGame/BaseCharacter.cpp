@@ -2,6 +2,7 @@
 
 
 #include "BaseCharacter.h"
+#include "BaseCharacterAnimInstance.h"
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"

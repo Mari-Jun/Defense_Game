@@ -9,6 +9,25 @@
 class USpringArmComponent;
 class UCameraComponent;
 
+class UBlendSpace1D;
+
+USTRUCT(BlueprintType)
+struct FCharacterAnimationData
+{
+	GENERATED_BODY()
+	
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimSequence* IdleAnimSequence;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UBlendSpace1D* JogStartBlendSpace;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UBlendSpace1D* JogBlendSpace;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UBlendSpace1D* JogStopBlendSpace;
+};
+
 UCLASS()
 class DEFENSEGAME_API ABaseCharacter : public ACharacter
 {
@@ -40,4 +59,8 @@ private:
 	USpringArmComponent* CameraBoom;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	FCharacterAnimationData CharacterAnimationData;
+
 };
