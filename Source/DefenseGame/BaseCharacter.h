@@ -26,6 +26,15 @@ public:
 	UBlendSpace1D* JogBlendSpace;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UBlendSpace1D* JogStopBlendSpace;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimSequence* JumpStartSequence;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimSequence* JumpApexSequence;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimSequence* JumpLandSequence; 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly) /**Use Additive Sequence*/
+	UAnimSequence* JumpRecoverySequence;
 };
 
 UCLASS()

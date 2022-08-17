@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "BasePlayerController.generated.h"
 
+class ABaseCharacter;
 /**
  * 
  */
@@ -25,5 +26,9 @@ private:
 	virtual void MoveRight(float AxisValue);
 	virtual void Turn(float AxisValue);
 	virtual void LookUp(float AxisValue);
-	
+	virtual void Jump();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	ABaseCharacter* BaseCharacter = nullptr;
 };
