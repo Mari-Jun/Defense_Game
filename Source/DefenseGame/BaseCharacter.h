@@ -35,6 +35,9 @@ public:
 	UAnimSequence* JumpLandSequence; 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly) /**Use Additive Sequence*/
 	UAnimSequence* JumpRecoverySequence;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<UAnimMontage*> AttackAnimMontange;
 };
 
 UCLASS()
@@ -58,7 +61,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-
+	virtual void Attack();
 
 protected:
 
@@ -69,6 +72,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	FCharacterAnimationData CharacterAnimationData;
 	

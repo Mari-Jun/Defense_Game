@@ -54,4 +54,15 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &ABaseCharacter::Attack);
+}
+
+void ABaseCharacter::Attack()
+{
+	if (CharacterAnimationData.AttackAnimMontange.IsEmpty() == false)
+	{
+		int32 index = FMath::RandRange(0, CharacterAnimationData.AttackAnimMontange.Num() - 1);
+		const auto& attack_montage = CharacterAnimationData.AttackAnimMontange[index];
+		PlayAnimMontage(attack_montage);
+	}
 }
