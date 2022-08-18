@@ -26,9 +26,20 @@ private:
 	virtual void MoveRight(float AxisValue);
 	virtual void Turn(float AxisValue);
 	virtual void LookUp(float AxisValue);
+	virtual void ZoomCamera(float AxisValue);
+
 	virtual void Jump();
+	void ResetCameraZoom();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 	ABaseCharacter* BaseCharacter = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	float DefaultTargetArmLength = 450.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	float ZoomCameraSpeed = 2000.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	FVector2D ZoomCameraMinMaxValue = { 200.f, 800.f };
+
 };

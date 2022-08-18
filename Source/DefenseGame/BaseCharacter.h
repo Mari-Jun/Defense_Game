@@ -71,5 +71,7 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	FCharacterAnimationData CharacterAnimationData;
-
+	
+public:
+	USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 };

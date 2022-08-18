@@ -4,6 +4,10 @@
 #include "BasePlayerController.h"
 #include "BaseCharacter.h"
 
+#include "GameFramework/SpringArmComponent.h"
+
+#include "Kismet/KismetMathLibrary.h"
+
 void ABasePlayerController::BeginPlay()
 {
 	BaseCharacter = Cast<ABaseCharacter>(GetPawn());
@@ -11,6 +15,7 @@ void ABasePlayerController::BeginPlay()
 	{
 		UE_LOG(LogTemp, Fatal, TEXT("Could not cast GetPawn() to ABaseCharacter"));
 	}
+	DefaultTargetArmLength = BaseCharacter->GetCameraBoom()->TargetArmLength;
 }
 
 void ABasePlayerController::SetupInputComponent()
@@ -21,8 +26,10 @@ void ABasePlayerController::SetupInputComponent()
 	InputComponent->BindAxis("MoveRight", this, &ABasePlayerController::MoveRight);
 	InputComponent->BindAxis("Turn", this, &ABasePlayerController::Turn);
 	InputComponent->BindAxis("LookUp", this, &ABasePlayerController::LookUp);
+	InputComponent->BindAxis("Zoom", this, &ABasePlayerController::ZoomCamera);
 
 	InputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ABasePlayerController::Jump);
+	InputComponent->BindAction("ResetZoom", EInputEvent::IE_Pressed, this, &ABasePlayerController::ResetCameraZoom);
 }
 
 void ABasePlayerController::MoveForward(float AxisValue)
@@ -47,7 +54,20 @@ void ABasePlayerController::LookUp(float AxisValue)
 	AddPitchInput(AxisValue);
 }
 
+void ABasePlayerController::ZoomCamera(float AxisValue)
+{
+	float ChangeValue = GetWorld()->GetDeltaSeconds() * AxisValue * ZoomCameraSpeed;
+	float NewTargetArmLength = BaseCharacter->GetCameraBoom()->TargetArmLength + ChangeValue;
+	NewTargetArmLength = UKismetMathLibrary::FClamp(NewTargetArmLength, ZoomCameraMinMaxValue.X, ZoomCameraMinMaxValue.Y);
+	BaseCharacter->GetCameraBoom()->TargetArmLength = NewTargetArmLength;
+}
+
 void ABasePlayerController::Jump()
 {
 	BaseCharacter->Jump();
+}
+
+void ABasePlayerController::ResetCameraZoom()
+{
+	BaseCharacter->GetCameraBoom()->TargetArmLength = DefaultTargetArmLength;
 }
