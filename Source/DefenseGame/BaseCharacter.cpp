@@ -59,10 +59,16 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ABaseCharacter::Attack()
 {
-	if (CharacterAnimationData.AttackAnimMontange.IsEmpty() == false)
+	if (CharacterAnimationData.AttackAnimMontange.IsEmpty() == false && bIsAttacking == false)
 	{
 		int32 index = FMath::RandRange(0, CharacterAnimationData.AttackAnimMontange.Num() - 1);
 		const auto& attack_montage = CharacterAnimationData.AttackAnimMontange[index];
 		PlayAnimMontage(attack_montage);
+		bIsAttacking = true;
 	}
+}
+
+void ABaseCharacter::AttackEnd()
+{
+	bIsAttacking = false;
 }
