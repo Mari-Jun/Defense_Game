@@ -2,8 +2,11 @@
 
 
 #include "CharacterCaster.h"
+#include "Projectile.h"
 
 #include "Animation/BlendSpace1D.h"
+
+#include "Kismet/GameplayStatics.h"
 
 ACharacterCaster::ACharacterCaster()
 {
@@ -46,4 +49,38 @@ ACharacterCaster::ACharacterCaster()
 			TEXT("AnimMontage'/Game/_Game/Characters/Caster/Animations/Caster_Attack_D_Montage.Caster_Attack_D_Montage'")))
 	);
 
+}
+
+void ACharacterCaster::AttackHit()
+{
+	if (GEngine != nullptr && GEngine->GameViewport != nullptr)
+	{
+		FVector2D ViewportSize;
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+
+		FVector2D ViewportMidPos = ViewportSize * 0.5f;
+		FVector CrosshairWorldPosition, CrosshairWorldDirection;
+
+		if (UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0),
+			ViewportMidPos, CrosshairWorldPosition, CrosshairWorldDirection))
+		{
+			const FVector Start{ CrosshairWorldPosition };
+			const FVector End{ Start + CrosshairWorldDirection * 50'000 };
+
+			if (AttackMagicBall != nullptr)
+			{
+				//애니메이션 커브를 통해서 왼쪽손에서의 공격인지, 오른쪽손에서의 공격인지 확인한다.
+				UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+				if (AnimInstance != nullptr)
+				{
+					float AttackingHandValue = AnimInstance->GetCurveValue("AttackingHand");
+
+					FVector SpawnPoint = (AttackingHandValue > 0.0f) ? GetMesh()->GetBoneLocation("hand_l") : GetMesh()->GetBoneLocation("hand_r");
+
+					AProjectile* SpawnBall = GetWorld()->SpawnActor<AProjectile>(AttackMagicBall, SpawnPoint, FRotator{});
+					SpawnBall->SetActorEnableCollision(false);
+				}
+			}
+		}
+	}
 }

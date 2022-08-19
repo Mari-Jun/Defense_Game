@@ -6,6 +6,7 @@
 #include "BaseCharacter.h"
 #include "CharacterCaster.generated.h"
 
+class AProjectile;
 /**
  * 
  */
@@ -17,4 +18,11 @@ class DEFENSEGAME_API ACharacterCaster : public ABaseCharacter
 public:
 	ACharacterCaster();
 	
+
+public:
+	virtual void AttackHit() override;
+
+private:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AProjectile> AttackMagicBall;
 };

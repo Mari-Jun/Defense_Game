@@ -72,3 +72,7 @@ void ABaseCharacter::AttackEnd()
 {
 	bIsAttacking = false;
 }
+
+void ABaseCharacter::AttackHit()
+{
+}

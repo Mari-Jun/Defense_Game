@@ -69,6 +69,8 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable)
 	virtual void AttackEnd();
+	UFUNCTION(BlueprintCallable)
+	virtual void AttackHit();
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
