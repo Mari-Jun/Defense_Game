@@ -3,6 +3,8 @@
 
 #include "BaseCharacter.h"
 #include "BaseCharacterAnimInstance.h"
+#include "CrosshairWidget.h"
+#include "BasePlayerController.h"
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -35,11 +37,34 @@ ABaseCharacter::ABaseCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
+void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (CrosshairWidget != nullptr)
+	{
+		CrosshairWidget->RemoveFromParent();
+		CrosshairWidget = nullptr;
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (CrosshairWidgetClass != nullptr)
+	{
+		ABasePlayerController* BPC = GetController<ABasePlayerController>();
+		if (BPC != nullptr)
+		{
+			CrosshairWidget = CreateWidget<UCrosshairWidget>(BPC, CrosshairWidgetClass);
+			if (CrosshairWidget != nullptr)
+			{
+				CrosshairWidget->AddToPlayerScreen();
+			}
+		}
+	}
 }
 
 // Called every frame

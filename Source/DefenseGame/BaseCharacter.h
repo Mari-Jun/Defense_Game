@@ -11,6 +11,8 @@ class UCameraComponent;
 
 class UBlendSpace1D;
 
+class UCrosshairWidget;
+
 USTRUCT(BlueprintType)
 struct FCharacterAnimationData
 {
@@ -49,6 +51,8 @@ public:
 	// Sets default values for this character's properties
 	ABaseCharacter();
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -77,6 +81,11 @@ private:
 	USpringArmComponent* CameraBoom;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UCrosshairWidget> CrosshairWidgetClass;
+	UPROPERTY()
+	UCrosshairWidget* CrosshairWidget;
 
 	bool bIsAttacking = false;
 
