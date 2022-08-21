@@ -64,9 +64,6 @@ void ACharacterCaster::AttackHit()
 		if (UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0),
 			ViewportMidPos, CrosshairWorldPosition, CrosshairWorldDirection))
 		{
-			const FVector Start{ CrosshairWorldPosition };
-			const FVector End{ Start + CrosshairWorldDirection * 50'000 };
-
 			if (AttackMagicBall != nullptr)
 			{
 				//애니메이션 커브를 통해서 왼쪽손에서의 공격인지, 오른쪽손에서의 공격인지 확인한다.
@@ -78,7 +75,20 @@ void ACharacterCaster::AttackHit()
 					FVector SpawnPoint = (AttackingHandValue > 0.0f) ? GetMesh()->GetBoneLocation("hand_l") : GetMesh()->GetBoneLocation("hand_r");
 
 					AProjectile* SpawnBall = GetWorld()->SpawnActor<AProjectile>(AttackMagicBall, SpawnPoint, FRotator{});
-					SpawnBall->SetActorEnableCollision(false);
+
+					const FVector Start{ CrosshairWorldPosition };
+					const FVector End{ Start + CrosshairWorldDirection * 50'000 };
+
+					FVector ImpulseWorldDirection = CrosshairWorldDirection;
+
+					FHitResult HitResult;
+					if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility))
+					{
+						ImpulseWorldDirection = HitResult.ImpactPoint - SpawnPoint;
+						ImpulseWorldDirection.Normalize();
+					}
+
+					SpawnBall->AddImpulse(ImpulseWorldDirection);
 				}
 			}
 		}

@@ -11,13 +11,20 @@ AProjectile::AProjectile()
 
 	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>("projectile mesh");
 	SetRootComponent(ProjectileMesh);
+
+	ProjectileMesh->SetSimulatePhysics(true);
+	ProjectileMesh->SetEnableGravity(false);
+	ProjectileMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+
+	ProjectileMesh->SetMassOverrideInKg(NAME_None, 1.0f, true);
 }
 
 // Called when the game starts or when spawned
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	GetWorldTimerManager().SetTimer(LifeTimerHandle, this, &AProjectile::FinishLifeTime, LifeTime);
 }
 
 // Called every frame
@@ -25,5 +32,15 @@ void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AProjectile::FinishLifeTime()
+{
+	GetWorld()->DestroyActor(this);
+}
+
+void AProjectile::AddImpulse(FVector WorldDirection)
+{
+	ProjectileMesh->AddImpulse(WorldDirection * ImpulseScale);
 }
 
