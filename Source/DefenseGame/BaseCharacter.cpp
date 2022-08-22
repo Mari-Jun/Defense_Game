@@ -3,8 +3,9 @@
 
 #include "BaseCharacter.h"
 #include "BaseCharacterAnimInstance.h"
-#include "CrosshairWidget.h"
 #include "BasePlayerController.h"
+#include "CrosshairWidget.h"
+#include "CharacterStatusWidget.h"
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -45,6 +46,12 @@ void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		CrosshairWidget = nullptr;
 	}
 
+	if (StatusWidget != nullptr)
+	{
+		StatusWidget->RemoveFromParent();
+		StatusWidget = nullptr;
+	}
+
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -62,6 +69,19 @@ void ABaseCharacter::BeginPlay()
 			if (CrosshairWidget != nullptr)
 			{
 				CrosshairWidget->AddToPlayerScreen();
+			}
+		}
+	}
+
+	if (StatusWidgetClass != nullptr)
+	{
+		ABasePlayerController* BPC = GetController<ABasePlayerController>();
+		if (BPC != nullptr)
+		{
+			StatusWidget = CreateWidget<UCharacterStatusWidget>(BPC, StatusWidgetClass);
+			if (StatusWidget != nullptr)
+			{
+				StatusWidget->AddToPlayerScreen();
 			}
 		}
 	}

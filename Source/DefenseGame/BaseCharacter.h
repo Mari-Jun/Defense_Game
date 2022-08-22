@@ -12,6 +12,7 @@ class UCameraComponent;
 class UBlendSpace1D;
 
 class UCrosshairWidget;
+class UCharacterStatusWidget;
 
 USTRUCT(BlueprintType)
 struct FCharacterAnimationData
@@ -40,6 +41,18 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<UAnimMontage*> AttackAnimMontange;
+};
+
+USTRUCT(BlueprintType)
+struct FCharacterStatusData
+{
+	GENERATED_BODY()
+	
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 CurrentHP = 100;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 MaxHP = 100;
 };
 
 UCLASS()
@@ -87,12 +100,20 @@ private:
 	UPROPERTY()
 	UCrosshairWidget* CrosshairWidget;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UCharacterStatusWidget> StatusWidgetClass;
+	UPROPERTY()
+	UCharacterStatusWidget* StatusWidget;
+
 	bool bIsAttacking = false;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	FCharacterAnimationData CharacterAnimationData;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	FCharacterStatusData CharacterStatusData;
+
 public:
 	USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 };
