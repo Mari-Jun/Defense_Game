@@ -55,6 +55,8 @@ public:
 	int32 MaxHP = 100;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeHPDelegate, int32, CurrentHP, int32, MaxHP);
+
 UCLASS()
 class DEFENSEGAME_API ABaseCharacter : public ACharacter
 {
@@ -113,6 +115,10 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	FCharacterStatusData CharacterStatusData;
+
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Delegate", meta = (AllowPrivateAccess = "true"))
+	FChangeHPDelegate ChangeHPDelegate;
 
 public:
 	USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

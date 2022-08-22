@@ -25,7 +25,8 @@ class DEFENSEGAME_API UCharacterStatusWidget : public UUserWidget
 	
 protected:
 	virtual void NativePreConstruct() override;
-	
+	virtual void NativeConstruct() override;
+
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UCanvasPanel* CanvasPanel;
@@ -35,4 +36,6 @@ private:
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	ABaseCharacter* BaseCharacter;
 
+public:
+	void SetBaseCharacter(ABaseCharacter* Character);
 };

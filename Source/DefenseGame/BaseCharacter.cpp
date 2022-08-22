@@ -81,17 +81,19 @@ void ABaseCharacter::BeginPlay()
 			StatusWidget = CreateWidget<UCharacterStatusWidget>(BPC, StatusWidgetClass);
 			if (StatusWidget != nullptr)
 			{
+				StatusWidget->SetBaseCharacter(this);
 				StatusWidget->AddToPlayerScreen();
 			}
 		}
 	}
+
 }
 
 // Called every frame
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 }
 
 // Called to bind functionality to input
@@ -116,6 +118,9 @@ void ABaseCharacter::Attack()
 void ABaseCharacter::AttackEnd()
 {
 	bIsAttacking = false;
+
+	//실험을 위한 코드
+	ChangeHPDelegate.Broadcast(--CharacterStatusData.CurrentHP, CharacterStatusData.MaxHP);
 }
 
 void ABaseCharacter::AttackHit()
