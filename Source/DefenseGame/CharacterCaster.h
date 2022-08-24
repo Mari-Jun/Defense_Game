@@ -19,7 +19,7 @@ public:
 	ACharacterCaster();
 
 private:
-	virtual void AbilityR() override;
+	virtual void AbilityR(int32 AbilityIndex) override;
 	
 protected:
 	virtual void AttackLMBHit() override;

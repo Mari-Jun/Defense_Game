@@ -6,6 +6,7 @@
 #include "BasePlayerController.h"
 #include "CrosshairWidget.h"
 #include "CharacterStatusWidget.h"
+#include "CharacterSkillTimeWidget.h"
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -36,6 +37,9 @@ ABaseCharacter::ABaseCharacter()
 	bUseControllerRotationRoll = false;
 
 	GetCharacterMovement()->bOrientRotationToMovement = false;
+
+	ChangeAbilityTimeDelegate.SetNum(4);
+	CharacterStatusData.AbilityTimerHandle.SetNum(4);
 }
 
 void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -93,7 +97,15 @@ void ABaseCharacter::BeginPlay()
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+
+	for (int32 Index = 0; Index < CharacterStatusData.AbilityTimerHandle.Num(); ++Index)
+	{
+		if (CharacterStatusData.AbilityTimerHandle[Index].IsValid())
+		{
+			float ElapsedTime = GetWorldTimerManager().GetTimerElapsed(CharacterStatusData.AbilityTimerHandle[Index]);
+			ChangeAbilityTimeDelegate[Index].Broadcast(CharacterStatusData.AbilityTime[Index] - ElapsedTime);
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -102,10 +114,10 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &ABaseCharacter::Attack);
-	PlayerInputComponent->BindAction("AbilityQ", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityQ);
-	PlayerInputComponent->BindAction("AbilityE", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityE);
-	PlayerInputComponent->BindAction("AbilityR", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityR);
-	PlayerInputComponent->BindAction("AbilityRMB", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityRMB);
+	PlayerInputComponent->BindAction<TDelegate<void(int32)>>("AbilityQ", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityQ, 0);
+	PlayerInputComponent->BindAction<TDelegate<void(int32)>>("AbilityE", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityE, 1);
+	PlayerInputComponent->BindAction<TDelegate<void(int32)>>("AbilityR", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityR, 2);
+	PlayerInputComponent->BindAction<TDelegate<void(int32)>>("AbilityRMB", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityRMB, 3);
 }
 
 void ABaseCharacter::Attack()
@@ -120,44 +132,71 @@ void ABaseCharacter::Attack()
 	}
 }
 
-void ABaseCharacter::AbilityQ()
+void ABaseCharacter::AbilityQ(int32 AbilityIndex)
 {
 	if (CharacterAnimationData.AbilityQMontage != nullptr &&
-		AttackState == EAttackState::ENone)
+		AttackState == EAttackState::ENone && CheckAbilityCooldown(AbilityIndex))
 	{
 		PlayAnimMontage(CharacterAnimationData.AbilityQMontage);
 		AttackState = EAttackState::EAbilityQ;
+
+		StartAbilityCooldown(AbilityIndex);
 	}
 }
 
-void ABaseCharacter::AbilityE()
+void ABaseCharacter::AbilityE(int32 AbilityIndex)
 {
 	if (CharacterAnimationData.AbilityEMontage != nullptr &&
-		AttackState == EAttackState::ENone)
+		AttackState == EAttackState::ENone && CheckAbilityCooldown(AbilityIndex))
 	{
 		PlayAnimMontage(CharacterAnimationData.AbilityEMontage);
 		AttackState = EAttackState::EAbilityE;
+
+		StartAbilityCooldown(AbilityIndex);
 	}
 }
 
-void ABaseCharacter::AbilityR()
+void ABaseCharacter::AbilityR(int32 AbilityIndex)
 {
 	if (CharacterAnimationData.AbilityRMontage != nullptr &&
-		AttackState == EAttackState::ENone)
+		AttackState == EAttackState::ENone && CheckAbilityCooldown(AbilityIndex))
 	{
 		PlayAnimMontage(CharacterAnimationData.AbilityRMontage);
 		AttackState = EAttackState::EAbilityR;
+
+		StartAbilityCooldown(AbilityIndex);
 	}
 }
 
-void ABaseCharacter::AbilityRMB()
+void ABaseCharacter::AbilityRMB(int32 AbilityIndex)
 {
 	if (CharacterAnimationData.AbilityRMBMontage != nullptr &&
-		AttackState == EAttackState::ENone)
+		AttackState == EAttackState::ENone && CheckAbilityCooldown(AbilityIndex))
 	{
 		PlayAnimMontage(CharacterAnimationData.AbilityRMBMontage);
 		AttackState = EAttackState::EAbilityRMB;
+
+		StartAbilityCooldown(AbilityIndex);
 	}
+}
+
+bool ABaseCharacter::CheckAbilityCooldown(int32 AbilityIndex) const
+{
+	return CharacterStatusData.AbilityTimerHandle[AbilityIndex].IsValid() == false;
+}
+
+void ABaseCharacter::StartAbilityCooldown(int32 AbilityIndex)
+{
+	FTimerDelegate TimerDelegate = FTimerDelegate::CreateUObject(this, &ABaseCharacter::ResetAbilityTimer, AbilityIndex);
+	GetWorldTimerManager().SetTimer(CharacterStatusData.AbilityTimerHandle[AbilityIndex],
+		TimerDelegate, CharacterStatusData.AbilityTime[AbilityIndex], false);
+	StatusWidget->GetAbilityWidget(AbilityIndex)->SetCooldownVisibility(true);
+}
+
+void ABaseCharacter::ResetAbilityTimer(int32 AbilityIndex)
+{
+	GetWorldTimerManager().ClearTimer(CharacterStatusData.AbilityTimerHandle[AbilityIndex]);
+	StatusWidget->GetAbilityWidget(AbilityIndex)->SetCooldownVisibility(false);
 }
 
 void ABaseCharacter::AttackEnd()

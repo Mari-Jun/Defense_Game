@@ -57,20 +57,26 @@ ACharacterCaster::ACharacterCaster()
 		TEXT("AnimMontage'/Game/_Game/Characters/Caster/Animations/Caster_Ability_R_Montage.Caster_Ability_R_Montage'")));
 }
 
-void ACharacterCaster::AbilityR()
+void ACharacterCaster::AbilityR(int32 AbilityIndex)
 {
 	if (CharacterAnimationData.AbilityRMontage != nullptr)
 	{
-		if (AttackState == EAttackState::ENone)
+		if (AttackState == EAttackState::ENone && CheckAbilityCooldown(AbilityIndex))
 		{
 			PlayAnimMontage(CharacterAnimationData.AbilityRMontage);
 			AttackState = EAttackState::EAbilityR;
 			bIsAttackFull = true;
+
+			StartAbilityCooldown(AbilityIndex);
 		}
 		else if (AttackState == EAttackState::EAbilityR)
 		{
-			StopAnimMontage(CharacterAnimationData.AbilityRMontage);
-			AttackEnd();
+			float ElapsedTime = GetWorldTimerManager().GetTimerElapsed(CharacterStatusData.AbilityTimerHandle[AbilityIndex]);
+			if (ElapsedTime > 0.5f)
+			{
+				StopAnimMontage(CharacterAnimationData.AbilityRMontage);
+				AttackEnd();
+			}
 		}
 	}
 }

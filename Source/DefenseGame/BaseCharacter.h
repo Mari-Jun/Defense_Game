@@ -75,9 +75,14 @@ public:
 	int32 CurrentHP = 100;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 MaxHP = 100;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<float> AbilityTime = {3, 3, 3, 3};
+	TArray<FTimerHandle> AbilityTimerHandle;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeHPDelegate, int32, CurrentHP, int32, MaxHP);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangeCooldownTimeDelegate, float, Time);
 
 UCLASS()
 class DEFENSEGAME_API ABaseCharacter : public ACharacter
@@ -103,10 +108,12 @@ public:
 
 private:
 	virtual void Attack();
-	virtual void AbilityQ();
-	virtual void AbilityE();
-	virtual void AbilityR();
-	virtual void AbilityRMB();
+	virtual void AbilityQ(int32 AbilityIndex);
+	virtual void AbilityE(int32 AbilityIndex);
+	virtual void AbilityR(int32 AbilityIndex);
+	virtual void AbilityRMB(int32 AbilityIndex);
+
+	void ResetAbilityTimer(int32 AbilityIndex);
 
 protected:
 	virtual void AttackLMBHit() {}
@@ -114,6 +121,9 @@ protected:
 	virtual void AbilityEHit() {}
 	virtual void AbilityRHit() {}
 	virtual void AbilityRMBHit() {}
+
+	bool CheckAbilityCooldown(int32 AbilityIndex) const;
+	void StartAbilityCooldown(int32 AbilityIndex);
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -151,8 +161,11 @@ protected:
 	bool bIsAttackFull = false;
 
 public:
-	UPROPERTY(BlueprintAssignable, Category = "Delegate", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	FChangeHPDelegate ChangeHPDelegate;
+
+	UPROPERTY()
+	TArray<FChangeCooldownTimeDelegate> ChangeAbilityTimeDelegate;
 
 public:
 	USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

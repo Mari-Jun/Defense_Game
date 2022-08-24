@@ -8,6 +8,7 @@
 
 class ABaseCharacter;
 class UCharacterProgressBarWidget;
+class UCharacterSkillTimeWidget;
 
 class UCanvasPanel;
 class UCanvasPanelSlot;
@@ -33,9 +34,20 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UCharacterProgressBarWidget* HPProgressBar;
 
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UCharacterSkillTimeWidget* AbilityQWidget;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UCharacterSkillTimeWidget* AbilityEWidget;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UCharacterSkillTimeWidget* AbilityRWidget;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UCharacterSkillTimeWidget* AbilityRMBWidget;
+
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	ABaseCharacter* BaseCharacter;
 
 public:
 	void SetBaseCharacter(ABaseCharacter* Character);
+
+	UCharacterSkillTimeWidget* GetAbilityWidget(int32 AbilityIndex) const;
 };
