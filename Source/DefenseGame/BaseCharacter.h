@@ -14,6 +14,19 @@ class UBlendSpace1D;
 class UCrosshairWidget;
 class UCharacterStatusWidget;
 
+UENUM(BlueprintType)
+enum class EAttackState : uint8
+{
+	ENone UMETA(DisplayName = "None"),
+	EAttackLMB UMETA(DisplayName = "AttackLMB"),
+	EAbilityQ UMETA(DisplayName = "AbilityQ"),
+	EAbilityE UMETA(DisplayName = "AbilityE"),
+	EAbilityR UMETA(DisplayName = "AbilityR"),
+	EAbilityRMB UMETA(DisplayName = "AbilityRMB"),
+
+	EMAX UMETA(DisplayName = "MAX"),
+};
+
 USTRUCT(BlueprintType)
 struct FCharacterAnimationData
 {
@@ -41,6 +54,15 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<UAnimMontage*> AttackAnimMontange;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* AbilityQMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* AbilityEMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* AbilityRMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* AbilityRMBMontage;
 };
 
 USTRUCT(BlueprintType)
@@ -81,9 +103,17 @@ public:
 
 private:
 	virtual void Attack();
+	virtual void AbilityQ();
+	virtual void AbilityE();
+	virtual void AbilityR();
+	virtual void AbilityRMB();
 
 protected:
-
+	virtual void AttackLMBHit() {}
+	virtual void AbilityQHit() {}
+	virtual void AbilityEHit() {}
+	virtual void AbilityRHit() {}
+	virtual void AbilityRMBHit() {}
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -107,14 +137,18 @@ private:
 	UPROPERTY()
 	UCharacterStatusWidget* StatusWidget;
 
-	bool bIsAttacking = false;
-
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	FCharacterAnimationData CharacterAnimationData;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	FCharacterStatusData CharacterStatusData;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	EAttackState AttackState = EAttackState::ENone;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	bool bIsAttackFull = false;
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Delegate", meta = (AllowPrivateAccess = "true"))

@@ -102,22 +102,68 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &ABaseCharacter::Attack);
+	PlayerInputComponent->BindAction("AbilityQ", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityQ);
+	PlayerInputComponent->BindAction("AbilityE", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityE);
+	PlayerInputComponent->BindAction("AbilityR", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityR);
+	PlayerInputComponent->BindAction("AbilityRMB", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityRMB);
 }
 
 void ABaseCharacter::Attack()
 {
-	if (CharacterAnimationData.AttackAnimMontange.IsEmpty() == false && bIsAttacking == false)
+	if (CharacterAnimationData.AttackAnimMontange.IsEmpty() == false &&
+		AttackState == EAttackState::ENone)
 	{
 		int32 index = FMath::RandRange(0, CharacterAnimationData.AttackAnimMontange.Num() - 1);
 		const auto& attack_montage = CharacterAnimationData.AttackAnimMontange[index];
 		PlayAnimMontage(attack_montage);
-		bIsAttacking = true;
+		AttackState = EAttackState::EAttackLMB;
+	}
+}
+
+void ABaseCharacter::AbilityQ()
+{
+	if (CharacterAnimationData.AbilityQMontage != nullptr &&
+		AttackState == EAttackState::ENone)
+	{
+		PlayAnimMontage(CharacterAnimationData.AbilityQMontage);
+		AttackState = EAttackState::EAbilityQ;
+	}
+}
+
+void ABaseCharacter::AbilityE()
+{
+	if (CharacterAnimationData.AbilityEMontage != nullptr &&
+		AttackState == EAttackState::ENone)
+	{
+		PlayAnimMontage(CharacterAnimationData.AbilityEMontage);
+		AttackState = EAttackState::EAbilityE;
+	}
+}
+
+void ABaseCharacter::AbilityR()
+{
+	if (CharacterAnimationData.AbilityRMontage != nullptr &&
+		AttackState == EAttackState::ENone)
+	{
+		PlayAnimMontage(CharacterAnimationData.AbilityRMontage);
+		AttackState = EAttackState::EAbilityR;
+	}
+}
+
+void ABaseCharacter::AbilityRMB()
+{
+	if (CharacterAnimationData.AbilityRMBMontage != nullptr &&
+		AttackState == EAttackState::ENone)
+	{
+		PlayAnimMontage(CharacterAnimationData.AbilityRMBMontage);
+		AttackState = EAttackState::EAbilityRMB;
 	}
 }
 
 void ABaseCharacter::AttackEnd()
 {
-	bIsAttacking = false;
+	AttackState = EAttackState::ENone;
+	bIsAttackFull = false;
 
 	//실험을 위한 코드
 	ChangeHPDelegate.Broadcast(--CharacterStatusData.CurrentHP, CharacterStatusData.MaxHP);
@@ -125,4 +171,13 @@ void ABaseCharacter::AttackEnd()
 
 void ABaseCharacter::AttackHit()
 {
+	switch (AttackState)
+	{
+	case EAttackState::EAttackLMB: AttackLMBHit(); break;
+	case EAttackState::EAbilityQ: AbilityQHit(); break;
+	case EAttackState::EAbilityE: AbilityEHit(); break;
+	case EAttackState::EAbilityR: AbilityRHit(); break;
+	case EAttackState::EAbilityRMB: AbilityRMBHit(); break;
+	default: break;
+	}
 }

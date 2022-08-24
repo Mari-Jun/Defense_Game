@@ -17,10 +17,16 @@ class DEFENSEGAME_API ACharacterCaster : public ABaseCharacter
 	
 public:
 	ACharacterCaster();
-	
 
-public:
-	virtual void AttackHit() override;
+private:
+	virtual void AbilityR() override;
+	
+protected:
+	virtual void AttackLMBHit() override;
+	virtual void AbilityQHit() override;
+	virtual void AbilityEHit() override;
+	virtual void AbilityRHit() override;
+	virtual void AbilityRMBHit() override;
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))

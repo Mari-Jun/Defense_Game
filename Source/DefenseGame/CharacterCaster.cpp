@@ -49,9 +49,33 @@ ACharacterCaster::ACharacterCaster()
 			TEXT("AnimMontage'/Game/_Game/Characters/Caster/Animations/Caster_Attack_D_Montage.Caster_Attack_D_Montage'")))
 	);
 
+	CharacterAnimationData.AbilityQMontage = Cast<UAnimMontage>(StaticLoadObject(UAnimMontage::StaticClass(), nullptr,
+		TEXT("AnimMontage'/Game/_Game/Characters/Caster/Animations/Caster_Ability_Q_Montage.Caster_Ability_Q_Montage'")));
+	CharacterAnimationData.AbilityEMontage = Cast<UAnimMontage>(StaticLoadObject(UAnimMontage::StaticClass(), nullptr,
+		TEXT("AnimMontage'/Game/_Game/Characters/Caster/Animations/Caster_Ability_E_Montage.Caster_Ability_E_Montage'")));
+	CharacterAnimationData.AbilityRMontage = Cast<UAnimMontage>(StaticLoadObject(UAnimMontage::StaticClass(), nullptr,
+		TEXT("AnimMontage'/Game/_Game/Characters/Caster/Animations/Caster_Ability_R_Montage.Caster_Ability_R_Montage'")));
 }
 
-void ACharacterCaster::AttackHit()
+void ACharacterCaster::AbilityR()
+{
+	if (CharacterAnimationData.AbilityRMontage != nullptr)
+	{
+		if (AttackState == EAttackState::ENone)
+		{
+			PlayAnimMontage(CharacterAnimationData.AbilityRMontage);
+			AttackState = EAttackState::EAbilityR;
+			bIsAttackFull = true;
+		}
+		else if (AttackState == EAttackState::EAbilityR)
+		{
+			StopAnimMontage(CharacterAnimationData.AbilityRMontage);
+			AttackEnd();
+		}
+	}
+}
+
+void ACharacterCaster::AttackLMBHit()
 {
 	if (GEngine != nullptr && GEngine->GameViewport != nullptr)
 	{
@@ -93,4 +117,20 @@ void ACharacterCaster::AttackHit()
 			}
 		}
 	}
+}
+
+void ACharacterCaster::AbilityQHit()
+{
+}
+
+void ACharacterCaster::AbilityEHit()
+{
+}
+
+void ACharacterCaster::AbilityRHit()
+{
+}
+
+void ACharacterCaster::AbilityRMBHit()
+{
 }
