@@ -23,6 +23,8 @@ ABaseCharacter::ABaseCharacter()
 	GetMesh()->SetRelativeLocation({0.0f, 0.0f, -GetCapsuleComponent()->GetScaledCapsuleHalfHeight()});
 	GetMesh()->SetRelativeRotation({ 0.0f, -90.0f, 0.0f });
 
+	GetCapsuleComponent()->SetCollisionProfileName("Character");
+
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>("camera boom");
 	CameraBoom->SetupAttachment(GetRootComponent());
 	CameraBoom->TargetArmLength = 450.f;
