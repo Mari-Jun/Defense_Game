@@ -25,6 +25,8 @@ void AProjectile::BeginPlay()
 	Super::BeginPlay();
 
 	GetWorldTimerManager().SetTimer(LifeTimerHandle, this, &AProjectile::FinishLifeTime, LifeTime);
+
+	ProjectileMesh->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnOverlapEvent);
 }
 
 // Called every frame
@@ -35,6 +37,13 @@ void AProjectile::Tick(float DeltaTime)
 }
 
 void AProjectile::FinishLifeTime()
+{
+	GetWorld()->DestroyActor(this);
+}
+
+void AProjectile::OnOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+	bool bFromSweep, const FHitResult& SweepResult)
 {
 	GetWorld()->DestroyActor(this);
 }

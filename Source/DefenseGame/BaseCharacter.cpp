@@ -93,6 +93,7 @@ void ABaseCharacter::BeginPlay()
 		}
 	}
 
+	ChangeHPDelegate.Broadcast(CharacterStatusData.CurrentHP, CharacterStatusData.MaxHP);
 }
 
 // Called every frame

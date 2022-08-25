@@ -10,8 +10,8 @@ void UCharacterProgressBarWidget::NativePreConstruct()
 {
 }
 
-void UCharacterProgressBarWidget::OnChangeHP(int32 CurrentHP, int32 MaxHP)
+void UCharacterProgressBarWidget::OnChangeHP(float CurrentHP, float MaxHP)
 {
-	ProgressBar->SetPercent(static_cast<float>(CurrentHP) / MaxHP);
-	ValueText->SetText(FText::FromString(FString::FromInt(CurrentHP)));
+	ProgressBar->SetPercent(CurrentHP / MaxHP);
+	ValueText->SetText(FText::FromString(FString::FromInt(FMath::FloorToInt(CurrentHP))));
 }

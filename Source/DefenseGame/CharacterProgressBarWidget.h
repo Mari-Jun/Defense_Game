@@ -24,7 +24,7 @@ protected:
 
 public:
 	UFUNCTION()
-	void OnChangeHP(int32 CurrentHP, int32 MaxHP);
+	void OnChangeHP(float CurrentHP, float MaxHP);
 
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))

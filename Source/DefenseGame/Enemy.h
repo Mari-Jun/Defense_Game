@@ -6,6 +6,10 @@
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
+class UEnemyStatusWidget;
+
+class UWidgetComponent;
+
 USTRUCT(BlueprintType)
 struct FEnemyStatusData
 {
@@ -13,11 +17,12 @@ struct FEnemyStatusData
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int32 CurrentHP = 100;
+	float CurrentHP = 200.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int32 MaxHP = 100;
+	float MaxHP = 200.f;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeEnemyHPDelegate, float, CurrentHP, float, MaxHP);
 
 UCLASS()
 class DEFENSEGAME_API AEnemy : public ACharacter
@@ -41,7 +46,7 @@ public:
 
 protected:
 	UFUNCTION()
-	virtual void OnOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	virtual void OnCharacterAttackOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult);
 
@@ -51,6 +56,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	FEnemyStatusData EnemyStatusData;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UWidgetComponent* EnemyStatusWidgetComponent;
+
+	UEnemyStatusWidget* EnemyStatusWidget;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UAnimSequence* IdleAnimSequence;
+
+public:
+	FChangeEnemyHPDelegate ChangeHPDelegate;
+
 };

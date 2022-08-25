@@ -72,16 +72,18 @@ struct FCharacterStatusData
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int32 CurrentHP = 100;
+	float CurrentHP = 500.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int32 MaxHP = 100;
+	float MaxHP = 500.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float Attack = 50.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<float> AbilityTime = {3, 3, 3, 3};
 	TArray<FTimerHandle> AbilityTimerHandle;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeHPDelegate, int32, CurrentHP, int32, MaxHP);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeCharacterHPDelegate, float, CurrentHP, float, MaxHP);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangeCooldownTimeDelegate, float, Time);
 
 UCLASS()
@@ -162,7 +164,7 @@ protected:
 
 public:
 	UPROPERTY()
-	FChangeHPDelegate ChangeHPDelegate;
+	FChangeCharacterHPDelegate ChangeHPDelegate;
 
 	UPROPERTY()
 	TArray<FChangeCooldownTimeDelegate> ChangeAbilityTimeDelegate;
