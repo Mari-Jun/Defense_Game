@@ -7,8 +7,10 @@
 #include "Enemy.generated.h"
 
 class UEnemyStatusWidget;
+class AEnemyController;
 
 class UWidgetComponent;
+class UBehaviorTree;
 
 USTRUCT(BlueprintType)
 struct FEnemyStatusData
@@ -49,6 +51,10 @@ public:
 protected:
 
 private:
+	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
+	UBehaviorTree* BehaviorTree;
+
+	AEnemyController* EnemyController;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
@@ -59,10 +65,13 @@ protected:
 
 	UEnemyStatusWidget* EnemyStatusWidget;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	UAnimSequence* IdleAnimSequence;
 
 public:
 	FChangeEnemyHPDelegate ChangeHPDelegate;
+
+public:
+	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 
 };

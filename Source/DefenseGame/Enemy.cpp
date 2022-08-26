@@ -3,6 +3,7 @@
 
 #include "Enemy.h"
 #include "EnemyStatusWidget.h"
+#include "EnemyController.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
@@ -47,6 +48,13 @@ void AEnemy::BeginPlay()
 			ChangeHPDelegate.AddDynamic(EnemyStatusWidget, &UEnemyStatusWidget::OnChangeHP);
 			ChangeHPDelegate.Broadcast(EnemyStatusData.CurrentHP, EnemyStatusData.MaxHP);
 		}
+	}
+
+	EnemyController = Cast<AEnemyController>(GetController());
+	if (EnemyController == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Could not cast GetController() to AEnemyController"));
+		GetWorld()->DestroyActor(this);
 	}
 }
 
