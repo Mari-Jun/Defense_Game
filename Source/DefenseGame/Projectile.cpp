@@ -2,6 +2,9 @@
 
 
 #include "Projectile.h"
+#include "GameFramework/Character.h"
+
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -17,6 +20,18 @@ AProjectile::AProjectile()
 	ProjectileMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 
 	ProjectileMesh->SetMassOverrideInKg(NAME_None, 1.0f, true);
+}
+
+AProjectile* AProjectile::SpawnProjectile(TSubclassOf<AProjectile> ActorClass, FTransform SpawnTransform, ACharacter* Character, float Damage)
+{
+	AProjectile* Projectile = Cast<AProjectile>(UGameplayStatics::BeginDeferredActorSpawnFromClass(Character, ActorClass, SpawnTransform));
+	if (Projectile != nullptr)
+	{
+		Projectile->SetOwnerCharacter(Character);
+		Projectile->SetAttackDamage(Damage);
+		UGameplayStatics::FinishSpawningActor(Projectile, SpawnTransform);
+	}
+	return Projectile;
 }
 
 // Called when the game starts or when spawned
@@ -45,6 +60,15 @@ void AProjectile::OnOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActo
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (OwnerCharacter == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Please set the owner character"));
+	}
+	else
+	{
+		UGameplayStatics::ApplyPointDamage(OtherActor, AttackDamage, ProjectileMesh->GetComponentVelocity().GetSafeNormal(),
+			SweepResult, OwnerCharacter->GetController(), OwnerCharacter, UDamageType::StaticClass());
+	}
 	GetWorld()->DestroyActor(this);
 }
 

@@ -104,7 +104,7 @@ void ACharacterCaster::AttackLMBHit()
 
 					FVector SpawnPoint = (AttackingHandValue > 0.0f) ? GetMesh()->GetBoneLocation("hand_l") : GetMesh()->GetBoneLocation("hand_r");
 
-					AProjectile* SpawnBall = GetWorld()->SpawnActor<AProjectile>(AttackMagicBall, SpawnPoint, FRotator{});
+					AProjectile* SpawnBall = AProjectile::SpawnProjectile(AttackMagicBall, { FRotator{}, SpawnPoint }, this, CharacterStatusData.Attack);
 
 					const FVector Start{ CrosshairWorldPosition };
 					const FVector End{ Start + CrosshairWorldDirection * 50'000 };

@@ -15,6 +15,8 @@ public:
 	// Sets default values for this actor's properties
 	AProjectile();
 
+	static AProjectile* SpawnProjectile(TSubclassOf<AProjectile> ActorClass, FTransform SpawnTransform, ACharacter* Character, float Damage);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,6 +47,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float ImpulseScale = 5000.f;
 
+	ACharacter* OwnerCharacter;
+	float AttackDamage = 0.f;
+
 public:
 	UStaticMeshComponent* GetProjectileMesh() const { return ProjectileMesh; }
+	void SetOwnerCharacter(ACharacter* Character) { OwnerCharacter = Character; }
+	void SetAttackDamage(float Damage) { AttackDamage = Damage; }
 };

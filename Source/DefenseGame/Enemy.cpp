@@ -34,8 +34,6 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	GetMesh()->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnCharacterAttackOverlapEvent);
-
 	if (EnemyStatusWidgetComponent != nullptr)
 	{
 		EnemyStatusWidget = Cast<UEnemyStatusWidget>(EnemyStatusWidgetComponent->GetWidget());
@@ -73,10 +71,18 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
-void AEnemy::OnCharacterAttackOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-	bool bFromSweep, const FHitResult& SweepResult)
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	EnemyStatusData.CurrentHP -= 20.f;
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		const FPointDamageEvent* PointDamageEvent = (FPointDamageEvent*)&DamageEvent;
+
+		const FRotator ActorRotation = GetActorRotation();
+		const FRotator ShotRotation = UKismetMathLibrary::MakeRotFromX(PointDamageEvent->ShotDirection);
+
+		const float DeltaYaw = UKismetMathLibrary::NormalizedDeltaRotator(ActorRotation, ShotRotation).Yaw;
+	}
+	EnemyStatusData.CurrentHP -= DamageAmount;
 	ChangeHPDelegate.Broadcast(EnemyStatusData.CurrentHP, EnemyStatusData.MaxHP);
+	return DamageAmount;
 }
