@@ -22,6 +22,15 @@ public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	
+public:
+	UFUNCTION(BlueprintCallable)
+	virtual void StartTurn();
+	UFUNCTION(BlueprintCallable)
+	virtual void StopTurn();
+
+private:
+	void TurnInPlace();
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 	ABaseCharacter* BaseCharacter = nullptr;
@@ -37,4 +46,12 @@ private:
 	FRotator MovementOffset;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	FRotator LastMovementOffset;
+
+	FTimerHandle TurnInPlaceTimer;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float RootYawOffset = 0.f;
+	float TurnYaw = 0.f;
+	float LastFrameTurnYaw = 0.f;
+	float RotationYawCurveValue = -90.f;
+	float LastFrameRotationYawCurveValue = -90.f;
 };

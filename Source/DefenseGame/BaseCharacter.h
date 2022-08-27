@@ -35,6 +35,12 @@ struct FCharacterAnimationData
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UAnimSequence* IdleAnimSequence;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimSequence* TurnLeft90Sequence;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimSequence* TurnRight90Sequence;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UCurveFloat* TurnRotationCurve;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UBlendSpace1D* JogStartBlendSpace;
@@ -171,4 +177,5 @@ public:
 
 public:
 	USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	UCurveFloat* GetTurnRotationCurve() const { return CharacterAnimationData.TurnRotationCurve; }
 };

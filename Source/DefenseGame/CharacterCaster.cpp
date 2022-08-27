@@ -16,6 +16,11 @@ ACharacterCaster::ACharacterCaster()
 
 	CharacterAnimationData.IdleAnimSequence = Cast<UAnimSequence>(StaticLoadObject(UAnimSequence::StaticClass(), nullptr,
 		TEXT("AnimSequence'/Game/_Game/Characters/Caster/Animations/Caster_Idle.Caster_Idle'")));
+	CharacterAnimationData.TurnLeft90Sequence = Cast<UAnimSequence>(StaticLoadObject(UAnimSequence::StaticClass(), nullptr,
+		TEXT("AnimSequence'/Game/_Game/Characters/Caster/Animations/Caster_TurnLeft_90.Caster_TurnLeft_90'")));
+	CharacterAnimationData.TurnRight90Sequence = Cast<UAnimSequence>(StaticLoadObject(UAnimSequence::StaticClass(), nullptr,
+		TEXT("AnimSequence'/Game/_Game/Characters/Caster/Animations/Caster_TurnRight_90.Caster_TurnRight_90'")));
+
 	CharacterAnimationData.JogStartBlendSpace = Cast<UBlendSpace1D>(StaticLoadObject(UBlendSpace1D::StaticClass(), nullptr,
 		TEXT("BlendSpace1D'/Game/_Game/Characters/Caster/Animations/BS_Caster_Jog_Start.BS_Caster_Jog_Start'")));
 	CharacterAnimationData.JogBlendSpace = Cast<UBlendSpace1D>(StaticLoadObject(UBlendSpace1D::StaticClass(), nullptr,
