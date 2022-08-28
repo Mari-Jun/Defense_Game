@@ -40,6 +40,8 @@ void UBaseCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		}
 
 		TurnInPlace();
+
+		CharacterPitch = BaseCharacter->GetBaseAimRotation().Pitch;
 	}
 }
 

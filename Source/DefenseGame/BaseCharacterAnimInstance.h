@@ -54,4 +54,7 @@ private:
 	float LastFrameTurnYaw = 0.f;
 	float RotationYawCurveValue = -90.f;
 	float LastFrameRotationYawCurveValue = -90.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float CharacterPitch = 0.f;
+
 };
