@@ -9,6 +9,7 @@
 class UEnemyStatusWidget;
 class AEnemyController;
 
+class UBlendSpace1D;
 class UWidgetComponent;
 class UBehaviorTree;
 
@@ -58,6 +59,7 @@ private:
 protected:
 	virtual void ShowStatusWidget();
 	virtual void HideStatusWidget();
+	virtual void PlayHitReaction(float HitYaw);
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
@@ -87,6 +89,15 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* DeadAnimMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* HitReactionFWDAnimMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* HitReactionRightAnimMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* HitReactionLeftAnimMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* HitReactionBWDAnimMontage;
 
 public:
 	FChangeEnemyHPDelegate ChangeHPDelegate;

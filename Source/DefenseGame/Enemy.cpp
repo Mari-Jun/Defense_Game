@@ -82,6 +82,8 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	float DeltaYaw = 0.f;
+	
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		const FPointDamageEvent* PointDamageEvent = (FPointDamageEvent*)&DamageEvent;
@@ -89,10 +91,12 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 		const FRotator ActorRotation = GetActorRotation();
 		const FRotator ShotRotation = UKismetMathLibrary::MakeRotFromX(PointDamageEvent->ShotDirection);
 
-		const float DeltaYaw = UKismetMathLibrary::NormalizedDeltaRotator(ActorRotation, ShotRotation).Yaw;
+		DeltaYaw = UKismetMathLibrary::NormalizedDeltaRotator(ActorRotation, ShotRotation).Yaw;
 	}
 	EnemyStatusData.CurrentHP -= DamageAmount;
 	ChangeHPDelegate.Broadcast(EnemyStatusData.CurrentHP, EnemyStatusData.MaxHP);
+
+	PlayHitReaction(DeltaYaw);
 
 	ShowStatusWidget();
 
@@ -116,7 +120,14 @@ void AEnemy::KillEnemy()
 	EnemyController->KilledControlledPawn();
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	PlayAnimMontage(DeadAnimMontage);
+	if (DeadAnimMontage != nullptr)
+	{
+		PlayAnimMontage(DeadAnimMontage);
+	}
+	else
+	{
+		GetWorld()->DestroyActor(this);
+	}
 }
 
 void AEnemy::DestoryEnemy()
@@ -133,4 +144,43 @@ void AEnemy::ShowStatusWidget()
 void AEnemy::HideStatusWidget()
 {
 	EnemyStatusWidgetComponent->SetHiddenInGame(true);
+}
+
+void AEnemy::PlayHitReaction(float HitYaw)
+{
+	UAnimMontage* HitReaction = HitReactionFWDAnimMontage;
+
+	if (HitYaw >= -45.f && HitYaw <= 45.f)
+	{
+		if (HitReactionFWDAnimMontage != nullptr)
+		{
+			HitReaction = HitReactionFWDAnimMontage;
+		}
+	}
+	else if (HitYaw >= -135.f && HitYaw < -45.f)
+	{
+		if (HitReactionLeftAnimMontage != nullptr)
+		{
+			HitReaction = HitReactionLeftAnimMontage;
+		}
+	}
+	else if (HitYaw <= 135.f && HitYaw > 45.f)
+	{
+		if (HitReactionRightAnimMontage != nullptr)
+		{
+			HitReaction = HitReactionRightAnimMontage;
+		}
+	}
+	else
+	{
+		if (HitReactionBWDAnimMontage != nullptr)
+		{
+			HitReaction = HitReactionBWDAnimMontage;
+		}
+	}
+
+	if (HitReaction != nullptr)
+	{
+		PlayAnimMontage(HitReaction);
+	}
 }
