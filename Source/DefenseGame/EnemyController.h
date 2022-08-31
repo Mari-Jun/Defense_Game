@@ -24,6 +24,8 @@ public:
 
 	virtual void OnPossess(APawn* InPawn) override;
 
+	virtual void KilledControlledPawn();
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -48,7 +48,16 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+	UFUNCTION(BlueprintCallable)
+	virtual void FinishDeath();
+
+private:
+	virtual void KillEnemy();
+	virtual void DestoryEnemy();
+
 protected:
+	virtual void ShowStatusWidget();
+	virtual void HideStatusWidget();
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
@@ -65,8 +74,19 @@ protected:
 
 	UEnemyStatusWidget* EnemyStatusWidget;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float ShowStatusWidgetTime = 5.0f;
+	FTimerHandle ShowStatusWidgetTimerHandle;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float DeathTime = 3.0f;
+	FTimerHandle DestoryActorTimerHandle;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	UAnimSequence* IdleAnimSequence;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* DeadAnimMontage;
 
 public:
 	FChangeEnemyHPDelegate ChangeHPDelegate;

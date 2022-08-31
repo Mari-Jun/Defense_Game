@@ -28,6 +28,7 @@ AEnemy::AEnemy()
 	EnemyStatusWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("status widget");
 	EnemyStatusWidgetComponent->SetupAttachment(GetRootComponent());
 	EnemyStatusWidgetComponent->SetDrawSize({ 150.f, 20.f });
+	HideStatusWidget();
 }
 
 // Called when the game starts or when spawned
@@ -92,5 +93,44 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	}
 	EnemyStatusData.CurrentHP -= DamageAmount;
 	ChangeHPDelegate.Broadcast(EnemyStatusData.CurrentHP, EnemyStatusData.MaxHP);
+
+	ShowStatusWidget();
+
+	if (EnemyStatusData.CurrentHP <= 0.f)
+	{
+		KillEnemy();
+	}
+
 	return DamageAmount;
+}
+
+void AEnemy::FinishDeath()
+{
+	GetMesh()->GlobalAnimRateScale = 0.0f;
+	HideStatusWidget();
+	GetWorldTimerManager().SetTimer(DestoryActorTimerHandle, this, &AEnemy::DestoryEnemy, DeathTime, false);
+}
+
+void AEnemy::KillEnemy()
+{
+	EnemyController->KilledControlledPawn();
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	PlayAnimMontage(DeadAnimMontage);
+}
+
+void AEnemy::DestoryEnemy()
+{
+	GetWorld()->DestroyActor(this);
+}
+
+void AEnemy::ShowStatusWidget()
+{
+	EnemyStatusWidgetComponent->SetHiddenInGame(false);
+	GetWorldTimerManager().SetTimer(ShowStatusWidgetTimerHandle, this, &AEnemy::HideStatusWidget, ShowStatusWidgetTime, false);
+}
+
+void AEnemy::HideStatusWidget()
+{
+	EnemyStatusWidgetComponent->SetHiddenInGame(true);
 }

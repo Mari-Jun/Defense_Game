@@ -32,6 +32,14 @@ void AEnemyController::OnPossess(APawn* InPawn)
 	}
 }
 
+void AEnemyController::KilledControlledPawn()
+{
+	if (Enemy != nullptr)
+	{
+		BehaviorTreeComponent->StopTree();
+	}
+}
+
 void AEnemyController::BeginPlay()
 {
 	Super::BeginPlay();
