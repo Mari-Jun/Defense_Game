@@ -4,10 +4,13 @@
 #include "EnemyController.h"
 #include "Enemy.h"
 #include "DefenseBase.h"
+#include "BaseCharacter.h"
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AIPerceptionComponent.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -19,6 +22,8 @@ AEnemyController::AEnemyController()
 
 	BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>("behavior component");
 	check(BehaviorTreeComponent);
+
+	InitializePerception();
 }
 
 void AEnemyController::OnPossess(APawn* InPawn)
@@ -34,6 +39,8 @@ void AEnemyController::OnPossess(APawn* InPawn)
 			BlackboardComponent->InitializeBlackboard(*(Enemy->GetBehaviorTree()->BlackboardAsset));
 		}
 	}
+
+	GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyController::OnPerceptionUpdate);
 }
 
 void AEnemyController::KilledControlledPawn()
@@ -47,7 +54,7 @@ void AEnemyController::KilledControlledPawn()
 FVector AEnemyController::FindNearestDefenseBaseLocation()
 {
 	if (Enemy == nullptr) return FVector{};
-
+	
 	TArray<AActor*> BaseActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADefenseBase::StaticClass(), BaseActors);
 
@@ -79,7 +86,41 @@ void AEnemyController::BeginPlay()
 
 	if (BlackboardComponent != nullptr)
 	{
-		FVector BaseTargetLocation = FindNearestDefenseBaseLocation();
-		BlackboardComponent->SetValueAsVector("BaseTargetLocation", BaseTargetLocation);
+		BlackboardComponent->SetValueAsVector("BaseTargetLocation", FindNearestDefenseBaseLocation());
+	}
+}
+
+void AEnemyController::InitializePerception()
+{
+	SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>("ai perception"));
+
+	if(UseSightSense)
+	{
+		Sight = CreateDefaultSubobject<UAISenseConfig_Sight>("sense sight");
+		Sight->SightRadius = SightRadius;
+		Sight->LoseSightRadius = LoseSightRadius;
+		Sight->PeripheralVisionAngleDegrees = VisionAngle * 0.5f;
+		Sight->SetMaxAge(LoseSightTime);
+		Sight->DetectionByAffiliation.bDetectNeutrals = true;
+
+		GetPerceptionComponent()->ConfigureSense(*Sight);
+		GetPerceptionComponent()->SetDominantSense(Sight->GetSenseImplementation());
+	}
+}
+
+void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
+{
+	ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Actor);
+	if (BaseCharacter == nullptr) return;
+
+	if (Stimulus.WasSuccessfullySensed())
+	{
+		BlackboardComponent->SetValueAsObject("TargetCharacter", BaseCharacter);
+		SetFocus(BaseCharacter);
+	}
+	else
+	{
+		BlackboardComponent->SetValueAsObject("TargetCharacter", nullptr);
+		BlackboardComponent->SetValueAsVector("BaseTargetLocation", FindNearestDefenseBaseLocation());
 	}
 }
