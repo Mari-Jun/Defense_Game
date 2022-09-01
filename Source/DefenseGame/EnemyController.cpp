@@ -3,10 +3,14 @@
 
 #include "EnemyController.h"
 #include "Enemy.h"
+#include "DefenseBase.h"
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
+
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AEnemyController::AEnemyController()
 {
@@ -40,6 +44,30 @@ void AEnemyController::KilledControlledPawn()
 	}
 }
 
+FVector AEnemyController::FindNearestDefenseBaseLocation()
+{
+	if (Enemy == nullptr) return FVector{};
+
+	TArray<AActor*> BaseActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADefenseBase::StaticClass(), BaseActors);
+
+	FVector EnemyLocation = Enemy->GetActorLocation();
+	FVector MinLocation = Enemy->GetActorLocation();
+	float MinLength = FLT_MAX;
+
+	for (AActor* BaseActor : BaseActors)
+	{
+		float Length = (BaseActor->GetActorLocation() - EnemyLocation).Length();
+		if (MinLength > Length)
+		{
+			MinLocation = BaseActor->GetActorLocation();
+			MinLength = Length;
+		}
+	}
+
+	return MinLocation;
+}
+
 void AEnemyController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -47,5 +75,11 @@ void AEnemyController::BeginPlay()
 	{
 		RunBehaviorTree(Enemy->GetBehaviorTree());
 		BehaviorTreeComponent->StartTree(*Enemy->GetBehaviorTree());
+	}
+
+	if (BlackboardComponent != nullptr)
+	{
+		FVector BaseTargetLocation = FindNearestDefenseBaseLocation();
+		BlackboardComponent->SetValueAsVector("BaseTargetLocation", BaseTargetLocation);
 	}
 }

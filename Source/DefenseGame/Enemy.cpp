@@ -7,6 +7,7 @@
 
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -23,7 +24,11 @@ AEnemy::AEnemy()
 	GetMesh()->SetCollisionProfileName("Enemy");
 	GetMesh()->SetGenerateOverlapEvents(true);
 
+	bUseControllerRotationYaw = false;
+
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
+	
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	EnemyStatusWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("status widget");
 	EnemyStatusWidgetComponent->SetupAttachment(GetRootComponent());

@@ -7,6 +7,7 @@
 #include "EnemyController.generated.h"
 
 class AEnemy;
+class ADefenseBase;
 
 class UBlackboardComponent;
 class UBehaviorTreeComponent;
@@ -25,6 +26,7 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 
 	virtual void KilledControlledPawn();
+	virtual FVector FindNearestDefenseBaseLocation();
 
 protected:
 	virtual void BeginPlay() override;
