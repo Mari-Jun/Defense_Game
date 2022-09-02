@@ -4,9 +4,11 @@
 #include "Enemy.h"
 #include "EnemyStatusWidget.h"
 #include "EnemyController.h"
+#include "BaseCharacter.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -34,6 +36,11 @@ AEnemy::AEnemy()
 	EnemyStatusWidgetComponent->SetupAttachment(GetRootComponent());
 	EnemyStatusWidgetComponent->SetDrawSize({ 150.f, 20.f });
 	HideStatusWidget();
+
+	AttackRangeSphereComponent = CreateDefaultSubobject<USphereComponent>("AttackRangeSphere");
+	AttackRangeSphereComponent->SetupAttachment(GetRootComponent());
+	AttackRangeSphereComponent->SetSphereRadius(150.f);
+	AttackRangeSphereComponent->SetCollisionProfileName("EnemyAttack");
 }
 
 // Called when the game starts or when spawned
@@ -62,6 +69,13 @@ void AEnemy::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Could not cast GetController() to AEnemyController"));
 		GetWorld()->DestroyActor(this);
 	}
+
+	if (AttackRangeSphereComponent != nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Could not cast GetController() to AEnemyController"));
+		AttackRangeSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnAttackRangeBeginOverlap);
+		AttackRangeSphereComponent->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnAttackRangeEndOverlap);
+	}
 }
 
 // Called every frame
@@ -75,6 +89,11 @@ void AEnemy::Tick(float DeltaTime)
 		FVector CameraLocation = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation();
 		FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(WidgetLocation, CameraLocation);
 		EnemyStatusWidgetComponent->SetWorldRotation({ 0.0f, NewRotation.Yaw, 0.0f });
+	}
+
+	if (CheckAttack())
+	{
+		Attack();
 	}
 }
 
@@ -99,6 +118,7 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 		DeltaYaw = UKismetMathLibrary::NormalizedDeltaRotator(ActorRotation, ShotRotation).Yaw;
 	}
 	EnemyStatusData.CurrentHP -= DamageAmount;
+	EnemyStatusData.CurrentReactionValue += DamageAmount;
 	ChangeHPDelegate.Broadcast(EnemyStatusData.CurrentHP, EnemyStatusData.MaxHP);
 
 	PlayHitReaction(DeltaYaw);
@@ -123,8 +143,8 @@ void AEnemy::FinishDeath()
 void AEnemy::KillEnemy()
 {
 	EnemyController->KilledControlledPawn();
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DisableCollision();
+	EnemyState = EEnemyState::EDeath;
 	if (DeadAnimMontage != nullptr)
 	{
 		PlayAnimMontage(DeadAnimMontage);
@@ -153,6 +173,10 @@ void AEnemy::HideStatusWidget()
 
 void AEnemy::PlayHitReaction(float HitYaw)
 {
+	if (EnemyStatusData.CurrentReactionValue < EnemyStatusData.ReactionValue) return;
+
+	EnemyStatusData.CurrentReactionValue -= EnemyStatusData.ReactionValue;
+
 	UAnimMontage* HitReaction = HitReactionFWDAnimMontage;
 
 	if (HitYaw >= -45.f && HitYaw <= 45.f)
@@ -187,5 +211,61 @@ void AEnemy::PlayHitReaction(float HitYaw)
 	if (HitReaction != nullptr)
 	{
 		PlayAnimMontage(HitReaction);
+		EnemyState = EEnemyState::EReaction;
 	}
+}
+
+bool AEnemy::CheckAttack()
+{
+	if (EnemyStatusData.CanAttack == false) return false;
+	if (EnemyState != EEnemyState::ENone) return false;
+
+	return true;
+}
+
+void AEnemy::Attack()
+{
+	if (AttackAnimMontange.IsEmpty() == false)
+	{
+		int32 index = FMath::RandRange(0, AttackAnimMontange.Num() - 1);
+		const auto& attack_montage = AttackAnimMontange[index];
+		PlayAnimMontage(attack_montage);
+		EnemyState = EEnemyState::EAttack;
+	}
+}
+
+void AEnemy::OnAttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (EnemyController != nullptr && OtherActor == EnemyController->GetTargetCharacter())
+	{
+		EnemyStatusData.CanAttack = true;
+	}
+}
+
+void AEnemy::OnAttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (EnemyController != nullptr &&
+		(EnemyController->GetTargetCharacter() == nullptr || EnemyController->GetTargetCharacter() == OtherActor))
+	{
+		EnemyStatusData.CanAttack = false;
+	}
+}
+
+void AEnemy::DisableCollision()
+{
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AEnemy::AttackEnd()
+{
+	EnemyState = EEnemyState::ENone;
+}
+
+void AEnemy::ReactionEnd()
+{
+	EnemyState = EEnemyState::ENone;
 }

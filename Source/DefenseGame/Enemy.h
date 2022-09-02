@@ -8,10 +8,23 @@
 
 class UEnemyStatusWidget;
 class AEnemyController;
+class ABaseCharacter;
 
 class UBlendSpace1D;
 class UWidgetComponent;
 class UBehaviorTree;
+class USphereComponent;
+
+UENUM(BlueprintType)
+enum class EEnemyState : uint8
+{
+	ENone UMETA(DisplayName = "None"),
+	EReaction UMETA(DisplayName = "Reaction"),
+	EAttack UMETA(DisplayName = "Attack"),
+	EDeath UMETA(DisplayName = "Death"),
+
+	EMAX UMETA(DisplayName = "MAX"),
+};
 
 USTRUCT(BlueprintType)
 struct FEnemyStatusData
@@ -23,6 +36,15 @@ public:
 	float CurrentHP = 200.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float MaxHP = 200.f;
+
+	float CurrentReactionValue = 0.f;
+	/** °æÁ÷Ä¡ */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float ReactionValue = 50.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float Attack = 20.f;
+	bool CanAttack = false;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeEnemyHPDelegate, float, CurrentHP, float, MaxHP);
@@ -61,6 +83,25 @@ protected:
 	virtual void HideStatusWidget();
 	virtual void PlayHitReaction(float HitYaw);
 
+	virtual bool CheckAttack();
+	virtual void Attack();
+
+	UFUNCTION()
+	virtual void OnAttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	virtual void OnAttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	virtual void DisableCollision();
+
+public:
+	UFUNCTION(BlueprintCallable)
+	virtual void AttackEnd();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void ReactionEnd();
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
 	UBehaviorTree* BehaviorTree;
@@ -69,13 +110,15 @@ private:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	EEnemyState EnemyState = EEnemyState::ENone;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	FEnemyStatusData EnemyStatusData;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* EnemyStatusWidgetComponent;
 
 	UEnemyStatusWidget* EnemyStatusWidget;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float ShowStatusWidgetTime = 5.0f;
 	FTimerHandle ShowStatusWidgetTimerHandle;
@@ -83,6 +126,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float DeathTime = 3.0f;
 	FTimerHandle DestoryActorTimerHandle;
+
+	USphereComponent* AttackRangeSphereComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	UAnimSequence* IdleAnimSequence;
@@ -98,6 +143,9 @@ protected:
 	UAnimMontage* HitReactionLeftAnimMontage;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* HitReactionBWDAnimMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	TArray<UAnimMontage*> AttackAnimMontange;
 
 public:
 	FChangeEnemyHPDelegate ChangeHPDelegate;

@@ -8,6 +8,7 @@
 #include "EnemyController.generated.h"
 
 class AEnemy;
+class ABaseCharacter;
 
 class UBlackboardComponent;
 class UBehaviorTreeComponent;
@@ -58,4 +59,9 @@ private:
 	float LoseSightTime = 5.f;
 
 	UAISenseConfig_Sight* Sight;
+
+	ABaseCharacter* TargetCharacter = nullptr;
+
+public:
+	ABaseCharacter* GetTargetCharacter() const { return TargetCharacter; }
 };

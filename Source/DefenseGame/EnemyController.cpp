@@ -115,12 +115,13 @@ void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		BlackboardComponent->SetValueAsObject("TargetCharacter", BaseCharacter);
+		TargetCharacter = BaseCharacter;
 		SetFocus(BaseCharacter);
 	}
 	else
 	{
-		BlackboardComponent->SetValueAsObject("TargetCharacter", nullptr);
+		TargetCharacter = nullptr;
 		BlackboardComponent->SetValueAsVector("BaseTargetLocation", FindNearestDefenseBaseLocation());
 	}
+	BlackboardComponent->SetValueAsObject("TargetCharacter", TargetCharacter);
 }
