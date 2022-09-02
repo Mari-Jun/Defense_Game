@@ -76,6 +76,8 @@ void AEnemy::BeginPlay()
 		AttackRangeSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnAttackRangeBeginOverlap);
 		AttackRangeSphereComponent->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnAttackRangeEndOverlap);
 	}
+
+	GetCharacterMovement()->MaxWalkSpeed = EnemyStatusData.DefaultSpeed;
 }
 
 // Called every frame
@@ -133,6 +135,11 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	return DamageAmount;
 }
 
+void AEnemy::ApplyDamage(AActor* OtherActor, float Damage)
+{
+	UGameplayStatics::ApplyDamage(OtherActor, Damage, EnemyController, this, UDamageType::StaticClass());
+}
+
 void AEnemy::FinishDeath()
 {
 	GetMesh()->GlobalAnimRateScale = 0.0f;
@@ -144,7 +151,7 @@ void AEnemy::KillEnemy()
 {
 	EnemyController->KilledControlledPawn();
 	DisableCollision();
-	EnemyState = EEnemyState::EDeath;
+	ChangeEnemyState(EEnemyState::EDeath);
 	if (DeadAnimMontage != nullptr)
 	{
 		PlayAnimMontage(DeadAnimMontage);
@@ -158,6 +165,25 @@ void AEnemy::KillEnemy()
 void AEnemy::DestoryEnemy()
 {
 	GetWorld()->DestroyActor(this);
+}
+
+void AEnemy::ChangeEnemyState(EEnemyState State)
+{
+	switch (State)
+	{
+	case EEnemyState::ENone: 
+		GetCharacterMovement()->MaxWalkSpeed = EnemyStatusData.DefaultSpeed;
+		break;
+	case EEnemyState::EReaction: 
+		GetCharacterMovement()->MaxWalkSpeed = EnemyStatusData.ReactionSpeed;
+		break;
+	case EEnemyState::EAttack: 
+		GetCharacterMovement()->MaxWalkSpeed = EnemyStatusData.AttackSpeed;
+		break;
+	case EEnemyState::EDeath: break;
+	default: break;
+	}
+	EnemyState = State;
 }
 
 void AEnemy::ShowStatusWidget()
@@ -211,7 +237,7 @@ void AEnemy::PlayHitReaction(float HitYaw)
 	if (HitReaction != nullptr)
 	{
 		PlayAnimMontage(HitReaction);
-		EnemyState = EEnemyState::EReaction;
+		ChangeEnemyState(EEnemyState::EReaction);
 	}
 }
 
@@ -230,7 +256,7 @@ void AEnemy::Attack()
 		int32 index = FMath::RandRange(0, AttackAnimMontange.Num() - 1);
 		const auto& attack_montage = AttackAnimMontange[index];
 		PlayAnimMontage(attack_montage);
-		EnemyState = EEnemyState::EAttack;
+		ChangeEnemyState(EEnemyState::EAttack);
 	}
 }
 
@@ -262,10 +288,10 @@ void AEnemy::DisableCollision()
 
 void AEnemy::AttackEnd()
 {
-	EnemyState = EEnemyState::ENone;
+	ChangeEnemyState(EEnemyState::ENone);
 }
 
 void AEnemy::ReactionEnd()
 {
-	EnemyState = EEnemyState::ENone;
+	ChangeEnemyState(EEnemyState::ENone);
 }

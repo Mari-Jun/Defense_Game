@@ -124,6 +124,14 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction<TDelegate<void(int32)>>("AbilityRMB", EInputEvent::IE_Pressed, this, &ABaseCharacter::AbilityRMB, 3);
 }
 
+float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	CharacterStatusData.CurrentHP -= DamageAmount;
+	ChangeHPDelegate.Broadcast(CharacterStatusData.CurrentHP, CharacterStatusData.MaxHP);
+
+	return DamageAmount;
+}
+
 void ABaseCharacter::Attack()
 {
 	if (CharacterAnimationData.AttackAnimMontange.IsEmpty() == false &&
@@ -207,9 +215,6 @@ void ABaseCharacter::AttackEnd()
 {
 	AttackState = EAttackState::ENone;
 	bIsAttackFull = false;
-
-	//실험을 위한 코드
-	ChangeHPDelegate.Broadcast(--CharacterStatusData.CurrentHP, CharacterStatusData.MaxHP);
 }
 
 void ABaseCharacter::AttackHit()

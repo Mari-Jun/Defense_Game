@@ -37,6 +37,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float MaxHP = 200.f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float DefaultSpeed = 400.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float AttackSpeed = 350.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float ReactionSpeed = 250.f;
+
 	float CurrentReactionValue = 0.f;
 	/** °æÁ÷Ä¡ */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -71,6 +78,8 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+	void ApplyDamage(AActor* OtherActor, float Damage);
+
 	UFUNCTION(BlueprintCallable)
 	virtual void FinishDeath();
 
@@ -79,6 +88,8 @@ private:
 	virtual void DestoryEnemy();
 
 protected:
+	virtual void ChangeEnemyState(EEnemyState State);
+
 	virtual void ShowStatusWidget();
 	virtual void HideStatusWidget();
 	virtual void PlayHitReaction(float HitYaw);
@@ -96,6 +107,12 @@ protected:
 	virtual void DisableCollision();
 
 public:
+	UFUNCTION(BlueprintCallable)
+	virtual void AttackHit() {}
+	UFUNCTION(BlueprintCallable)
+	virtual void AttackHitStart() {}
+	UFUNCTION(BlueprintCallable)
+	virtual void AttackHitEnd() {}
 	UFUNCTION(BlueprintCallable)
 	virtual void AttackEnd();
 
@@ -127,6 +144,7 @@ protected:
 	float DeathTime = 3.0f;
 	FTimerHandle DestoryActorTimerHandle;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	USphereComponent* AttackRangeSphereComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
