@@ -69,6 +69,9 @@ public:
 	UAnimMontage* AbilityRMontage;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UAnimMontage* AbilityRMBMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* DeathMontage;
 };
 
 USTRUCT(BlueprintType)
@@ -125,6 +128,8 @@ private:
 
 	void ResetAbilityTimer(int32 AbilityIndex);
 
+	virtual void KillCharacter();
+
 protected:
 	virtual void AttackLMBHit() {}
 	virtual void AbilityQHit() {}
@@ -140,6 +145,8 @@ public:
 	virtual void AttackEnd();
 	UFUNCTION(BlueprintCallable)
 	virtual void AttackHit();
+	UFUNCTION(BlueprintCallable)
+	virtual void FinishDeath();
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))

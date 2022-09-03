@@ -129,6 +129,11 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	CharacterStatusData.CurrentHP -= DamageAmount;
 	ChangeHPDelegate.Broadcast(CharacterStatusData.CurrentHP, CharacterStatusData.MaxHP);
 
+	if (CharacterStatusData.CurrentHP <= 0)
+	{
+		KillCharacter();
+	}
+
 	return DamageAmount;
 }
 
@@ -211,6 +216,16 @@ void ABaseCharacter::ResetAbilityTimer(int32 AbilityIndex)
 	StatusWidget->GetAbilityWidget(AbilityIndex)->SetCooldownVisibility(false);
 }
 
+void ABaseCharacter::KillCharacter()
+{
+	GetController()->UnPossess();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (CharacterAnimationData.DeathMontage != nullptr)
+	{
+		PlayAnimMontage(CharacterAnimationData.DeathMontage);
+	}
+}
+
 void ABaseCharacter::AttackEnd()
 {
 	AttackState = EAttackState::ENone;
@@ -228,4 +243,9 @@ void ABaseCharacter::AttackHit()
 	case EAttackState::EAbilityRMB: AbilityRMBHit(); break;
 	default: break;
 	}
+}
+
+void ABaseCharacter::FinishDeath()
+{
+	GetMesh()->GlobalAnimRateScale = 0.f;
 }
