@@ -20,6 +20,8 @@ ACharacterCaster::ACharacterCaster()
 		TEXT("AnimSequence'/Game/_Game/Characters/Caster/Animations/Caster_TurnLeft_90.Caster_TurnLeft_90'")));
 	CharacterAnimationData.TurnRight90Sequence = Cast<UAnimSequence>(StaticLoadObject(UAnimSequence::StaticClass(), nullptr,
 		TEXT("AnimSequence'/Game/_Game/Characters/Caster/Animations/Caster_TurnRight_90.Caster_TurnRight_90'")));
+	CharacterAnimationData.TurnRotationCurve = Cast<UCurveFloat>(StaticLoadObject(UCurveFloat::StaticClass(), nullptr,
+		TEXT("CurveFloat'/Game/_Game/Characters/Caster/Curve/Caster_TurnRotation_Curve.Caster_TurnRotation_Curve'")));
 
 	CharacterAnimationData.JogStartBlendSpace = Cast<UBlendSpace1D>(StaticLoadObject(UBlendSpace1D::StaticClass(), nullptr,
 		TEXT("BlendSpace1D'/Game/_Game/Characters/Caster/Animations/BS_Caster_Jog_Start.BS_Caster_Jog_Start'")));
@@ -60,6 +62,9 @@ ACharacterCaster::ACharacterCaster()
 		TEXT("AnimMontage'/Game/_Game/Characters/Caster/Animations/Caster_Ability_E_Montage.Caster_Ability_E_Montage'")));
 	CharacterAnimationData.AbilityRMontage = Cast<UAnimMontage>(StaticLoadObject(UAnimMontage::StaticClass(), nullptr,
 		TEXT("AnimMontage'/Game/_Game/Characters/Caster/Animations/Caster_Ability_R_Montage.Caster_Ability_R_Montage'")));
+
+	CharacterAnimationData.DeathMontage = Cast<UAnimMontage>(StaticLoadObject(UAnimMontage::StaticClass(), nullptr,
+		TEXT("AnimMontage'/Game/_Game/Characters/Caster/Animations/Caster_Death_Montage.Caster_Death_Montage'")));
 }
 
 void ACharacterCaster::AbilityR(int32 AbilityIndex)

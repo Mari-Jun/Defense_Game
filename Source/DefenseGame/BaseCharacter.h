@@ -15,6 +15,17 @@ class UCrosshairWidget;
 class UCharacterStatusWidget;
 
 UENUM(BlueprintType)
+enum class ECharacterState : uint8
+{
+	EDefault UMETA(DisplayName = "Default"),
+	EAttack UMETA(DisplayName = "Attack"),
+	EReaction UMETA(DisplayName = "Reaction"),
+	EDeath UMETA(DisplayName = "Death"),
+
+	EMAX UMETA(DisplayName = "MAX"),
+};
+
+UENUM(BlueprintType)
 enum class EAttackState : uint8
 {
 	ENone UMETA(DisplayName = "None"),
@@ -72,6 +83,15 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UAnimMontage* DeathMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* HitReactionFWDAnimMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* HitReactionRightAnimMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* HitReactionLeftAnimMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* HitReactionBWDAnimMontage;
 };
 
 USTRUCT(BlueprintType)
@@ -90,6 +110,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<float> AbilityTime = {3, 3, 3, 3};
 	TArray<FTimerHandle> AbilityTimerHandle;
+
+	float CurrentReactionValue = 0.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float ReactionValue = 100.f;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeCharacterHPDelegate, float, CurrentHP, float, MaxHP);
@@ -140,6 +164,8 @@ protected:
 	bool CheckAbilityCooldown(int32 AbilityIndex) const;
 	void StartAbilityCooldown(int32 AbilityIndex);
 
+	virtual void PlayHitReaction(float HitYaw);
+
 public:
 	UFUNCTION(BlueprintCallable)
 	virtual void AttackEnd();
@@ -147,6 +173,8 @@ public:
 	virtual void AttackHit();
 	UFUNCTION(BlueprintCallable)
 	virtual void FinishDeath();
+	UFUNCTION(BlueprintCallable)
+	virtual void ReactionEnd();
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
@@ -165,6 +193,9 @@ private:
 	UCharacterStatusWidget* StatusWidget;
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	ECharacterState CharacterState = ECharacterState::EDefault;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	FCharacterAnimationData CharacterAnimationData;
 	
@@ -187,4 +218,5 @@ public:
 public:
 	USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	UCurveFloat* GetTurnRotationCurve() const { return CharacterAnimationData.TurnRotationCurve; }
+	void SetCharacterState(ECharacterState State);
 };

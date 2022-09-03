@@ -12,8 +12,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -126,8 +127,23 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	float DeltaYaw = 0.f;
+
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		const FPointDamageEvent* PointDamageEvent = (FPointDamageEvent*)&DamageEvent;
+
+		const FRotator ActorRotation = GetActorRotation();
+		const FRotator ShotRotation = UKismetMathLibrary::MakeRotFromX(PointDamageEvent->ShotDirection);
+
+		DeltaYaw = UKismetMathLibrary::NormalizedDeltaRotator(ActorRotation, ShotRotation).Yaw;
+	}
+
 	CharacterStatusData.CurrentHP -= DamageAmount;
+	CharacterStatusData.CurrentReactionValue += DamageAmount;
 	ChangeHPDelegate.Broadcast(CharacterStatusData.CurrentHP, CharacterStatusData.MaxHP);
+
+	PlayHitReaction(DeltaYaw);
 
 	if (CharacterStatusData.CurrentHP <= 0)
 	{
@@ -140,11 +156,12 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 void ABaseCharacter::Attack()
 {
 	if (CharacterAnimationData.AttackAnimMontange.IsEmpty() == false &&
-		AttackState == EAttackState::ENone)
+		CharacterState == ECharacterState::EDefault)
 	{
 		int32 index = FMath::RandRange(0, CharacterAnimationData.AttackAnimMontange.Num() - 1);
 		const auto& attack_montage = CharacterAnimationData.AttackAnimMontange[index];
 		PlayAnimMontage(attack_montage);
+		SetCharacterState(ECharacterState::EAttack);
 		AttackState = EAttackState::EAttackLMB;
 	}
 }
@@ -152,9 +169,10 @@ void ABaseCharacter::Attack()
 void ABaseCharacter::AbilityQ(int32 AbilityIndex)
 {
 	if (CharacterAnimationData.AbilityQMontage != nullptr &&
-		AttackState == EAttackState::ENone && CheckAbilityCooldown(AbilityIndex))
+		CharacterState == ECharacterState::EDefault && CheckAbilityCooldown(AbilityIndex))
 	{
 		PlayAnimMontage(CharacterAnimationData.AbilityQMontage);
+		SetCharacterState(ECharacterState::EAttack);
 		AttackState = EAttackState::EAbilityQ;
 
 		StartAbilityCooldown(AbilityIndex);
@@ -164,9 +182,10 @@ void ABaseCharacter::AbilityQ(int32 AbilityIndex)
 void ABaseCharacter::AbilityE(int32 AbilityIndex)
 {
 	if (CharacterAnimationData.AbilityEMontage != nullptr &&
-		AttackState == EAttackState::ENone && CheckAbilityCooldown(AbilityIndex))
+		CharacterState == ECharacterState::EDefault && CheckAbilityCooldown(AbilityIndex))
 	{
 		PlayAnimMontage(CharacterAnimationData.AbilityEMontage);
+		SetCharacterState(ECharacterState::EAttack);
 		AttackState = EAttackState::EAbilityE;
 
 		StartAbilityCooldown(AbilityIndex);
@@ -176,9 +195,10 @@ void ABaseCharacter::AbilityE(int32 AbilityIndex)
 void ABaseCharacter::AbilityR(int32 AbilityIndex)
 {
 	if (CharacterAnimationData.AbilityRMontage != nullptr &&
-		AttackState == EAttackState::ENone && CheckAbilityCooldown(AbilityIndex))
+		CharacterState == ECharacterState::EDefault && CheckAbilityCooldown(AbilityIndex))
 	{
 		PlayAnimMontage(CharacterAnimationData.AbilityRMontage);
+		SetCharacterState(ECharacterState::EAttack);
 		AttackState = EAttackState::EAbilityR;
 
 		StartAbilityCooldown(AbilityIndex);
@@ -188,9 +208,10 @@ void ABaseCharacter::AbilityR(int32 AbilityIndex)
 void ABaseCharacter::AbilityRMB(int32 AbilityIndex)
 {
 	if (CharacterAnimationData.AbilityRMBMontage != nullptr &&
-		AttackState == EAttackState::ENone && CheckAbilityCooldown(AbilityIndex))
+		CharacterState == ECharacterState::EDefault && CheckAbilityCooldown(AbilityIndex))
 	{
 		PlayAnimMontage(CharacterAnimationData.AbilityRMBMontage);
+		SetCharacterState(ECharacterState::EAttack);
 		AttackState = EAttackState::EAbilityRMB;
 
 		StartAbilityCooldown(AbilityIndex);
@@ -210,6 +231,50 @@ void ABaseCharacter::StartAbilityCooldown(int32 AbilityIndex)
 	StatusWidget->GetAbilityWidget(AbilityIndex)->SetCooldownVisibility(true);
 }
 
+void ABaseCharacter::PlayHitReaction(float HitYaw)
+{
+	if (CharacterStatusData.CurrentReactionValue < CharacterStatusData.ReactionValue) return;
+
+	CharacterStatusData.CurrentReactionValue -= CharacterStatusData.ReactionValue;
+
+	UAnimMontage* HitReaction = CharacterAnimationData.HitReactionFWDAnimMontage;
+
+	if (HitYaw >= -45.f && HitYaw <= 45.f)
+	{
+		if (CharacterAnimationData.HitReactionFWDAnimMontage != nullptr)
+		{
+			HitReaction = CharacterAnimationData.HitReactionFWDAnimMontage;
+		}
+	}
+	else if (HitYaw >= -135.f && HitYaw < -45.f)
+	{
+		if (CharacterAnimationData.HitReactionLeftAnimMontage != nullptr)
+		{
+			HitReaction = CharacterAnimationData.HitReactionLeftAnimMontage;
+		}
+	}
+	else if (HitYaw <= 135.f && HitYaw > 45.f)
+	{
+		if (CharacterAnimationData.HitReactionRightAnimMontage != nullptr)
+		{
+			HitReaction = CharacterAnimationData.HitReactionRightAnimMontage;
+		}
+	}
+	else
+	{
+		if (CharacterAnimationData.HitReactionBWDAnimMontage != nullptr)
+		{
+			HitReaction = CharacterAnimationData.HitReactionBWDAnimMontage;
+		}
+	}
+
+	if (HitReaction != nullptr)
+	{
+		PlayAnimMontage(HitReaction);
+		SetCharacterState(ECharacterState::EReaction);
+	}
+}
+
 void ABaseCharacter::ResetAbilityTimer(int32 AbilityIndex)
 {
 	GetWorldTimerManager().ClearTimer(CharacterStatusData.AbilityTimerHandle[AbilityIndex]);
@@ -224,10 +289,12 @@ void ABaseCharacter::KillCharacter()
 	{
 		PlayAnimMontage(CharacterAnimationData.DeathMontage);
 	}
+	SetCharacterState(ECharacterState::EDeath);
 }
 
 void ABaseCharacter::AttackEnd()
 {
+	SetCharacterState(ECharacterState::EDefault);
 	AttackState = EAttackState::ENone;
 	bIsAttackFull = false;
 }
@@ -248,4 +315,27 @@ void ABaseCharacter::AttackHit()
 void ABaseCharacter::FinishDeath()
 {
 	GetMesh()->GlobalAnimRateScale = 0.f;
+}
+
+void ABaseCharacter::ReactionEnd()
+{
+	SetCharacterState(ECharacterState::EDefault);
+}
+
+void ABaseCharacter::SetCharacterState(ECharacterState State)
+{
+	switch (State)
+	{
+	case ECharacterState::EDefault:
+		break;
+	case ECharacterState::EAttack:
+		break;
+	case ECharacterState::EReaction:
+		break;
+	case ECharacterState::EDeath:
+		break;
+	default: break;
+	}
+
+	CharacterState = State;
 }
