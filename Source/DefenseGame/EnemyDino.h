@@ -6,6 +6,8 @@
 #include "Enemy.h"
 #include "EnemyDino.generated.h"
 
+class UParticleSystem;
+
 /**
  * 
  */
@@ -34,4 +36,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	USphereComponent* BiteAttackSphereComponent;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX", meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* BiteAttackParticle;
 };

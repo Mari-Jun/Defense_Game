@@ -4,6 +4,8 @@
 #include "EnemyDino.h"
 #include "Components/SphereComponent.h"
 
+#include "Kismet/GameplayStatics.h"
+
 AEnemyDino::AEnemyDino()
 {
 	EnemyStatusData.DefaultSpeed = 650.f;
@@ -26,6 +28,10 @@ void AEnemyDino::BeginPlay()
 void AEnemyDino::AttackHitStart()
 {
 	BiteAttackSphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	if (BiteAttackParticle != nullptr)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BiteAttackParticle, BiteAttackSphereComponent->GetComponentTransform());
+	}
 }
 
 void AEnemyDino::AttackHitEnd()
