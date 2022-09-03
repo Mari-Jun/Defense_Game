@@ -15,6 +15,7 @@ class UCanvasPanelSlot;
 class UImage;
 class UProgressBar;
 class UTextLayoutWidget;
+class APostProcessVolume;
 /**
  * 
  */
@@ -27,6 +28,11 @@ class DEFENSEGAME_API UCharacterStatusWidget : public UUserWidget
 protected:
 	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+public:
+	UFUNCTION()
+	void OnChangeHP(float CurrentHP, float MaxHP);
 
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
@@ -43,8 +49,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UCharacterSkillTimeWidget* AbilityRMBWidget;
 
-	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	ABaseCharacter* BaseCharacter;
+
+	APostProcessVolume* PostProcessVolume;
 
 public:
 	void SetBaseCharacter(ABaseCharacter* Character);
