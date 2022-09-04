@@ -14,6 +14,8 @@ class UBlackboardComponent;
 class UBehaviorTreeComponent;
 class UAIPerceptionComponent;
 class UAISenseConfig_Sight;
+class UAISenseConfig_Damage;
+class UAISenseConfig_Team;
 
 /**
  * 
@@ -32,6 +34,8 @@ public:
 	virtual FVector FindNearestDefenseBaseLocation();
 
 	virtual void Tick(float DeltaTime) override;
+
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -57,10 +61,16 @@ private:
 	float LoseSightRadius = 4500.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
 	float VisionAngle = 120.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
-	float LoseSightTime = 5.f;
 
-	UAISenseConfig_Sight* Sight;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
+	bool UseDamageSense = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
+	bool UseTeamSense = true;
+
+	UAISenseConfig_Sight* SenseSight;
+	UAISenseConfig_Damage* SenseDamage;
+	UAISenseConfig_Team* SenseTeam;
 
 	ABaseCharacter* TargetCharacter = nullptr;
 

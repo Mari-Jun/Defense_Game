@@ -10,6 +10,8 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISenseConfig_Damage.h"
+#include "Perception/AISenseConfig_Team.h"
 #include "Perception/AIPerceptionComponent.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -48,6 +50,7 @@ void AEnemyController::KilledControlledPawn()
 	if (Enemy != nullptr)
 	{
 		BehaviorTreeComponent->StopTree();
+		GetWorld()->DestroyActor(this);
 	}
 }
 
@@ -81,6 +84,16 @@ void AEnemyController::Tick(float DeltaTime)
 
 }
 
+float AEnemyController::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	SenseDamage->Implementation.GetDefaultObject()->ReportDamageEvent(GetWorld(), Enemy,
+		DamageCauser, DamageAmount, DamageCauser->GetActorLocation(), Enemy->GetActorLocation());
+
+	return DamageAmount;
+}
+
 void AEnemyController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -94,6 +107,13 @@ void AEnemyController::BeginPlay()
 	{
 		BlackboardComponent->SetValueAsVector("BaseTargetLocation", FindNearestDefenseBaseLocation());
 	}
+
+	UAIPerceptionSystem* PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
+	if (PerceptionSystem != nullptr)
+	{
+		SetGenericTeamId(Enemy->GetGenericTeamId());
+		PerceptionSystem->UpdateListener(*GetPerceptionComponent());
+	}
 }
 
 void AEnemyController::InitializePerception()
@@ -102,15 +122,28 @@ void AEnemyController::InitializePerception()
 
 	if(UseSightSense)
 	{
-		Sight = CreateDefaultSubobject<UAISenseConfig_Sight>("sense sight");
-		Sight->SightRadius = SightRadius;
-		Sight->LoseSightRadius = LoseSightRadius;
-		Sight->PeripheralVisionAngleDegrees = VisionAngle * 0.5f;
-		Sight->SetMaxAge(LoseSightTime);
-		Sight->DetectionByAffiliation.bDetectEnemies = true;
+		SenseSight = CreateDefaultSubobject<UAISenseConfig_Sight>("sense sight");
+		SenseSight->SightRadius = SightRadius;
+		SenseSight->LoseSightRadius = LoseSightRadius;
+		SenseSight->PeripheralVisionAngleDegrees = VisionAngle * 0.5f;
+		SenseSight->DetectionByAffiliation.bDetectEnemies = true;
 
-		GetPerceptionComponent()->ConfigureSense(*Sight);
-		GetPerceptionComponent()->SetDominantSense(Sight->GetSenseImplementation());
+		GetPerceptionComponent()->ConfigureSense(*SenseSight);
+		GetPerceptionComponent()->SetDominantSense(SenseSight->GetSenseImplementation());
+	}
+
+	if (UseDamageSense)
+	{
+		SenseDamage = CreateDefaultSubobject<UAISenseConfig_Damage>("sense damage");
+
+		GetPerceptionComponent()->ConfigureSense(*SenseDamage);
+	}
+
+	if (UseTeamSense)
+	{
+		SenseTeam = CreateDefaultSubobject<UAISenseConfig_Team>("sense team");
+
+		GetPerceptionComponent()->ConfigureSense(*SenseTeam);
 	}
 }
 
@@ -119,16 +152,30 @@ void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 	ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Actor);
 	if (BaseCharacter == nullptr) return;
 
-	TArray<AActor*> Threats;
-	PerceptionComponent->GetHostileActors(Threats);
-	if (Threats.Num() <= 0) return;
-	const int32 i = Threats.Find(Actor);
-	if (i < 0) return;
-
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		TargetCharacter = BaseCharacter;
-		SetFocus(BaseCharacter);
+		if (TargetCharacter == nullptr)
+		{
+			TArray<AActor*> Threats;
+			PerceptionComponent->GetHostileActors(Threats);
+			if (Threats.Num() <= 0) return;
+			const int32 i = Threats.Find(Actor);
+			if (i < 0) return;
+
+			TargetCharacter = BaseCharacter;
+			SetFocus(BaseCharacter);
+
+			if (Stimulus.Type == SenseDamage->GetSenseID() ||
+				Stimulus.Type == SenseSight->GetSenseID())
+			{
+				UAIPerceptionSystem* PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
+				if (PerceptionSystem != nullptr)
+				{
+					FAITeamStimulusEvent Event = FAITeamStimulusEvent(this, Actor, Actor->GetActorLocation(), SightRadius);
+					PerceptionSystem->OnEvent(Event);
+				}
+			}
+		}
 	}
 	else
 	{

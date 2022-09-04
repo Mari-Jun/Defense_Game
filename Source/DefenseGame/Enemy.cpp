@@ -66,7 +66,7 @@ void AEnemy::BeginPlay()
 	EnemyController = Cast<AEnemyController>(GetController());
 	if (EnemyController == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Could not cast GetController() to AEnemyController"));
+		UE_LOG(LogTemp, Error, TEXT("Could notlluxur cast GetController() to AEnemyController"));
 		GetWorld()->DestroyActor(this);
 	}
 
@@ -108,6 +108,8 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
 	float DeltaYaw = 0.f;
 	
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
@@ -124,6 +126,8 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	ChangeHPDelegate.Broadcast(EnemyStatusData.CurrentHP, EnemyStatusData.MaxHP);
 
 	PlayHitReaction(DeltaYaw);
+
+	EnemyController->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	ShowStatusWidget();
 
