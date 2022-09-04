@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GenericTeamAgentInterface.h"
 #include "Enemy.generated.h"
 
 class UEnemyStatusWidget;
@@ -57,7 +58,7 @@ public:
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeEnemyHPDelegate, float, CurrentHP, float, MaxHP);
 
 UCLASS()
-class DEFENSEGAME_API AEnemy : public ACharacter
+class DEFENSEGAME_API AEnemy : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -165,10 +166,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	TArray<UAnimMontage*> AttackAnimMontange;
 
+	FGenericTeamId TeamId{ 0 };
+
 public:
 	FChangeEnemyHPDelegate ChangeHPDelegate;
 
 public:
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
-
+	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }
 };

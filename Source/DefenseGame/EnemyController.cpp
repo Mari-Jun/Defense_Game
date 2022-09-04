@@ -75,6 +75,12 @@ FVector AEnemyController::FindNearestDefenseBaseLocation()
 	return MinLocation;
 }
 
+void AEnemyController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
 void AEnemyController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -101,7 +107,7 @@ void AEnemyController::InitializePerception()
 		Sight->LoseSightRadius = LoseSightRadius;
 		Sight->PeripheralVisionAngleDegrees = VisionAngle * 0.5f;
 		Sight->SetMaxAge(LoseSightTime);
-		Sight->DetectionByAffiliation.bDetectNeutrals = true;
+		Sight->DetectionByAffiliation.bDetectEnemies = true;
 
 		GetPerceptionComponent()->ConfigureSense(*Sight);
 		GetPerceptionComponent()->SetDominantSense(Sight->GetSenseImplementation());
@@ -112,6 +118,12 @@ void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 {
 	ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Actor);
 	if (BaseCharacter == nullptr) return;
+
+	TArray<AActor*> Threats;
+	PerceptionComponent->GetHostileActors(Threats);
+	if (Threats.Num() <= 0) return;
+	const int32 i = Threats.Find(Actor);
+	if (i < 0) return;
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
@@ -125,4 +137,38 @@ void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 		BlackboardComponent->SetValueAsVector("BaseTargetLocation", FindNearestDefenseBaseLocation());
 	}
 	BlackboardComponent->SetValueAsObject("TargetCharacter", TargetCharacter);
+}
+
+ETeamAttitude::Type AEnemyController::GetTeamAttitudeTowards(const AActor& Other) const
+{
+	const APawn* OtherPawn = Cast<APawn>(&Other);
+	if (OtherPawn == nullptr) { return ETeamAttitude::Neutral; }
+
+	const IGenericTeamAgentInterface* OtherTI = Cast<IGenericTeamAgentInterface>(&Other);
+	IGenericTeamAgentInterface* OtherControllerTI = Cast<IGenericTeamAgentInterface>(OtherPawn->GetController());
+	if (OtherTI == nullptr && OtherControllerTI == nullptr) { return ETeamAttitude::Neutral; }
+
+	FGenericTeamId OtherActorTeamId;
+	if (OtherTI != nullptr)
+	{
+		OtherActorTeamId = OtherTI->GetGenericTeamId();
+	}
+	else if (OtherControllerTI != nullptr)
+	{
+		OtherActorTeamId = OtherControllerTI->GetGenericTeamId();
+	}
+	
+	FGenericTeamId ControllerId = Enemy->GetGenericTeamId();
+	if (OtherActorTeamId == 8)
+	{
+		return ETeamAttitude::Neutral;
+	}
+	else if (OtherActorTeamId == ControllerId)
+	{
+		return ETeamAttitude::Friendly;
+	}
+	else
+	{
+		return ETeamAttitude::Hostile;
+	}
 }

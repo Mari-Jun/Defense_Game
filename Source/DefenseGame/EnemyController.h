@@ -31,6 +31,8 @@ public:
 	virtual void KilledControlledPawn();
 	virtual FVector FindNearestDefenseBaseLocation();
 
+	virtual void Tick(float DeltaTime) override;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -61,6 +63,9 @@ private:
 	UAISenseConfig_Sight* Sight;
 
 	ABaseCharacter* TargetCharacter = nullptr;
+
+protected:
+	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 
 public:
 	ABaseCharacter* GetTargetCharacter() const { return TargetCharacter; }

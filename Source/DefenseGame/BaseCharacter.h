@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GenericTeamAgentInterface.h"
 #include "BaseCharacter.generated.h"
 
 class USpringArmComponent;
@@ -120,7 +121,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeCharacterHPDelegate, float, 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangeCooldownTimeDelegate, float, Time);
 
 UCLASS()
-class DEFENSEGAME_API ABaseCharacter : public ACharacter
+class DEFENSEGAME_API ABaseCharacter : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -208,6 +209,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	bool bIsAttackFull = false;
 
+	FGenericTeamId TeamId{ 255 };
+
 public:
 	UPROPERTY()
 	FChangeCharacterHPDelegate ChangeHPDelegate;
@@ -219,4 +222,6 @@ public:
 	USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	UCurveFloat* GetTurnRotationCurve() const { return CharacterAnimationData.TurnRotationCurve; }
 	void SetCharacterState(ECharacterState State);
+
+	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }
 };
