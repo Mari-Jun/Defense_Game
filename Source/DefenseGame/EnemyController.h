@@ -13,6 +13,7 @@ class ABaseCharacter;
 class UBlackboardComponent;
 class UBehaviorTreeComponent;
 class UAIPerceptionComponent;
+class UAIPerceptionSystem;
 class UAISenseConfig_Sight;
 class UAISenseConfig_Damage;
 class UAISenseConfig_Team;
@@ -44,6 +45,10 @@ protected:
 	UFUNCTION()
 	virtual void OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus);
 
+	void TriggerDamageEvent(float DamageAmount, AActor* DamageCauser);
+	void TriggerTeamEvent(AActor* Actor);
+	void LoseSense();
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 	AEnemy* Enemy;
@@ -53,26 +58,31 @@ private:
 	UPROPERTY(BlueprintReadWrite, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
 	UBehaviorTreeComponent* BehaviorTreeComponent;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
-	bool UseSightSense = true;
+	UAIPerceptionSystem* PerceptionSystem;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
 	float SightRadius = 3000.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
 	float LoseSightRadius = 4500.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
 	float VisionAngle = 120.f;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
-	bool UseDamageSense = true;
+	float TeamSenseRange = 1000.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
-	bool UseTeamSense = true;
+	bool SuccessSightSense = false;
+	bool SuccessDamageSense = false;
+	bool SuccessTeamSense = false;
 
 	UAISenseConfig_Sight* SenseSight;
 	UAISenseConfig_Damage* SenseDamage;
 	UAISenseConfig_Team* SenseTeam;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
+	float LoseSenseTime = 5.0f;
+	FTimerHandle LoseSenseTimerHandle;
+
 	ABaseCharacter* TargetCharacter = nullptr;
+	FVector TargetLocation;
 
 protected:
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;

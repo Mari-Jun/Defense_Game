@@ -88,8 +88,10 @@ float AEnemyController::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	SenseDamage->Implementation.GetDefaultObject()->ReportDamageEvent(GetWorld(), Enemy,
-		DamageCauser, DamageAmount, DamageCauser->GetActorLocation(), Enemy->GetActorLocation());
+	if (SenseDamage != nullptr && Enemy != nullptr)
+	{
+		TriggerDamageEvent(DamageAmount, DamageCauser);
+	}
 
 	return DamageAmount;
 }
@@ -105,10 +107,11 @@ void AEnemyController::BeginPlay()
 
 	if (BlackboardComponent != nullptr)
 	{
+		BlackboardComponent->SetValueAsBool("LoseSense", true);
 		BlackboardComponent->SetValueAsVector("BaseTargetLocation", FindNearestDefenseBaseLocation());
 	}
 
-	UAIPerceptionSystem* PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
+	PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
 	if (PerceptionSystem != nullptr)
 	{
 		SetGenericTeamId(Enemy->GetGenericTeamId());
@@ -120,31 +123,24 @@ void AEnemyController::InitializePerception()
 {
 	SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>("ai perception"));
 
-	if(UseSightSense)
-	{
-		SenseSight = CreateDefaultSubobject<UAISenseConfig_Sight>("sense sight");
-		SenseSight->SightRadius = SightRadius;
-		SenseSight->LoseSightRadius = LoseSightRadius;
-		SenseSight->PeripheralVisionAngleDegrees = VisionAngle * 0.5f;
-		SenseSight->DetectionByAffiliation.bDetectEnemies = true;
+	SenseSight = CreateDefaultSubobject<UAISenseConfig_Sight>("sense sight");
+	SenseSight->SightRadius = SightRadius;
+	SenseSight->LoseSightRadius = LoseSightRadius;
+	SenseSight->PeripheralVisionAngleDegrees = VisionAngle * 0.5f;
+	SenseSight->DetectionByAffiliation.bDetectEnemies = true;
 
-		GetPerceptionComponent()->ConfigureSense(*SenseSight);
-		GetPerceptionComponent()->SetDominantSense(SenseSight->GetSenseImplementation());
-	}
+	GetPerceptionComponent()->ConfigureSense(*SenseSight);
+	GetPerceptionComponent()->SetDominantSense(SenseSight->GetSenseImplementation());
 
-	if (UseDamageSense)
-	{
-		SenseDamage = CreateDefaultSubobject<UAISenseConfig_Damage>("sense damage");
+	SenseDamage = CreateDefaultSubobject<UAISenseConfig_Damage>("sense damage");
+	SenseDamage->SetMaxAge(5.0f);
 
-		GetPerceptionComponent()->ConfigureSense(*SenseDamage);
-	}
+	GetPerceptionComponent()->ConfigureSense(*SenseDamage);
 
-	if (UseTeamSense)
-	{
-		SenseTeam = CreateDefaultSubobject<UAISenseConfig_Team>("sense team");
+	SenseTeam = CreateDefaultSubobject<UAISenseConfig_Team>("sense team");
+	SenseTeam->SetMaxAge(5.0f);
 
-		GetPerceptionComponent()->ConfigureSense(*SenseTeam);
-	}
+	GetPerceptionComponent()->ConfigureSense(*SenseTeam);
 }
 
 void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
@@ -152,38 +148,95 @@ void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 	ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Actor);
 	if (BaseCharacter == nullptr) return;
 
+	TSubclassOf<UAISense> AISense = PerceptionSystem->GetSenseClassForStimulus(GetWorld(), Stimulus);
+	FString SenseName = AISense->GetName();
+
 	if (Stimulus.WasSuccessfullySensed())
 	{
+		if (SenseName == UAISense_Damage::StaticClass()->GetName())
+		{
+			SuccessDamageSense = true;
+			TriggerTeamEvent(Actor);
+		}
+		else if (SenseName == UAISense_Sight::StaticClass()->GetName())
+		{
+			SuccessSightSense = true;
+			TriggerTeamEvent(Actor);
+		}
+		else if (SenseName == UAISense_Team::StaticClass()->GetName())
+		{
+			SuccessTeamSense = true;
+		}
+
+		BlackboardComponent->SetValueAsBool("LoseSense", false);
+
 		if (TargetCharacter == nullptr)
 		{
-			TArray<AActor*> Threats;
+			/*TArray<AActor*> Threats;
 			PerceptionComponent->GetHostileActors(Threats);
 			if (Threats.Num() <= 0) return;
 			const int32 i = Threats.Find(Actor);
-			if (i < 0) return;
+			if (i < 0) return;*/
 
 			TargetCharacter = BaseCharacter;
 			SetFocus(BaseCharacter);
-
-			if (Stimulus.Type == SenseDamage->GetSenseID() ||
-				Stimulus.Type == SenseSight->GetSenseID())
-			{
-				UAIPerceptionSystem* PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
-				if (PerceptionSystem != nullptr)
-				{
-					FAITeamStimulusEvent Event = FAITeamStimulusEvent(this, Actor, Actor->GetActorLocation(), SightRadius);
-					PerceptionSystem->OnEvent(Event);
-				}
-			}
 		}
 	}
 	else
 	{
-		TargetCharacter = nullptr;
-		SetFocus(nullptr);
-		BlackboardComponent->SetValueAsVector("BaseTargetLocation", FindNearestDefenseBaseLocation());
+		if (SenseName == UAISense_Damage::StaticClass()->GetName())
+		{
+			SuccessDamageSense = false;
+		}
+		else if (SenseName == UAISense_Sight::StaticClass()->GetName())
+		{
+			SuccessSightSense = false;
+		}
+		else if (SenseName == UAISense_Team::StaticClass()->GetName())
+		{
+			SuccessTeamSense = false;
+		}
+
+		if (!SuccessDamageSense && !SuccessSightSense && !SuccessTeamSense)
+		{
+			if (SenseName == UAISense_Sight::StaticClass()->GetName())
+			{
+				TargetLocation = TargetCharacter->GetActorLocation();
+				GetWorldTimerManager().SetTimer(LoseSenseTimerHandle, this, &AEnemyController::LoseSense, LoseSenseTime, false);
+			}
+			TargetCharacter = nullptr;
+			SetFocus(nullptr);
+		}
 	}
 	BlackboardComponent->SetValueAsObject("TargetCharacter", TargetCharacter);
+}
+
+void AEnemyController::TriggerDamageEvent(float DamageAmount, AActor* DamageCauser)
+{
+	if (PerceptionSystem != nullptr)
+	{
+		FAIDamageEvent Event = FAIDamageEvent(Enemy, DamageCauser, DamageAmount,
+			DamageCauser->GetActorLocation(), Enemy->GetActorLocation());
+		PerceptionSystem->OnEvent(Event);
+	}
+}
+
+void AEnemyController::TriggerTeamEvent(AActor* Actor)
+{
+	if (PerceptionSystem != nullptr)
+	{
+		FAITeamStimulusEvent Event = FAITeamStimulusEvent(this, Actor, Actor->GetActorLocation(), TeamSenseRange);
+		PerceptionSystem->OnEvent(Event);
+	}
+}
+
+void AEnemyController::LoseSense()
+{
+	if (!SuccessDamageSense && !SuccessSightSense && !SuccessTeamSense)
+	{
+		BlackboardComponent->SetValueAsVector("BaseTargetLocation", FindNearestDefenseBaseLocation());
+		BlackboardComponent->SetValueAsBool("LoseSense", true);
+	}
 }
 
 ETeamAttitude::Type AEnemyController::GetTeamAttitudeTowards(const AActor& Other) const

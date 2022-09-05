@@ -66,13 +66,12 @@ void AEnemy::BeginPlay()
 	EnemyController = Cast<AEnemyController>(GetController());
 	if (EnemyController == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Could notlluxur cast GetController() to AEnemyController"));
+		UE_LOG(LogTemp, Error, TEXT("Could not cast GetController() to AEnemyController"));
 		GetWorld()->DestroyActor(this);
 	}
 
 	if (AttackRangeSphereComponent != nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Could not cast GetController() to AEnemyController"));
 		AttackRangeSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnAttackRangeBeginOverlap);
 		AttackRangeSphereComponent->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnAttackRangeEndOverlap);
 	}
