@@ -5,6 +5,7 @@
 #include "EnemyStatusWidget.h"
 #include "EnemyController.h"
 #include "BaseCharacter.h"
+#include "EnemyDamageWidget.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
@@ -41,6 +42,9 @@ AEnemy::AEnemy()
 	AttackRangeSphereComponent->SetupAttachment(GetRootComponent());
 	AttackRangeSphereComponent->SetSphereRadius(150.f);
 	AttackRangeSphereComponent->SetCollisionProfileName("EnemyAttack");
+
+	DamageWidgetSpawnPoint = CreateDefaultSubobject<USceneComponent>("DamageWidgetSpawnPoint");
+	DamageWidgetSpawnPoint->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
@@ -96,6 +100,8 @@ void AEnemy::Tick(float DeltaTime)
 	{
 		Attack();
 	}
+
+	RenderHitNumbers();
 }
 
 // Called to bind functionality to input
@@ -110,7 +116,7 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	float DeltaYaw = 0.f;
-	
+
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		const FPointDamageEvent* PointDamageEvent = (FPointDamageEvent*)&DamageEvent;
@@ -129,6 +135,12 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	EnemyController->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	ShowStatusWidget();
+
+	APlayerController* PlayerController = Cast<APlayerController>(EventInstigator);
+	if (PlayerController != nullptr)
+	{
+		AddDamageNumber(PlayerController, DamageAmount);
+	}
 
 	if (EnemyStatusData.CurrentHP <= 0.f)
 	{
@@ -260,6 +272,50 @@ void AEnemy::Attack()
 		const auto& attack_montage = AttackAnimMontange[index];
 		PlayAnimMontage(attack_montage);
 		ChangeEnemyState(EEnemyState::EAttack);
+	}
+}
+
+void AEnemy::AddDamageNumber(APlayerController* PlayerController, float Damage)
+{
+	if (DamageNumberWidgetClass != nullptr)
+	{
+		UEnemyDamageWidget* DamageWidget = CreateWidget<UEnemyDamageWidget>(PlayerController, DamageNumberWidgetClass);
+		if (DamageWidget != nullptr)
+		{
+			DamageWidget->SetDamageText(Damage);
+			DamageWidget->SetTextAlpha(ShowDamageWidgetTime);
+
+			float CapsuleHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+			FVector Location = GetActorLocation() + FVector(0.0f, 100.0, CapsuleHalfHeight);
+			DamageNumbers.Add(DamageWidget, Location);
+			DamageWidget->AddToViewport();
+
+			FTimerHandle DamageNumberTimerHandle;
+			FTimerDelegate DamageNumberTimerDelegate;
+
+			DamageNumberTimerDelegate.BindUFunction(this, FName("DestoryDamageNumber"), DamageWidget);
+			GetWorldTimerManager().SetTimer(DamageNumberTimerHandle, DamageNumberTimerDelegate, ShowDamageWidgetTime, false);
+		}
+	}
+}
+
+void AEnemy::DestoryDamageNumber(UEnemyDamageWidget* DamageWidget)
+{
+	DamageNumbers.Remove(DamageWidget);
+	DamageWidget->RemoveFromParent();
+}
+
+void AEnemy::RenderHitNumbers()
+{
+	for (auto& DamageNumber : DamageNumbers)
+	{
+		UEnemyDamageWidget* DamageNumberWidget = DamageNumber.Key;
+		const FVector HitLocation = DamageNumber.Value;
+		DamageNumber.Value += FVector(0.0f, 0.0f, 50.0f * GetWorld()->GetDeltaSeconds());
+
+		FVector2D ScreenPosition;
+		UGameplayStatics::ProjectWorldToScreen(GetWorld()->GetFirstPlayerController(), HitLocation, ScreenPosition);
+		DamageNumberWidget->SetPositionInViewport(ScreenPosition);
 	}
 }
 
