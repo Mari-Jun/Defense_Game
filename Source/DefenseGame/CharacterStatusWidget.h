@@ -34,6 +34,9 @@ public:
 	UFUNCTION()
 	void OnChangeHP(float CurrentHP, float MaxHP);
 
+	UFUNCTION()
+	void OnHitReaction();
+
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UCanvasPanel* CanvasPanel;
@@ -48,6 +51,13 @@ private:
 	UCharacterSkillTimeWidget* AbilityRWidget;
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UCharacterSkillTimeWidget* AbilityRMBWidget;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UImage* HitImage;
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	UCurveLinearColor* HitImageLinearColorCurve;
+	FTimerHandle HitImageColorTimer;
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	ABaseCharacter* BaseCharacter;

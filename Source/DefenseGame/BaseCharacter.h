@@ -119,6 +119,7 @@ public:
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeCharacterHPDelegate, float, CurrentHP, float, MaxHP);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangeCooldownTimeDelegate, float, Time);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHitShakeCameraDelegate);
 
 UCLASS()
 class DEFENSEGAME_API ABaseCharacter : public ACharacter, public IGenericTeamAgentInterface
@@ -167,6 +168,9 @@ protected:
 
 	virtual void PlayHitReaction(float HitYaw);
 
+	UFUNCTION()
+	virtual void ShakePlayerCamera();
+
 public:
 	UFUNCTION(BlueprintCallable)
 	virtual void AttackEnd();
@@ -193,6 +197,9 @@ private:
 	UPROPERTY()
 	UCharacterStatusWidget* StatusWidget;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UCameraShakeBase> HitCameraShakeClass;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	ECharacterState CharacterState = ECharacterState::EDefault;
@@ -217,6 +224,9 @@ public:
 
 	UPROPERTY()
 	TArray<FChangeCooldownTimeDelegate> ChangeAbilityTimeDelegate;
+
+	UPROPERTY()
+	FHitShakeCameraDelegate HitShakeCameraDelegate;
 
 public:
 	USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

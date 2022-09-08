@@ -7,6 +7,8 @@
 #include "BaseCharacter.h"
 
 #include "Internationalization/Text.h"
+#include "Components/Image.h"
+#include "Curves/CurveLinearColor.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Engine/PostProcessVolume.h"
@@ -48,6 +50,11 @@ void UCharacterStatusWidget::NativeConstruct()
 		{
 			BaseCharacter->ChangeAbilityTimeDelegate[3].AddDynamic(AbilityRMBWidget, &UCharacterSkillTimeWidget::OnChangeCooldownState);
 		}
+
+		if (HitImage != nullptr)
+		{
+			BaseCharacter->HitShakeCameraDelegate.AddDynamic(this, &UCharacterStatusWidget::OnHitReaction);
+		}
 	}
 
 	PostProcessVolume = Cast<APostProcessVolume>(UGameplayStatics::GetActorOfClass(GetWorld(), APostProcessVolume::StaticClass()));
@@ -57,6 +64,13 @@ void UCharacterStatusWidget::NativeTick(const FGeometry& MyGeometry, float InDel
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 	
+	if (HitImageColorTimer.IsValid())
+	{
+		const float ElapsedTime = GetWorld()->GetTimerManager().GetTimerElapsed(HitImageColorTimer);
+
+		FLinearColor ImageColor = HitImageLinearColorCurve->GetLinearColorValue(ElapsedTime);
+		HitImage->SetBrushTintColor(ImageColor);
+	}
 }
 
 void UCharacterStatusWidget::OnChangeHP(float CurrentHP, float MaxHP)
@@ -74,6 +88,11 @@ void UCharacterStatusWidget::OnChangeHP(float CurrentHP, float MaxHP)
 			PostProcessVolume->Settings.WeightedBlendables.Array[0].Weight = 0.0f;
 		}
 	}
+}
+
+void UCharacterStatusWidget::OnHitReaction()
+{
+	GetWorld()->GetTimerManager().SetTimer(HitImageColorTimer, 0.25f, false);
 }
 
 void UCharacterStatusWidget::SetBaseCharacter(ABaseCharacter* Character)

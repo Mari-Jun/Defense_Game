@@ -95,6 +95,8 @@ void ABaseCharacter::BeginPlay()
 		}
 	}
 
+	HitShakeCameraDelegate.AddDynamic(this, &ABaseCharacter::ShakePlayerCamera);
+
 	ChangeHPDelegate.Broadcast(CharacterStatusData.CurrentHP, CharacterStatusData.MaxHP);
 }
 
@@ -233,6 +235,8 @@ void ABaseCharacter::StartAbilityCooldown(int32 AbilityIndex)
 
 void ABaseCharacter::PlayHitReaction(float HitYaw)
 {
+	HitShakeCameraDelegate.Broadcast();
+
 	if (CharacterStatusData.CurrentReactionValue < CharacterStatusData.ReactionValue) return;
 
 	CharacterStatusData.CurrentReactionValue -= CharacterStatusData.ReactionValue;
@@ -272,6 +276,14 @@ void ABaseCharacter::PlayHitReaction(float HitYaw)
 	{
 		PlayAnimMontage(HitReaction);
 		SetCharacterState(ECharacterState::EReaction);
+	}
+}
+
+void ABaseCharacter::ShakePlayerCamera()
+{
+	if (HitCameraShakeClass != nullptr)
+	{
+		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(HitCameraShakeClass, 1.0f);
 	}
 }
 
