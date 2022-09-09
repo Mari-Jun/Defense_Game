@@ -4,6 +4,8 @@
 #include "Projectile.h"
 #include "GameFramework/Character.h"
 
+#include "Particles/ParticleSystemComponent.h"
+
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -41,6 +43,12 @@ void AProjectile::BeginPlay()
 
 	GetWorldTimerManager().SetTimer(LifeTimerHandle, this, &AProjectile::FinishLifeTime, LifeTime);
 
+	if (SpawnParticle != nullptr)
+	{
+		UParticleSystemComponent* SpawnedSpawnParticle = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SpawnParticle, GetActorTransform());
+		SpawnedSpawnParticle->SetRelativeScale3D(FVector{ SpawnParticleScale });
+	}
+
 	ProjectileMesh->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnOverlapEvent);
 }
 
@@ -69,6 +77,13 @@ void AProjectile::OnOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActo
 		UGameplayStatics::ApplyPointDamage(OtherActor, AttackDamage, ProjectileMesh->GetComponentVelocity().GetSafeNormal(),
 			SweepResult, OwnerCharacter->GetController(), OwnerCharacter, UDamageType::StaticClass());
 	}
+
+	if (ImpactParticle != nullptr)
+	{
+		UParticleSystemComponent* SpawnedImpactParticle = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, GetActorTransform());
+		SpawnedImpactParticle->SetRelativeScale3D(FVector{ ImpactParticleScale });
+	}
+
 	GetWorld()->DestroyActor(this);
 }
 

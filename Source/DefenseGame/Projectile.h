@@ -47,6 +47,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float ImpulseScale = 5000.f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Particle", meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* SpawnParticle;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Particle", meta = (AllowPrivateAccess = "true"))
+	float SpawnParticleScale = 1.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Particle", meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* ImpactParticle;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Particle", meta = (AllowPrivateAccess = "true"))
+	float ImpactParticleScale = 1.0f;
+
 	ACharacter* OwnerCharacter;
 	float AttackDamage = 0.f;
 
