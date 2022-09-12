@@ -3,9 +3,11 @@
 
 #include "BasePlayerController.h"
 #include "BaseCharacter.h"
+#include "GameInterfaceWidget.h"
 
 #include "GameFramework/SpringArmComponent.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
 void ABasePlayerController::BeginPlay()
@@ -16,6 +18,11 @@ void ABasePlayerController::BeginPlay()
 		UE_LOG(LogTemp, Fatal, TEXT("Could not cast GetPawn() to ABaseCharacter"));
 	}
 	DefaultTargetArmLength = BaseCharacter->GetCameraBoom()->TargetArmLength;
+
+	if (GameInterfaceWidgetClass != nullptr)
+	{
+		GameInterfaceWidget = CreateWidget<UGameInterfaceWidget>(this, GameInterfaceWidgetClass);
+	}
 }
 
 void ABasePlayerController::SetupInputComponent()
@@ -30,6 +37,9 @@ void ABasePlayerController::SetupInputComponent()
 
 	InputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ABasePlayerController::Jump);
 	InputComponent->BindAction("ResetZoom", EInputEvent::IE_Pressed, this, &ABasePlayerController::ResetCameraZoom);
+	FInputActionBinding& InputGameInterface = 
+		InputComponent->BindAction("GameInterface", EInputEvent::IE_Pressed, this, &ABasePlayerController::ShowGameInterface);
+	InputGameInterface.bExecuteWhenPaused = true;
 }
 
 void ABasePlayerController::MoveForward(float AxisValue)
@@ -70,4 +80,25 @@ void ABasePlayerController::Jump()
 void ABasePlayerController::ResetCameraZoom()
 {
 	BaseCharacter->GetCameraBoom()->TargetArmLength = DefaultTargetArmLength;
+}
+
+void ABasePlayerController::ShowGameInterface()
+{
+	if (GameInterfaceWidget != nullptr)
+	{
+		if (GameInterfaceWidget->IsInViewport())
+		{
+			GameInterfaceWidget->RemoveFromParent();
+			UGameplayStatics::SetGamePaused(GetWorld(), false);
+			SetInputMode(FInputModeGameOnly());
+			SetShowMouseCursor(false);
+		}
+		else
+		{
+			GameInterfaceWidget->AddToViewport();
+			UGameplayStatics::SetGamePaused(GetWorld(), true);
+			SetInputMode(FInputModeGameAndUI());
+			SetShowMouseCursor(true);
+		}
+	}
 }

@@ -7,6 +7,8 @@
 #include "BasePlayerController.generated.h"
 
 class ABaseCharacter;
+class UGameInterfaceWidget;
+
 /**
  * 
  */
@@ -30,6 +32,7 @@ private:
 
 	virtual void Jump();
 	void ResetCameraZoom();
+	void ShowGameInterface();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
@@ -42,4 +45,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	FVector2D ZoomCameraMinMaxValue = { 200.f, 800.f };
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interface", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameInterfaceWidget> GameInterfaceWidgetClass;
+
+	UGameInterfaceWidget* GameInterfaceWidget;
 };
