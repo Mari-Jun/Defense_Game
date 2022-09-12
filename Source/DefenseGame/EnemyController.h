@@ -9,6 +9,7 @@
 
 class AEnemy;
 class ABaseCharacter;
+class ADefenseBase;
 
 class UBlackboardComponent;
 class UBehaviorTreeComponent;
@@ -32,7 +33,7 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 
 	virtual void KilledControlledPawn();
-	virtual FVector FindNearestDefenseBaseLocation();
+	virtual void FindNearestDefenseBaseLocation();
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -81,6 +82,7 @@ private:
 	float LoseSenseTime = 5.0f;
 	FTimerHandle LoseSenseTimerHandle;
 
+	ADefenseBase* TargetDefenseBase = nullptr;
 	ABaseCharacter* TargetCharacter = nullptr;
 	FVector TargetLocation;
 
@@ -88,5 +90,6 @@ protected:
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 
 public:
+	ADefenseBase* GetTargetDefenseBase() const { return TargetDefenseBase; }
 	ABaseCharacter* GetTargetCharacter() const { return TargetCharacter; }
 };

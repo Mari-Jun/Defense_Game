@@ -49,8 +49,9 @@ void AEnemyController::OnPossess(APawn* InPawn)
 
 	if (BlackboardComponent != nullptr)
 	{
+		FindNearestDefenseBaseLocation();
 		BlackboardComponent->SetValueAsBool("LoseSense", true);
-		BlackboardComponent->SetValueAsVector("BaseTargetLocation", FindNearestDefenseBaseLocation());
+		BlackboardComponent->SetValueAsVector("BaseTargetLocation", TargetDefenseBase->GetActorLocation());
 	}
 
 	PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
@@ -72,28 +73,28 @@ void AEnemyController::KilledControlledPawn()
 	}
 }
 
-FVector AEnemyController::FindNearestDefenseBaseLocation()
+void AEnemyController::FindNearestDefenseBaseLocation()
 {
-	if (Enemy == nullptr) return FVector{};
+	if (Enemy == nullptr) return;
 	
 	TArray<AActor*> BaseActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADefenseBase::StaticClass(), BaseActors);
 
 	FVector EnemyLocation = Enemy->GetActorLocation();
-	FVector MinLocation = Enemy->GetActorLocation();
-	float MinLength = FLT_MAX;
+	AActor* MinDefenseBase = nullptr;
+	float MinLength = FLT_MAX;	
 
 	for (AActor* BaseActor : BaseActors)
 	{
 		float Length = (BaseActor->GetActorLocation() - EnemyLocation).Length();
 		if (MinLength > Length)
 		{
-			MinLocation = BaseActor->GetActorLocation();
+			MinDefenseBase = BaseActor;
 			MinLength = Length;
 		}
 	}
 
-	return MinLocation;
+	TargetDefenseBase = Cast<ADefenseBase>(MinDefenseBase);
 }
 
 void AEnemyController::Tick(float DeltaTime)
@@ -204,8 +205,8 @@ void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 			if (SenseName == UAISense_Sight::StaticClass()->GetName())
 			{
 				TargetLocation = TargetCharacter->GetActorLocation();
-				GetWorldTimerManager().SetTimer(LoseSenseTimerHandle, this, &AEnemyController::LoseSense, LoseSenseTime, false);
 			}
+			GetWorldTimerManager().SetTimer(LoseSenseTimerHandle, this, &AEnemyController::LoseSense, LoseSenseTime, false);
 			TargetCharacter = nullptr;
 			SetFocus(nullptr);
 		}
@@ -236,7 +237,8 @@ void AEnemyController::LoseSense()
 {
 	if (!SuccessDamageSense && !SuccessSightSense && !SuccessTeamSense)
 	{
-		BlackboardComponent->SetValueAsVector("BaseTargetLocation", FindNearestDefenseBaseLocation());
+		FindNearestDefenseBaseLocation();
+		BlackboardComponent->SetValueAsVector("BaseTargetLocation", TargetDefenseBase->GetActorLocation());
 		BlackboardComponent->SetValueAsBool("LoseSense", true);
 	}
 }

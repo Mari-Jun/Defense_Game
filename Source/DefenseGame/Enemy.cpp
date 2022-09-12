@@ -6,6 +6,7 @@
 #include "EnemyController.h"
 #include "BaseCharacter.h"
 #include "EnemyDamageWidget.h"
+#include "DefenseBase.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
@@ -28,6 +29,7 @@ AEnemy::AEnemy()
 	GetMesh()->SetGenerateOverlapEvents(true);
 
 	bUseControllerRotationYaw = false;
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 	
@@ -258,10 +260,17 @@ void AEnemy::PlayHitReaction(float HitYaw)
 
 bool AEnemy::CheckAttack()
 {
-	if (EnemyStatusData.CanAttack == false) return false;
+	if (InAttackRangeActors.IsEmpty()) return false;
 	if (EnemyState != EEnemyState::ENone) return false;
 
-	return true;
+	ABaseCharacter* TargetCharacter = EnemyController->GetTargetCharacter();
+	ADefenseBase* TargetBase = EnemyController->GetTargetDefenseBase();
+	if (InAttackRangeActors.Find(TargetCharacter) || InAttackRangeActors.Find(TargetBase))
+	{
+		return true;
+	}
+
+	return false;
 }
 
 void AEnemy::Attack()
@@ -324,19 +333,18 @@ void AEnemy::RenderHitNumbers()
 void AEnemy::OnAttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (EnemyController != nullptr && OtherActor == EnemyController->GetTargetCharacter())
+	if (EnemyController != nullptr)
 	{
-		EnemyStatusData.CanAttack = true;
+		InAttackRangeActors.Add(OtherActor);
 	}
 }
 
 void AEnemy::OnAttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (EnemyController != nullptr &&
-		(EnemyController->GetTargetCharacter() == nullptr || EnemyController->GetTargetCharacter() == OtherActor))
+	if (EnemyController != nullptr)
 	{
-		EnemyStatusData.CanAttack = false;
+		InAttackRangeActors.Remove(OtherActor);
 	}
 }
 

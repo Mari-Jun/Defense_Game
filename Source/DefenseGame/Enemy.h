@@ -53,7 +53,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float Attack = 20.f;
-	bool CanAttack = false;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeEnemyHPDelegate, float, CurrentHP, float, MaxHP);
@@ -137,6 +136,8 @@ protected:
 	EEnemyState EnemyState = EEnemyState::ENone;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	FEnemyStatusData EnemyStatusData;
+
+	TSet<AActor*> InAttackRangeActors;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* EnemyStatusWidgetComponent;
