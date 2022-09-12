@@ -314,8 +314,10 @@ void AEnemy::RenderHitNumbers()
 		DamageNumber.Value += FVector(0.0f, 0.0f, 50.0f * GetWorld()->GetDeltaSeconds());
 
 		FVector2D ScreenPosition;
-		UGameplayStatics::ProjectWorldToScreen(GetWorld()->GetFirstPlayerController(), HitLocation, ScreenPosition);
-		DamageNumberWidget->SetPositionInViewport(ScreenPosition);
+		if (UGameplayStatics::ProjectWorldToScreen(GetWorld()->GetFirstPlayerController(), HitLocation, ScreenPosition))
+		{
+			DamageNumberWidget->SetPositionInViewport(ScreenPosition);
+		}
 	}
 }
 
