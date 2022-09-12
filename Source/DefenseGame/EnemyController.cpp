@@ -31,15 +31,33 @@ AEnemyController::AEnemyController()
 void AEnemyController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	if (InPawn == nullptr) return;
 
+	UE_LOG(LogTemp, Error, TEXT("Possess Pawn!!"));
+
+	if (InPawn == nullptr) return;
+	
 	Enemy = Cast<AEnemy>(InPawn);
 	if (Enemy != nullptr)
 	{
 		if (Enemy->GetBehaviorTree() != nullptr)
 		{
 			BlackboardComponent->InitializeBlackboard(*(Enemy->GetBehaviorTree()->BlackboardAsset));
+			RunBehaviorTree(Enemy->GetBehaviorTree());
+			BehaviorTreeComponent->StartTree(*Enemy->GetBehaviorTree());
 		}
+	}
+
+	if (BlackboardComponent != nullptr)
+	{
+		BlackboardComponent->SetValueAsBool("LoseSense", true);
+		BlackboardComponent->SetValueAsVector("BaseTargetLocation", FindNearestDefenseBaseLocation());
+	}
+
+	PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
+	if (PerceptionSystem != nullptr)
+	{
+		SetGenericTeamId(Enemy->GetGenericTeamId());
+		PerceptionSystem->UpdateListener(*GetPerceptionComponent());
 	}
 
 	GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyController::OnPerceptionUpdate);
@@ -99,24 +117,8 @@ float AEnemyController::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 void AEnemyController::BeginPlay()
 {
 	Super::BeginPlay();
-	if (Enemy != nullptr)
-	{
-		RunBehaviorTree(Enemy->GetBehaviorTree());
-		BehaviorTreeComponent->StartTree(*Enemy->GetBehaviorTree());
-	}
 
-	if (BlackboardComponent != nullptr)
-	{
-		BlackboardComponent->SetValueAsBool("LoseSense", true);
-		BlackboardComponent->SetValueAsVector("BaseTargetLocation", FindNearestDefenseBaseLocation());
-	}
-
-	PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
-	if (PerceptionSystem != nullptr)
-	{
-		SetGenericTeamId(Enemy->GetGenericTeamId());
-		PerceptionSystem->UpdateListener(*GetPerceptionComponent());
-	}
+	
 }
 
 void AEnemyController::InitializePerception()
@@ -258,6 +260,10 @@ ETeamAttitude::Type AEnemyController::GetTeamAttitudeTowards(const AActor& Other
 		OtherActorTeamId = OtherControllerTI->GetGenericTeamId();
 	}
 	
+	if (Enemy == nullptr)
+	{
+		return ETeamAttitude::Neutral;
+	}
 	FGenericTeamId ControllerId = Enemy->GetGenericTeamId();
 	if (OtherActorTeamId == 8)
 	{
