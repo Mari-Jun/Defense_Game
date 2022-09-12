@@ -262,10 +262,11 @@ bool AEnemy::CheckAttack()
 {
 	if (InAttackRangeActors.IsEmpty()) return false;
 	if (EnemyState != EEnemyState::ENone) return false;
+	if (EnemyController == nullptr) return false;
 
 	ABaseCharacter* TargetCharacter = EnemyController->GetTargetCharacter();
 	ADefenseBase* TargetBase = EnemyController->GetTargetDefenseBase();
-	if (InAttackRangeActors.Find(TargetCharacter) || InAttackRangeActors.Find(TargetBase))
+	if (InAttackRangeActors.Find(TargetCharacter) || (InAttackRangeActors.Find(TargetBase) && TargetCharacter == nullptr))
 	{
 		return true;
 	}
