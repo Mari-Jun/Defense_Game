@@ -8,6 +8,7 @@
 
 class ABaseCharacter;
 class UGameInterfaceWidget;
+class UGameResultWidget;
 
 /**
  * 
@@ -22,6 +23,8 @@ protected:
 	
 public:
 	virtual void SetupInputComponent() override;
+
+	void ShowGameResult(bool IsWin);
 
 private:
 	virtual void MoveForward(float AxisValue);
@@ -47,6 +50,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interface", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameInterfaceWidget> GameInterfaceWidgetClass;
-
 	UGameInterfaceWidget* GameInterfaceWidget;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interface", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameResultWidget> GameResultWidgetClass;
+	UGameResultWidget* GameResultWidget;
 };

@@ -4,6 +4,7 @@
 #include "BasePlayerController.h"
 #include "BaseCharacter.h"
 #include "GameInterfaceWidget.h"
+#include "GameResultWidget.h"
 
 #include "GameFramework/SpringArmComponent.h"
 
@@ -99,6 +100,21 @@ void ABasePlayerController::ShowGameInterface()
 			UGameplayStatics::SetGamePaused(GetWorld(), true);
 			SetInputMode(FInputModeGameAndUI());
 			SetShowMouseCursor(true);
+		}
+	}
+}
+
+void ABasePlayerController::ShowGameResult(bool IsWin)
+{
+	if (GameResultWidgetClass != nullptr)
+	{
+		GameResultWidget = CreateWidget<UGameResultWidget>(this, GameResultWidgetClass);
+		if (GameResultWidget != nullptr)
+		{
+			IsWin ? GameResultWidget->ShowWinResult() : GameResultWidget->ShowDefeatResult();
+			GameResultWidget->AddToViewport();
+			GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
+			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 		}
 	}
 }

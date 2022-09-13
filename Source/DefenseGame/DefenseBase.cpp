@@ -3,6 +3,7 @@
 
 #include "DefenseBase.h"
 #include "BaseStatusWidget.h"
+#include "BasePlayerController.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
@@ -66,6 +67,14 @@ float ADefenseBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	{
 		CurrentHP = UKismetMathLibrary::FClamp(CurrentHP - DamageAmount, 0.0f, MaxHP);
 		ChangeHPDelegate.Broadcast(CurrentHP, MaxHP);
+		if (CurrentHP <= 0.0f)
+		{
+			ABasePlayerController* PlayerController = Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
+			if (PlayerController != nullptr)
+			{
+				PlayerController->ShowGameResult(false);
+			}
+		}
 	}
 	else
 	{
