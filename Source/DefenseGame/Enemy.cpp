@@ -65,7 +65,7 @@ void AEnemy::BeginPlay()
 		else
 		{
 			ChangeHPDelegate.AddDynamic(EnemyStatusWidget, &UEnemyStatusWidget::OnChangeHP);
-			ChangeHPDelegate.Broadcast(EnemyStatusData.CurrentHP, EnemyStatusData.MaxHP);
+			ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
 		}
 	}
 
@@ -117,25 +117,6 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	float DeltaYaw = 0.f;
-
-	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
-	{
-		const FPointDamageEvent* PointDamageEvent = (FPointDamageEvent*)&DamageEvent;
-
-		const FRotator ActorRotation = GetActorRotation();
-		const FRotator ShotRotation = UKismetMathLibrary::MakeRotFromX(PointDamageEvent->ShotDirection);
-
-		DeltaYaw = UKismetMathLibrary::NormalizedDeltaRotator(ActorRotation, ShotRotation).Yaw;
-	}
-	EnemyStatusData.CurrentHP -= DamageAmount;
-	EnemyStatusData.CurrentReactionValue += DamageAmount;
-	ChangeHPDelegate.Broadcast(EnemyStatusData.CurrentHP, EnemyStatusData.MaxHP);
-
-	PlayHitReaction(DeltaYaw);
-
-	EnemyController->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
 	ShowStatusWidget();
 
 	APlayerController* PlayerController = Cast<APlayerController>(EventInstigator);
@@ -144,17 +125,7 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 		AddDamageNumber(PlayerController, DamageAmount);
 	}
 
-	if (EnemyStatusData.CurrentHP <= 0.f)
-	{
-		KillEnemy();
-	}
-
 	return DamageAmount;
-}
-
-void AEnemy::ApplyDamage(AActor* OtherActor, float Damage)
-{
-	UGameplayStatics::ApplyDamage(OtherActor, Damage, EnemyController, this, UDamageType::StaticClass());
 }
 
 void AEnemy::FinishDeath()
@@ -164,7 +135,7 @@ void AEnemy::FinishDeath()
 	GetWorldTimerManager().SetTimer(DestoryActorTimerHandle, this, &AEnemy::DestoryEnemy, DeathTime, false);
 }
 
-void AEnemy::KillEnemy()
+void AEnemy::KillObject()
 {
 	EnemyController->KilledControlledPawn();
 	DisableCollision();
@@ -216,10 +187,6 @@ void AEnemy::HideStatusWidget()
 
 void AEnemy::PlayHitReaction(float HitYaw)
 {
-	if (EnemyStatusData.CurrentReactionValue < EnemyStatusData.ReactionValue) return;
-
-	EnemyStatusData.CurrentReactionValue -= EnemyStatusData.ReactionValue;
-
 	UAnimMontage* HitReaction = HitReactionFWDAnimMontage;
 
 	if (HitYaw >= -45.f && HitYaw <= 45.f)
@@ -351,8 +318,7 @@ void AEnemy::OnAttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 void AEnemy::DisableCollision()
 {
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Super::DisableCollision();
 	AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 

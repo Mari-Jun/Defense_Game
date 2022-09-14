@@ -3,8 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "GenericTeamAgentInterface.h"
+#include "DefenseObject.h"
 #include "Enemy.generated.h"
 
 class UEnemyStatusWidget;
@@ -35,30 +34,15 @@ struct FEnemyStatusData
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float CurrentHP = 200.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float MaxHP = 200.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float DefaultSpeed = 400.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float AttackSpeed = 350.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float ReactionSpeed = 250.f;
-
-	float CurrentReactionValue = 0.f;
-	/** °æÁ÷Ä¡ */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float ReactionValue = 50.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float Attack = 20.f;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeEnemyHPDelegate, float, CurrentHP, float, MaxHP);
-
 UCLASS()
-class DEFENSEGAME_API AEnemy : public ACharacter, public IGenericTeamAgentInterface
+class DEFENSEGAME_API AEnemy : public ADefenseObject
 {
 	GENERATED_BODY()
 
@@ -79,13 +63,11 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-	void ApplyDamage(AActor* OtherActor, float Damage);
-
 	UFUNCTION(BlueprintCallable)
 	virtual void FinishDeath();
 
 private:
-	virtual void KillEnemy();
+	virtual void KillObject() override;
 	virtual void DestoryEnemy();
 
 protected:
@@ -110,7 +92,7 @@ protected:
 	virtual void OnAttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	virtual void DisableCollision();
+	virtual void DisableCollision() override;
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -182,12 +164,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	TArray<UAnimMontage*> AttackAnimMontange;
 
-	FGenericTeamId TeamId{ 0 };
-
-public:
-	FChangeEnemyHPDelegate ChangeHPDelegate;
-
 public:
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
-	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }
 };
