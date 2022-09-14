@@ -85,7 +85,8 @@ void ABasePlayerController::ResetCameraZoom()
 
 void ABasePlayerController::ShowGameInterface()
 {
-	if (GameInterfaceWidget != nullptr)
+	if (GameInterfaceWidget != nullptr && 
+		GameResultWidget == nullptr || GameResultWidget != nullptr && GameResultWidget->IsInViewport() == false)
 	{
 		if (GameInterfaceWidget->IsInViewport())
 		{
@@ -115,6 +116,11 @@ void ABasePlayerController::ShowGameResult(bool IsWin)
 			GameResultWidget->AddToViewport();
 			GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
 			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+		}
+
+		if (GameInterfaceWidget != nullptr && GameInterfaceWidget->IsInViewport())
+		{
+			GameInterfaceWidget->RemoveFromParent();
 		}
 	}
 }
