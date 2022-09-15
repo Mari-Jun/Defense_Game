@@ -97,6 +97,7 @@ void ABasePlayerController::ShowGameInterface()
 		}
 		else
 		{
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *GameInterfaceWidget->GetName());
 			GameInterfaceWidget->AddToViewport();
 			UGameplayStatics::SetGamePaused(GetWorld(), true);
 			SetInputMode(FInputModeGameAndUI());

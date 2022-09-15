@@ -96,11 +96,15 @@ void ADefenseBase::BillboardStatusWidget()
 	if (BaseStatusWidgetComponent != nullptr)
 	{
 		FVector WidgetLocation = BaseStatusWidgetComponent->GetComponentLocation();
+		FVector WidgetReleativeLocation = BaseStatusWidgetComponent->GetRelativeLocation();
+
+		WidgetLocation.X -= WidgetReleativeLocation.X;
+		WidgetLocation.Y -= WidgetReleativeLocation.Y;
+
 		FVector CameraLocation = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation();
 		FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(WidgetLocation, CameraLocation);
 
 		FVector NewLocation = UKismetMathLibrary::RotateAngleAxis(FVector{ 100.0f, 0.0f, 0.0f }, NewRotation.Yaw, FVector::ZAxisVector);
-		FVector WidgetReleativeLocation = BaseStatusWidgetComponent->GetRelativeLocation();
 		WidgetReleativeLocation.X = WidgetReleativeLocation.Y = 0.0f;
 
 		BaseStatusWidgetComponent->SetRelativeRotation({ 0.0f, NewRotation.Yaw, 0.0f });
