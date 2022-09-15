@@ -46,8 +46,8 @@ void ADefenseBase::BeginPlay()
 		{
 			ChangeHPDelegate.AddDynamic(BaseStatusWidget, &UBaseStatusWidget::OnChangeHP);
 			ChangeShieldDelegate.AddDynamic(BaseStatusWidget, &UBaseStatusWidget::OnChangeShield);
-			ChangeHPDelegate.Broadcast(CurrentHP, MaxHP);
-			ChangeShieldDelegate.Broadcast(CurrentShield, MaxShield);
+			ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
+			ChangeShieldDelegate.Broadcast(CombatStatus.CurrentShield, CombatStatus.MaxShield);
 		}
 	}
 }
@@ -63,11 +63,23 @@ void ADefenseBase::Tick(float DeltaTime)
 float ADefenseBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser)
 {
-	if (CurrentShield <= 0.0f)
+	DamageAmount = CalcDamage(DamageAmount, 0.0f, CombatStatus.Defense);
+
+	if (DamageAmount > 0.0f && CombatStatus.CurrentShield > 0.0f)
 	{
-		CurrentHP = UKismetMathLibrary::FClamp(CurrentHP - DamageAmount, 0.0f, MaxHP);
-		ChangeHPDelegate.Broadcast(CurrentHP, MaxHP);
-		if (CurrentHP <= 0.0f)
+		float ShieldDamage = FMath::Min(DamageAmount, CombatStatus.CurrentShield);
+		DamageAmount -= ShieldDamage;
+
+		CombatStatus.CurrentShield -= ShieldDamage;
+		ChangeShieldDelegate.Broadcast(CombatStatus.CurrentShield, CombatStatus.MaxShield);
+	}
+
+	if (DamageAmount > 0.0f)
+	{
+		CombatStatus.CurrentHP = UKismetMathLibrary::FClamp(CombatStatus.CurrentHP - DamageAmount, 0.0f, CombatStatus.MaxHP);
+		ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
+
+		if (CombatStatus.CurrentHP <= 0.0f)
 		{
 			ABasePlayerController* PlayerController = Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
 			if (PlayerController != nullptr)
@@ -76,12 +88,6 @@ float ADefenseBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 			}
 		}
 	}
-	else
-	{
-		CurrentShield = UKismetMathLibrary::FClamp(CurrentShield - DamageAmount, 0.0f, MaxShield);
-		ChangeShieldDelegate.Broadcast(CurrentShield, MaxShield);
-	}
-
 	return DamageAmount;
 }
 

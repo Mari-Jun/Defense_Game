@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "CombatHelperInterface.h"
 #include "DefenseBase.generated.h"
 
 class UBaseStatusWidget;
@@ -11,11 +12,8 @@ class UBaseStatusWidget;
 class UCapsuleComponent;
 class UWidgetComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeDefenseBaseHPDelegate, float, CurrentHP, float, MaxHP);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeDefenseBaseShieldDelegate, float, CurrentShield, float, MaxShield);
-
 UCLASS()
-class DEFENSEGAME_API ADefenseBase : public AActor
+class DEFENSEGAME_API ADefenseBase : public AActor, public ICombatHelperInterface
 {
 	GENERATED_BODY()
 	
@@ -35,6 +33,10 @@ public:
 
 	virtual void BillboardStatusWidget();
 
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	FDefaultCombatStatus CombatStatus;
+
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* BaseMesh;
@@ -47,17 +49,7 @@ private:
 
 	UBaseStatusWidget* BaseStatusWidget;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Status", meta = (AllowPrivateAccess = "true"))
-	float CurrentHP = 5000.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Status", meta = (AllowPrivateAccess = "true"))
-	float MaxHP = 5000.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Status", meta = (AllowPrivateAccess = "true"))
-	float CurrentShield = 500.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Status", meta = (AllowPrivateAccess = "true"))
-	float MaxShield = 500.f;
-
-public:
-	FChangeDefenseBaseHPDelegate ChangeHPDelegate;
-	FChangeDefenseBaseShieldDelegate ChangeShieldDelegate;
-
+protected:
+	FChangeHPDelegate ChangeHPDelegate;
+	FChangeShieldDelegate ChangeShieldDelegate;
 };

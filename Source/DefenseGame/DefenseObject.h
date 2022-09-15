@@ -5,41 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "GenericTeamAgentInterface.h"
+#include "CombatHelperInterface.h"
 #include "DefenseObject.generated.h"
 
-USTRUCT(BlueprintType)
-struct FCombatStatus
-{
-	GENERATED_BODY()
-	
-public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float CurrentHP = 500.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float MaxHP = 500.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float CurrentShield = 0.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float MaxShield = 500.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float Attack = 50.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float Defense = 50.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float Critical = 0.f;
-	
-	float CurrentReactionValue = 0.f;
-	/** °æÁ÷Ä¡ */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float ReactionValue = 50.f;
-};
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeHPDelegate, float, CurrentHP, float, MaxHP);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeShieldDelegate, float, CurrentShield, float, MaxShield);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeReactionDelegate, float, CurrentReaction, float, MaxReaction);
-
 UCLASS()
-class DEFENSEGAME_API ADefenseObject : public ACharacter, public IGenericTeamAgentInterface
+class DEFENSEGAME_API ADefenseObject : public ACharacter, public IGenericTeamAgentInterface, public ICombatHelperInterface
 {
 	GENERATED_BODY()
 
@@ -69,7 +39,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-	FCombatStatus CombatStatus;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	FReactionCombatStatus CombatStatus;
 
 	FChangeHPDelegate ChangeHPDelegate;
 	FChangeShieldDelegate ChangeShieldDelegate;

@@ -54,30 +54,7 @@ float ADefenseObject::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 
 float ADefenseObject::TakeDamage(float Attack, float Critical, float HitYaw)
 {
-	float DamageAmount = Attack;
-	float DecresePercent = 0.0f;
-
-	if (CombatStatus.Defense <= 100.f)
-	{
-		float Alpha = CombatStatus.Defense / 100.f;
-		DecresePercent = FMath::Lerp<float>(0.0f, 0.5f, Alpha);
-	}
-	else if (CombatStatus.Defense > 100.f && CombatStatus.Defense <= 200.f)
-	{
-		float Alpha = (CombatStatus.Defense - 100.f) / 100.f;
-		DecresePercent = FMath::Lerp<float>(0.5f, 0.8f, Alpha);
-	}
-	else
-	{
-		float Alpha = (CombatStatus.Defense - 200.f) / 800.f;
-		DecresePercent = FMath::Lerp<float>(0.8f, 0.95f, Alpha);
-	}
-
-	DamageAmount -= DamageAmount * DecresePercent;
-
-	float RandCritical = FMath::FRandRange(0.0f, 1.0f);
-	if (FMath::IsNearlyZero(Critical) == false && RandCritical <= Critical)
-		DamageAmount *= 2.0f;
+	float DamageAmount = CalcDamage(Attack, Critical, CombatStatus.Defense);
 
 	if (DamageAmount > 0.0f && CombatStatus.CurrentShield > 0.0f)
 	{
