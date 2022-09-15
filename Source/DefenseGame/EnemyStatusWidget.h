@@ -6,7 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "EnemyStatusWidget.generated.h"
 
-class UOverlay;
 class UProgressBar;
 
 /**
@@ -23,10 +22,12 @@ protected:
 public:
 	UFUNCTION()
 	void OnChangeHP(float CurrentHP, float MaxHP);
+	UFUNCTION()
+	void OnChangeShield(float CurrentShield, float MaxShield);
 
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
-	UOverlay* BaseOverlay;
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UProgressBar* HealthBar;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UProgressBar* ShieldBar;
 };

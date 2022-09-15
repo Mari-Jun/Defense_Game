@@ -13,3 +13,8 @@ void UEnemyStatusWidget::OnChangeHP(float CurrentHP, float MaxHP)
 {
 	HealthBar->SetPercent(CurrentHP / MaxHP);
 }
+
+void UEnemyStatusWidget::OnChangeShield(float CurrentShield, float MaxShield)
+{
+	ShieldBar->SetPercent(CurrentShield / MaxShield);
+}

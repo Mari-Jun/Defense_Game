@@ -37,7 +37,7 @@ AEnemy::AEnemy()
 
 	EnemyStatusWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("status widget");
 	EnemyStatusWidgetComponent->SetupAttachment(GetRootComponent());
-	EnemyStatusWidgetComponent->SetDrawSize({ 150.f, 20.f });
+	EnemyStatusWidgetComponent->SetDrawSize({ 200.f, 35.f });
 	HideStatusWidget();
 
 	AttackRangeSphereComponent = CreateDefaultSubobject<USphereComponent>("AttackRangeSphere");
@@ -65,7 +65,9 @@ void AEnemy::BeginPlay()
 		else
 		{
 			ChangeHPDelegate.AddDynamic(EnemyStatusWidget, &UEnemyStatusWidget::OnChangeHP);
+			ChangeShieldDelegate.AddDynamic(EnemyStatusWidget, &UEnemyStatusWidget::OnChangeShield);
 			ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
+			ChangeShieldDelegate.Broadcast(CombatStatus.CurrentShield, CombatStatus.MaxShield);
 		}
 	}
 
@@ -115,7 +117,7 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	DamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	ShowStatusWidget();
 

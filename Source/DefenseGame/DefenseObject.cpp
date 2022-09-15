@@ -55,6 +55,7 @@ float ADefenseObject::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 float ADefenseObject::TakeDamage(float Attack, float Critical, float HitYaw)
 {
 	float DamageAmount = CalcDamage(Attack, Critical, CombatStatus.Defense);
+	float ReturnDamageAmount = DamageAmount;
 
 	if (DamageAmount > 0.0f && CombatStatus.CurrentShield > 0.0f)
 	{
@@ -85,7 +86,7 @@ float ADefenseObject::TakeDamage(float Attack, float Critical, float HitYaw)
 		}
 	}
 
-	return DamageAmount;
+	return ReturnDamageAmount;
 }
 
 void ADefenseObject::PlayHitReaction(float HitYaw)
