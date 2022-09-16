@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FProjectileApplyDamageDelegate, AActor*, OtherActor, float, Damage, const FVector&, HitFromDirection, const FHitResult&, HitInfo);
+
 UCLASS()
 class DEFENSEGAME_API AProjectile : public AActor
 {
@@ -56,11 +58,12 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Particle", meta = (AllowPrivateAccess = "true"))
 	float ImpactParticleScale = 1.0f;
 
-	ACharacter* OwnerCharacter;
 	float AttackDamage = 0.f;
 
 public:
 	UStaticMeshComponent* GetProjectileMesh() const { return ProjectileMesh; }
-	void SetOwnerCharacter(ACharacter* Character) { OwnerCharacter = Character; }
 	void SetAttackDamage(float Damage) { AttackDamage = Damage; }
+
+public:
+	FProjectileApplyDamageDelegate ProjectileApplyDamageDelegate;
 };

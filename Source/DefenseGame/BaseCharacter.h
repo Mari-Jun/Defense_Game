@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "DefenseObject.h"
 #include "GenericTeamAgentInterface.h"
 #include "BaseCharacter.generated.h"
 
@@ -102,27 +102,15 @@ struct FCharacterStatusData
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float CurrentHP = 500.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float MaxHP = 500.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float Attack = 50.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<float> AbilityTime = {3, 3, 3, 3};
 	TArray<FTimerHandle> AbilityTimerHandle;
-
-	float CurrentReactionValue = 0.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float ReactionValue = 100.f;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeCharacterHPDelegate, float, CurrentHP, float, MaxHP);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangeCooldownTimeDelegate, float, Time);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHitShakeCameraDelegate);
 
 UCLASS()
-class DEFENSEGAME_API ABaseCharacter : public ACharacter, public IGenericTeamAgentInterface
+class DEFENSEGAME_API ABaseCharacter : public ADefenseObject
 {
 	GENERATED_BODY()
 
@@ -154,7 +142,7 @@ private:
 
 	void ResetAbilityTimer(int32 AbilityIndex);
 
-	virtual void KillCharacter();
+	virtual void KillObject() override;
 
 protected:
 	virtual void AttackLMBHit() {}
@@ -166,7 +154,7 @@ protected:
 	bool CheckAbilityCooldown(int32 AbilityIndex) const;
 	void StartAbilityCooldown(int32 AbilityIndex);
 
-	virtual void PlayHitReaction(float HitYaw);
+	virtual void PlayHitReaction(float HitYaw) override;
 
 	UFUNCTION()
 	virtual void ShakePlayerCamera();
@@ -216,12 +204,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	bool bIsAttackFull = false;
 
-	FGenericTeamId TeamId{ 255 };
-
 public:
-	UPROPERTY()
-	FChangeCharacterHPDelegate ChangeHPDelegate;
-
 	UPROPERTY()
 	TArray<FChangeCooldownTimeDelegate> ChangeAbilityTimeDelegate;
 

@@ -23,6 +23,8 @@ ABaseCharacter::ABaseCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	TeamId = 255;
+
 	GetMesh()->SetRelativeLocation({0.0f, 0.0f, -GetCapsuleComponent()->GetScaledCapsuleHalfHeight()});
 	GetMesh()->SetRelativeRotation({ 0.0f, -90.0f, 0.0f });
 
@@ -92,13 +94,14 @@ void ABaseCharacter::BeginPlay()
 			{
 				StatusWidget->SetBaseCharacter(this);
 				StatusWidget->AddToPlayerScreen();
+
+				ChangeHPDelegate.AddDynamic(StatusWidget, &UCharacterStatusWidget::OnChangeHP);
+				ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
 			}
 		}
 	}
 
 	HitShakeCameraDelegate.AddDynamic(this, &ABaseCharacter::ShakePlayerCamera);
-
-	ChangeHPDelegate.Broadcast(CharacterStatusData.CurrentHP, CharacterStatusData.MaxHP);
 }
 
 // Called every frame
@@ -130,38 +133,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	float DeltaYaw = 0.f;
-
-	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
-	{
-		const FPointDamageEvent* PointDamageEvent = (FPointDamageEvent*)&DamageEvent;
-
-		const FRotator ActorRotation = GetActorRotation();
-		const FRotator ShotRotation = UKismetMathLibrary::MakeRotFromX(PointDamageEvent->ShotDirection);
-
-		DeltaYaw = UKismetMathLibrary::NormalizedDeltaRotator(ActorRotation, ShotRotation).Yaw;
-	}
-
-	bool IsCritical = false;
-	UCriticalDamageType* CriticalDamageType = Cast<UCriticalDamageType>(DamageEvent.DamageTypeClass->GetDefaultObject());
-	if (CriticalDamageType != nullptr) 
-	{
-		IsCritical = true;
-		float Critical = CriticalDamageType->Critical;
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("Critical : %f"), Critical));
-	}
-
-	CharacterStatusData.CurrentHP -= DamageAmount;
-	CharacterStatusData.CurrentReactionValue += DamageAmount;
-	ChangeHPDelegate.Broadcast(CharacterStatusData.CurrentHP, CharacterStatusData.MaxHP);
-
-	PlayHitReaction(DeltaYaw);
-
-	if (CharacterStatusData.CurrentHP <= 0)
-	{
-		KillCharacter();
-	}
-
+	DamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	return DamageAmount;
 }
 
@@ -247,10 +219,6 @@ void ABaseCharacter::PlayHitReaction(float HitYaw)
 {
 	HitShakeCameraDelegate.Broadcast();
 
-	if (CharacterStatusData.CurrentReactionValue < CharacterStatusData.ReactionValue) return;
-
-	CharacterStatusData.CurrentReactionValue -= CharacterStatusData.ReactionValue;
-
 	UAnimMontage* HitReaction = CharacterAnimationData.HitReactionFWDAnimMontage;
 
 	if (HitYaw >= -45.f && HitYaw <= 45.f)
@@ -303,7 +271,7 @@ void ABaseCharacter::ResetAbilityTimer(int32 AbilityIndex)
 	StatusWidget->GetAbilityWidget(AbilityIndex)->SetCooldownVisibility(false);
 }
 
-void ABaseCharacter::KillCharacter()
+void ABaseCharacter::KillObject()
 {
 	GetController()->UnPossess();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);

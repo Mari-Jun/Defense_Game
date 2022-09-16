@@ -29,7 +29,6 @@ AProjectile* AProjectile::SpawnProjectile(TSubclassOf<AProjectile> ActorClass, F
 	AProjectile* Projectile = Cast<AProjectile>(UGameplayStatics::BeginDeferredActorSpawnFromClass(Character, ActorClass, SpawnTransform));
 	if (Projectile != nullptr)
 	{
-		Projectile->SetOwnerCharacter(Character);
 		Projectile->SetAttackDamage(Damage);
 		UGameplayStatics::FinishSpawningActor(Projectile, SpawnTransform);
 	}
@@ -68,15 +67,7 @@ void AProjectile::OnOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActo
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OwnerCharacter == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Please set the owner character"));
-	}
-	else
-	{
-		UGameplayStatics::ApplyPointDamage(OtherActor, AttackDamage, ProjectileMesh->GetComponentVelocity().GetSafeNormal(),
-			SweepResult, OwnerCharacter->GetController(), OwnerCharacter, UDamageType::StaticClass());
-	}
+	ProjectileApplyDamageDelegate.Broadcast(OtherActor, AttackDamage, ProjectileMesh->GetComponentVelocity().GetSafeNormal(), SweepResult);
 
 	if (ImpactParticle != nullptr)
 	{

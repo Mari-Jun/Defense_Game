@@ -75,7 +75,7 @@ protected:
 
 	virtual void ShowStatusWidget();
 	virtual void HideStatusWidget();
-	virtual void PlayHitReaction(float HitYaw);
+	virtual void PlayHitReaction(float HitYaw) override;
 
 	virtual bool CheckAttack();
 	virtual void Attack();

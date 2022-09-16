@@ -27,8 +27,7 @@ protected:
 
 	virtual void KillObject() {}
 
-	virtual void ApplyDamage(AActor* OtherActor, float Damage);
-
+	virtual TSubclassOf<UDamageType> GetDamageTypeClass() const;
 	virtual void DisableCollision();
 
 public:	
@@ -37,6 +36,11 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION()
+	virtual void ApplyDamage(AActor* OtherActor, float Damage);
+	UFUNCTION()
+	virtual void ApplyPointDamage(AActor* OtherActor, float Damage, const FVector& HitFromDirection, const FHitResult& HitInfo);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))

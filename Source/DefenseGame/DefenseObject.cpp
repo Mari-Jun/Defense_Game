@@ -101,7 +101,7 @@ void ADefenseObject::PlayHitReaction(float HitYaw)
 {
 }
 
-void ADefenseObject::ApplyDamage(AActor* OtherActor, float Damage)
+TSubclassOf<UDamageType> ADefenseObject::GetDamageTypeClass() const
 {
 	TSubclassOf<UDamageType> DamageTypeClass;
 
@@ -116,7 +116,19 @@ void ADefenseObject::ApplyDamage(AActor* OtherActor, float Damage)
 	{
 		DamageTypeClass = UDamageType::StaticClass();
 	}
-	UGameplayStatics::ApplyDamage(OtherActor, Damage, GetController(), this, DamageTypeClass);
+
+	return DamageTypeClass;
+}
+
+void ADefenseObject::ApplyDamage(AActor* OtherActor, float Damage)
+{
+	UGameplayStatics::ApplyDamage(OtherActor, Damage, GetController(), this, GetDamageTypeClass());
+}
+
+void ADefenseObject::ApplyPointDamage(AActor* OtherActor, float Damage, const FVector& HitFromDirection, const FHitResult& HitInfo)
+{
+	UGameplayStatics::ApplyPointDamage(OtherActor, Damage, HitFromDirection,
+		HitInfo, GetController(), this, GetDamageTypeClass());
 }
 
 void ADefenseObject::DisableCollision()

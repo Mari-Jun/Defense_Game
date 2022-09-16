@@ -29,11 +29,6 @@ void UCharacterStatusWidget::NativeConstruct()
 
 	if (BaseCharacter != nullptr)
 	{
-		if (HPProgressBar != nullptr)
-		{
-			BaseCharacter->ChangeHPDelegate.AddDynamic(this, &UCharacterStatusWidget::OnChangeHP);
-		}
-
 		if (AbilityQWidget != nullptr)
 		{
 			BaseCharacter->ChangeAbilityTimeDelegate[0].AddDynamic(AbilityQWidget, &UCharacterSkillTimeWidget::OnChangeCooldownState);

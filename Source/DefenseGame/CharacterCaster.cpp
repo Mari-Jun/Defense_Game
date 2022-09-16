@@ -114,7 +114,8 @@ void ACharacterCaster::AttackLMBHit()
 
 					FVector SpawnPoint = (AttackingHandValue > 0.0f) ? GetMesh()->GetBoneLocation("hand_l") : GetMesh()->GetBoneLocation("hand_r");
 
-					AProjectile* SpawnBall = AProjectile::SpawnProjectile(AttackMagicBall, { FRotator{}, SpawnPoint }, this, CharacterStatusData.Attack);
+					AProjectile* SpawnBall = AProjectile::SpawnProjectile(AttackMagicBall, { FRotator{}, SpawnPoint }, this, CombatStatus.Attack);
+					SpawnBall->ProjectileApplyDamageDelegate.AddDynamic(this, &ADefenseObject::ApplyPointDamage);
 
 					const FVector Start{ CrosshairWorldPosition };
 					const FVector End{ Start + CrosshairWorldDirection * 50'000 };
