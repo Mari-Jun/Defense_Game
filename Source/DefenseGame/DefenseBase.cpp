@@ -63,7 +63,8 @@ void ADefenseBase::Tick(float DeltaTime)
 float ADefenseBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser)
 {
-	DamageAmount = CalcDamage(DamageAmount, 0.0f, CombatStatus.Defense);
+	bool IsCritical = false;
+	DamageAmount = CalcDamage(DamageAmount, 0.0f, CombatStatus.Defense, IsCritical);
 
 	if (DamageAmount > 0.0f && CombatStatus.CurrentShield > 0.0f)
 	{

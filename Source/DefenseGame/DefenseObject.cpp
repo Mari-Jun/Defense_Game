@@ -2,6 +2,7 @@
 
 
 #include "DefenseObject.h"
+#include "CriticalDamageType.h"
 
 #include "GameFramework/Controller.h"
 #include "Components/CapsuleComponent.h"
@@ -40,7 +41,12 @@ float ADefenseObject::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		HitYaw = UKismetMathLibrary::NormalizedDeltaRotator(ActorRotation, ShotRotation).Yaw;
 	}
 
-	float Critical = DamageEvent.StaticStruct()->GetFloatMetaData("Critical");
+	float Critical = 0.0f;
+	UCriticalDamageType* CriticalDamageType = Cast<UCriticalDamageType>(DamageEvent.DamageTypeClass->GetDefaultObject());
+	if (CriticalDamageType != nullptr)
+	{
+		 Critical = CriticalDamageType->Critical;
+	}
 
 	TakeDamage(DamageAmount, Critical, HitYaw);
 
@@ -54,10 +60,10 @@ float ADefenseObject::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 
 void ADefenseObject::TakeDamage(float Attack, float Critical, float HitYaw)
 {
-	float DamageAmount = CalcDamage(Attack, Critical, CombatStatus.Defense);
+	bool IsCritical = false;
+	float DamageAmount = CalcDamage(Attack, Critical, CombatStatus.Defense, IsCritical);
 
 	float HPDamage = DamageAmount, ShieldDamage = 0.f;
-	bool IsCiritical = false;
 
 	if (DamageAmount > 0.0f && CombatStatus.CurrentShield > 0.0f)
 	{
@@ -88,7 +94,7 @@ void ADefenseObject::TakeDamage(float Attack, float Critical, float HitYaw)
 		}
 	}
 
-	BroadcastDamageInfoDelegate.Broadcast(HPDamage, ShieldDamage, IsCiritical);
+	BroadcastDamageInfoDelegate.Broadcast(HPDamage, ShieldDamage, IsCritical);
 }
 
 void ADefenseObject::PlayHitReaction(float HitYaw)
@@ -97,8 +103,20 @@ void ADefenseObject::PlayHitReaction(float HitYaw)
 
 void ADefenseObject::ApplyDamage(AActor* OtherActor, float Damage)
 {
-	UGameplayStatics::ApplyDamage(OtherActor, Damage, GetController(), this, UDamageType::StaticClass());
+	TSubclassOf<UDamageType> DamageTypeClass;
 
+	auto DamageType = UCriticalDamageType::StaticClass();
+	UCriticalDamageType* CriticalDamageType = Cast<UCriticalDamageType>(DamageType->GetDefaultObject());
+	if (CriticalDamageType != nullptr)
+	{
+		CriticalDamageType->Critical = CombatStatus.Critical;
+		DamageTypeClass = DamageType;
+	}
+	else
+	{
+		DamageTypeClass = UDamageType::StaticClass();
+	}
+	UGameplayStatics::ApplyDamage(OtherActor, Damage, GetController(), this, DamageTypeClass);
 }
 
 void ADefenseObject::DisableCollision()

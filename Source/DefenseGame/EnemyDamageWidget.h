@@ -24,6 +24,10 @@ private:
 	UTextBlock* HPDamageText;
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UTextBlock* ShieldDamageText;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UTextBlock* HPCriticalDamageText;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UTextBlock* ShieldCriticalDamageText;
 
 	float TextAlpha = 1.0f;
 

@@ -67,6 +67,5 @@ class DEFENSEGAME_API ICombatHelperInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual float CalcDamage(float Attack, float Critical, float OwnerDefense);
-
+	virtual float CalcDamage(float Damage, float Critical, float OwnerDefense, bool& IsCritical);
 };

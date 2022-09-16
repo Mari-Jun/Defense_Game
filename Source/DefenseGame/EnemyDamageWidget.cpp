@@ -9,19 +9,29 @@ void UEnemyDamageWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
 {
 	if (HPDamageText->GetVisibility() == ESlateVisibility::Visible)
 	{
-		HPDamageText->SetColorAndOpacity(FLinearColor{ 1.0f, 0.0f, 0.0f, FMath::Clamp(TextAlpha, 0.0f, 1.0f) });
+		HPDamageText->SetRenderOpacity(TextAlpha);
 	}
-	else if (ShieldDamageText->GetVisibility() == ESlateVisibility::Visible)
+	if (ShieldDamageText->GetVisibility() == ESlateVisibility::Visible)
 	{
-		ShieldDamageText->SetColorAndOpacity(FLinearColor{ 1.0f, 1.0f, 1.0f, FMath::Clamp(TextAlpha, 0.0f, 1.0f) });
+		ShieldDamageText->SetRenderOpacity(TextAlpha);
+	}
+	if (HPCriticalDamageText->GetVisibility() == ESlateVisibility::Visible)
+	{
+		HPCriticalDamageText->SetRenderOpacity(TextAlpha);
+	}
+	if (ShieldCriticalDamageText->GetVisibility() == ESlateVisibility::Visible)
+	{
+		ShieldCriticalDamageText->SetRenderOpacity(TextAlpha);
 	}
 	TextAlpha -= InDeltaTime;
 }
 
 void UEnemyDamageWidget::SetDamageText(float HPDamage, float ShieldDamage, bool IsCritical)
 {
-	ShieldDamageText->SetVisibility(ESlateVisibility::Hidden);
 	HPDamageText->SetVisibility(ESlateVisibility::Hidden);
+	HPCriticalDamageText->SetVisibility(ESlateVisibility::Hidden);
+	ShieldDamageText->SetVisibility(ESlateVisibility::Hidden);
+	ShieldCriticalDamageText->SetVisibility(ESlateVisibility::Hidden);
 
 	static auto SetDamageText = [](UTextBlock* DamageText, float Damage) {
 		DamageText->SetVisibility(ESlateVisibility::Visible);
@@ -32,12 +42,12 @@ void UEnemyDamageWidget::SetDamageText(float HPDamage, float ShieldDamage, bool 
 
 	if (HPDamage > 0.0f)
 	{
-		SetDamageText(HPDamageText, HPDamage);
+		IsCritical ? SetDamageText(HPCriticalDamageText, HPDamage) : SetDamageText(HPDamageText, HPDamage);
 	}
 
 	if (ShieldDamage > 0.0f)
 	{
-		SetDamageText(ShieldDamageText, ShieldDamage);
+		IsCritical ? SetDamageText(ShieldCriticalDamageText, ShieldDamage) : SetDamageText(ShieldDamageText, ShieldDamage);
 	}
 }
 

@@ -7,6 +7,7 @@
 #include "CrosshairWidget.h"
 #include "CharacterStatusWidget.h"
 #include "CharacterSkillTimeWidget.h"
+#include "CriticalDamageType.h"
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -139,6 +140,15 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		const FRotator ShotRotation = UKismetMathLibrary::MakeRotFromX(PointDamageEvent->ShotDirection);
 
 		DeltaYaw = UKismetMathLibrary::NormalizedDeltaRotator(ActorRotation, ShotRotation).Yaw;
+	}
+
+	bool IsCritical = false;
+	UCriticalDamageType* CriticalDamageType = Cast<UCriticalDamageType>(DamageEvent.DamageTypeClass->GetDefaultObject());
+	if (CriticalDamageType != nullptr) 
+	{
+		IsCritical = true;
+		float Critical = CriticalDamageType->Critical;
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("Critical : %f"), Critical));
 	}
 
 	CharacterStatusData.CurrentHP -= DamageAmount;

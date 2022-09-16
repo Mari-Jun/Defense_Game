@@ -5,9 +5,9 @@
 
 // Add default functionality here for any ICombatHelperInterface functions that are not pure virtual.
 
-float ICombatHelperInterface::CalcDamage(float Attack, float Critical, float OwnerDefense)
+float ICombatHelperInterface::CalcDamage(float Damage, float Critical, float OwnerDefense, bool& IsCritical)
 {
-	float DamageAmount = Attack;
+	float DamageAmount = Damage;
 	float DecresePercent = 0.0f;
 
 	if (OwnerDefense <= 100.f)
@@ -28,11 +28,14 @@ float ICombatHelperInterface::CalcDamage(float Attack, float Critical, float Own
 
 	DamageAmount -= DamageAmount * DecresePercent;
 
-	if(FMath::IsNearlyZero(Critical) == false)
+	if (FMath::IsNearlyZero(Critical) == false)
 	{
 		float RandCritical = FMath::FRandRange(0.0f, 1.0f);
 		if (RandCritical <= Critical)
+		{
 			DamageAmount *= 2.0f;
+			IsCritical = true;
+		}
 	}
 
 	return DamageAmount;
