@@ -21,11 +21,13 @@ protected:
 	
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
-	UTextBlock* DamageText;
+	UTextBlock* HPDamageText;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UTextBlock* ShieldDamageText;
 
 	float TextAlpha = 1.0f;
 
 public:
-	void SetDamageText(float Damage);
+	void SetDamageText(float HPDamage, float ShieldDamage, bool IsCritical);
 	void SetTextAlpha(float Alpha);
 };

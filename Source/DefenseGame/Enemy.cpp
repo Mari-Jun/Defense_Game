@@ -68,8 +68,10 @@ void AEnemy::BeginPlay()
 			ChangeShieldDelegate.AddDynamic(EnemyStatusWidget, &UEnemyStatusWidget::OnChangeShield);
 			ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
 			ChangeShieldDelegate.Broadcast(CombatStatus.CurrentShield, CombatStatus.MaxShield);
+
 		}
 	}
+	BroadcastDamageInfoDelegate.AddDynamic(this, &AEnemy::AddDamageNumber);
 
 	EnemyController = Cast<AEnemyController>(GetController());
 	if (EnemyController == nullptr)
@@ -120,12 +122,6 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	DamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	ShowStatusWidget();
-
-	APlayerController* PlayerController = Cast<APlayerController>(EventInstigator);
-	if (PlayerController != nullptr)
-	{
-		AddDamageNumber(PlayerController, DamageAmount);
-	}
 
 	return DamageAmount;
 }
@@ -254,14 +250,17 @@ void AEnemy::Attack()
 	}
 }
 
-void AEnemy::AddDamageNumber(APlayerController* PlayerController, float Damage)
+void AEnemy::AddDamageNumber(float HPDamage, float ShieldDamage, bool IsCritical)
 {
 	if (DamageNumberWidgetClass != nullptr)
 	{
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		if (PlayerController == nullptr) return;
+
 		UEnemyDamageWidget* DamageWidget = CreateWidget<UEnemyDamageWidget>(PlayerController, DamageNumberWidgetClass);
 		if (DamageWidget != nullptr)
 		{
-			DamageWidget->SetDamageText(Damage);
+			DamageWidget->SetDamageText(HPDamage, ShieldDamage, IsCritical);
 			DamageWidget->SetTextAlpha(ShowDamageWidgetTime);
 
 			float CapsuleHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();

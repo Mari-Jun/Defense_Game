@@ -80,7 +80,8 @@ protected:
 	virtual bool CheckAttack();
 	virtual void Attack();
 
-	void AddDamageNumber(APlayerController* PlayerController, float Damage);
+	UFUNCTION()
+	void AddDamageNumber(float HPDamage, float ShieldDamage, bool IsCritical);
 	UFUNCTION()
 	void DestoryDamageNumber(UEnemyDamageWidget* DamageWidget);
 	void RenderHitNumbers();

@@ -22,7 +22,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	virtual float TakeDamage(float Attack, float Critical, float HitYaw);
+	virtual void TakeDamage(float Attack, float Critical, float HitYaw);
 	virtual void PlayHitReaction(float HitYaw);
 
 	virtual void KillObject() {}
@@ -45,6 +45,7 @@ protected:
 	FChangeHPDelegate ChangeHPDelegate;
 	FChangeShieldDelegate ChangeShieldDelegate;
 	FChangeReactionDelegate ChangeReactionDelegate;
+	FBroadcastDamageInfo BroadcastDamageInfoDelegate;
 
 	FGenericTeamId TeamId{ 0 };
 

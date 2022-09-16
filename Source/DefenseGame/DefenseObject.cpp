@@ -42,7 +42,7 @@ float ADefenseObject::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 
 	float Critical = DamageEvent.StaticStruct()->GetFloatMetaData("Critical");
 
-	DamageAmount = TakeDamage(DamageAmount, Critical, HitYaw);
+	TakeDamage(DamageAmount, Critical, HitYaw);
 
 	if (Controller != nullptr)
 	{
@@ -52,26 +52,28 @@ float ADefenseObject::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	return DamageAmount;
 }
 
-float ADefenseObject::TakeDamage(float Attack, float Critical, float HitYaw)
+void ADefenseObject::TakeDamage(float Attack, float Critical, float HitYaw)
 {
 	float DamageAmount = CalcDamage(Attack, Critical, CombatStatus.Defense);
-	float ReturnDamageAmount = DamageAmount;
+
+	float HPDamage = DamageAmount, ShieldDamage = 0.f;
+	bool IsCiritical = false;
 
 	if (DamageAmount > 0.0f && CombatStatus.CurrentShield > 0.0f)
 	{
-		float ShieldDamage = FMath::Min(DamageAmount, CombatStatus.CurrentShield);
-		DamageAmount -= ShieldDamage;
+		ShieldDamage = FMath::Min(DamageAmount, CombatStatus.CurrentShield);
+		HPDamage -= ShieldDamage;
 
 		CombatStatus.CurrentShield -= ShieldDamage;
 		ChangeShieldDelegate.Broadcast(CombatStatus.CurrentShield, CombatStatus.MaxShield);
 	}
 
-	if (DamageAmount > 0.0f)
+	if (HPDamage > 0.0f)
 	{
-		CombatStatus.CurrentHP = UKismetMathLibrary::FClamp(CombatStatus.CurrentHP - DamageAmount, 0.0f, CombatStatus.MaxHP);
+		CombatStatus.CurrentHP = UKismetMathLibrary::FClamp(CombatStatus.CurrentHP - HPDamage, 0.0f, CombatStatus.MaxHP);
 		ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
 
-		CombatStatus.CurrentReactionValue += DamageAmount;
+		CombatStatus.CurrentReactionValue += HPDamage;
 		ChangeReactionDelegate.Broadcast(CombatStatus.CurrentReactionValue, CombatStatus.ReactionValue);
 
 		if (CombatStatus.CurrentReactionValue >= CombatStatus.ReactionValue)
@@ -86,7 +88,7 @@ float ADefenseObject::TakeDamage(float Attack, float Critical, float HitYaw)
 		}
 	}
 
-	return ReturnDamageAmount;
+	BroadcastDamageInfoDelegate.Broadcast(HPDamage, ShieldDamage, IsCiritical);
 }
 
 void ADefenseObject::PlayHitReaction(float HitYaw)
