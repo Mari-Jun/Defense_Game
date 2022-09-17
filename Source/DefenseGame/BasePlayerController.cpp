@@ -13,17 +13,22 @@
 
 void ABasePlayerController::BeginPlay()
 {
+	if (GameInterfaceWidgetClass != nullptr)
+	{
+		GameInterfaceWidget = CreateWidget<UGameInterfaceWidget>(this, GameInterfaceWidgetClass);
+	}
+}
+
+void ABasePlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
 	BaseCharacter = Cast<ABaseCharacter>(GetPawn());
 	if (BaseCharacter == nullptr)
 	{
 		UE_LOG(LogTemp, Fatal, TEXT("Could not cast GetPawn() to ABaseCharacter"));
 	}
 	DefaultTargetArmLength = BaseCharacter->GetCameraBoom()->TargetArmLength;
-
-	if (GameInterfaceWidgetClass != nullptr)
-	{
-		GameInterfaceWidget = CreateWidget<UGameInterfaceWidget>(this, GameInterfaceWidgetClass);
-	}
 }
 
 void ABasePlayerController::SetupInputComponent()

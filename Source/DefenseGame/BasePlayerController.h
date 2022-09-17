@@ -22,6 +22,8 @@ protected:
 	virtual void BeginPlay() override;
 	
 public:
+	virtual void OnPossess(APawn* InPawn) override;
+
 	virtual void SetupInputComponent() override;
 
 	void ShowGameResult(bool IsWin);

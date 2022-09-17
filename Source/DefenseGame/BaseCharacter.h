@@ -104,6 +104,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<float> AbilityTime = {3, 3, 3, 3};
 	TArray<FTimerHandle> AbilityTimerHandle;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float RespawnTime = 10.0f;
+	FTimerHandle RespawnTimerHandle;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangeCooldownTimeDelegate, float, Time);
@@ -143,6 +147,7 @@ private:
 	void ResetAbilityTimer(int32 AbilityIndex);
 
 	virtual void KillObject() override;
+	virtual void RespawnCharacter();
 
 protected:
 	virtual void AttackLMBHit() {}

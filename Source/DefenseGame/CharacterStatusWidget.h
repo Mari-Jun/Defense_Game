@@ -9,6 +9,7 @@
 class ABaseCharacter;
 class UCharacterProgressBarWidget;
 class UCharacterSkillTimeWidget;
+class UCharacterRespawnWidget;
 
 class UCanvasPanel;
 class UCanvasPanelSlot;
@@ -39,6 +40,9 @@ public:
 	UFUNCTION()
 	void OnHitReaction();
 
+	void SetRespawnWidgetVisibility(bool IsVisible);
+	void SetRespawnTime(float Time, float MaxTime);
+
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UCanvasPanel* CanvasPanel;
@@ -63,6 +67,8 @@ private:
 	UCurveLinearColor* HitImageLinearColorCurve;
 	FTimerHandle HitImageColorTimer;
 
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UCharacterRespawnWidget* RespawnWidget;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	ABaseCharacter* BaseCharacter;

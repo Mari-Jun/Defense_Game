@@ -4,6 +4,7 @@
 #include "CharacterStatusWidget.h"
 #include "CharacterProgressBarWidget.h"
 #include "CharacterSkillTimeWidget.h"
+#include "CharacterRespawnWidget.h"
 #include "BaseCharacter.h"
 
 #include "Internationalization/Text.h"
@@ -52,6 +53,8 @@ void UCharacterStatusWidget::NativeConstruct()
 		}
 	}
 
+	SetRespawnWidgetVisibility(false);
+
 	PostProcessVolume = Cast<APostProcessVolume>(UGameplayStatics::GetActorOfClass(GetWorld(), APostProcessVolume::StaticClass()));
 }
 
@@ -93,6 +96,16 @@ void UCharacterStatusWidget::OnChangeShield(float CurrentShield, float MaxShield
 void UCharacterStatusWidget::OnHitReaction()
 {
 	GetWorld()->GetTimerManager().SetTimer(HitImageColorTimer, 0.25f, false);
+}
+
+void UCharacterStatusWidget::SetRespawnWidgetVisibility(bool IsVisible)
+{
+	IsVisible ? RespawnWidget->SetVisibility(ESlateVisibility::Visible) : RespawnWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UCharacterStatusWidget::SetRespawnTime(float Time, float MaxTime)
+{
+	RespawnWidget->SetRespawnTime(Time, MaxTime);
 }
 
 void UCharacterStatusWidget::SetBaseCharacter(ABaseCharacter* Character)

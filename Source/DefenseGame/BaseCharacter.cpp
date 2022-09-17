@@ -119,6 +119,12 @@ void ABaseCharacter::Tick(float DeltaTime)
 			ChangeAbilityTimeDelegate[Index].Broadcast(CharacterStatusData.AbilityTime[Index] - ElapsedTime);
 		}
 	}
+
+	if (CharacterState == ECharacterState::EDeath && CharacterStatusData.RespawnTimerHandle.IsValid())
+	{
+		float Time = GetWorldTimerManager().GetTimerElapsed(CharacterStatusData.RespawnTimerHandle);
+		StatusWidget->SetRespawnTime(Time, CharacterStatusData.RespawnTime);
+	}
 }
 
 // Called to bind functionality to input
@@ -284,6 +290,18 @@ void ABaseCharacter::KillObject()
 	SetCharacterState(ECharacterState::EDeath);
 }
 
+void ABaseCharacter::RespawnCharacter()
+{
+	SetCharacterState(ECharacterState::EDefault);
+	GetMesh()->GlobalAnimRateScale = 1.f;
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetWorld()->GetFirstPlayerController()->Possess(this);
+
+	CombatStatus.CurrentHP = CombatStatus.MaxHP;
+	ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
+	StatusWidget->SetRespawnWidgetVisibility(false);
+}
+
 void ABaseCharacter::AttackEnd()
 {
 	SetCharacterState(ECharacterState::EDefault);
@@ -307,6 +325,9 @@ void ABaseCharacter::AttackHit()
 void ABaseCharacter::FinishDeath()
 {
 	GetMesh()->GlobalAnimRateScale = 0.f;
+	GetWorldTimerManager().SetTimer(CharacterStatusData.RespawnTimerHandle,
+		this, &ABaseCharacter::RespawnCharacter, CharacterStatusData.RespawnTime);
+	StatusWidget->SetRespawnWidgetVisibility(true);
 }
 
 void ABaseCharacter::ReactionEnd()
