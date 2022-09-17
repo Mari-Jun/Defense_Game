@@ -131,6 +131,12 @@ void ADefenseObject::ApplyPointDamage(AActor* OtherActor, float Damage, const FV
 		HitInfo, GetController(), this, GetDamageTypeClass());
 }
 
+void ADefenseObject::EnableCollision()
+{
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+}
+
 void ADefenseObject::DisableCollision()
 {
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);

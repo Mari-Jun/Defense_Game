@@ -28,6 +28,7 @@ protected:
 	virtual void KillObject() {}
 
 	virtual TSubclassOf<UDamageType> GetDamageTypeClass() const;
+	virtual void EnableCollision();
 	virtual void DisableCollision();
 
 public:	

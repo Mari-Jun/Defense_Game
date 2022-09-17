@@ -219,6 +219,7 @@ public:
 public:
 	USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	UCurveFloat* GetTurnRotationCurve() const { return CharacterAnimationData.TurnRotationCurve; }
+	ECharacterState GetCharacterState() const { return CharacterState; }
 	void SetCharacterState(ECharacterState State);
 
 	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }

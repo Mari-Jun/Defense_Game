@@ -282,7 +282,7 @@ void ABaseCharacter::ResetAbilityTimer(int32 AbilityIndex)
 void ABaseCharacter::KillObject()
 {
 	GetController()->UnPossess();
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DisableCollision();
 	if (CharacterAnimationData.DeathMontage != nullptr)
 	{
 		PlayAnimMontage(CharacterAnimationData.DeathMontage);
@@ -294,7 +294,7 @@ void ABaseCharacter::RespawnCharacter()
 {
 	SetCharacterState(ECharacterState::EDefault);
 	GetMesh()->GlobalAnimRateScale = 1.f;
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	EnableCollision();
 	GetWorld()->GetFirstPlayerController()->Possess(this);
 
 	CombatStatus.CurrentHP = CombatStatus.MaxHP;

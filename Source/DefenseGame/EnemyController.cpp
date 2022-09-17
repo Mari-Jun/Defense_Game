@@ -101,6 +101,17 @@ void AEnemyController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	if (TargetCharacter != nullptr && TargetCharacter->GetCharacterState() == ECharacterState::EDeath)
+	{
+		TargetCharacter = nullptr;
+		BlackboardComponent->SetValueAsObject("TargetCharacter", TargetCharacter);
+		SetFocus(nullptr);
+
+		FindNearestDefenseBaseLocation();
+		BlackboardComponent->SetValueAsVector("BaseTargetLocation", TargetDefenseBase->GetActorLocation());
+		BlackboardComponent->SetValueAsBool("LoseSense", true);
+	}
 }
 
 float AEnemyController::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -200,7 +211,7 @@ void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 			SuccessTeamSense = false;
 		}
 
-		if (!SuccessDamageSense && !SuccessSightSense && !SuccessTeamSense)
+		if (!SuccessDamageSense && !SuccessSightSense && !SuccessTeamSense && TargetCharacter != nullptr)
 		{
 			if (SenseName == UAISense_Sight::StaticClass()->GetName())
 			{
