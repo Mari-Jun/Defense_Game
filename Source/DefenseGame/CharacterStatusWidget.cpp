@@ -70,7 +70,7 @@ void UCharacterStatusWidget::NativeTick(const FGeometry& MyGeometry, float InDel
 
 void UCharacterStatusWidget::OnChangeHP(float CurrentHP, float MaxHP)
 {
-	HPProgressBar->OnChangeHP(CurrentHP, MaxHP);
+	HPProgressBar->OnChangeValue(CurrentHP, MaxHP);
 
 	if (PostProcessVolume != nullptr)
 	{
@@ -83,6 +83,11 @@ void UCharacterStatusWidget::OnChangeHP(float CurrentHP, float MaxHP)
 			PostProcessVolume->Settings.WeightedBlendables.Array[0].Weight = 0.0f;
 		}
 	}
+}
+
+void UCharacterStatusWidget::OnChangeShield(float CurrentShield, float MaxShield)
+{
+	ShieldProgressBar->OnChangeValue(CurrentShield, MaxShield);
 }
 
 void UCharacterStatusWidget::OnHitReaction()

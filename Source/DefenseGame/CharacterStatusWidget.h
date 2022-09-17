@@ -33,6 +33,8 @@ protected:
 public:
 	UFUNCTION()
 	void OnChangeHP(float CurrentHP, float MaxHP);
+	UFUNCTION()
+	void OnChangeShield(float CurrentShield, float MaxShield);
 
 	UFUNCTION()
 	void OnHitReaction();
@@ -42,6 +44,9 @@ private:
 	UCanvasPanel* CanvasPanel;
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UCharacterProgressBarWidget* HPProgressBar;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UCharacterProgressBarWidget* ShieldProgressBar;
+	
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UCharacterSkillTimeWidget* AbilityQWidget;

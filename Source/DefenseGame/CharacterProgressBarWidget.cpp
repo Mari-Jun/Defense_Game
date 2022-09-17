@@ -8,10 +8,11 @@
 
 void UCharacterProgressBarWidget::NativePreConstruct()
 {
+	ProgressBar->SetFillColorAndOpacity(ProgressTintColor);
 }
 
-void UCharacterProgressBarWidget::OnChangeHP(float CurrentHP, float MaxHP)
+void UCharacterProgressBarWidget::OnChangeValue(float CurrentValue, float MaxValue)
 {
-	ProgressBar->SetPercent(CurrentHP / MaxHP);
-	ValueText->SetText(FText::FromString(FString::FromInt(FMath::FloorToInt(CurrentHP))));
+	ProgressBar->SetPercent(CurrentValue / MaxValue);
+	ValueText->SetText(FText::FromString(FString::FromInt(FMath::FloorToInt(CurrentValue))));
 }

@@ -96,7 +96,9 @@ void ABaseCharacter::BeginPlay()
 				StatusWidget->AddToPlayerScreen();
 
 				ChangeHPDelegate.AddDynamic(StatusWidget, &UCharacterStatusWidget::OnChangeHP);
+				ChangeShieldDelegate.AddDynamic(StatusWidget, &UCharacterStatusWidget::OnChangeShield);
 				ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
+				ChangeShieldDelegate.Broadcast(CombatStatus.CurrentShield, CombatStatus.MaxShield);
 			}
 		}
 	}

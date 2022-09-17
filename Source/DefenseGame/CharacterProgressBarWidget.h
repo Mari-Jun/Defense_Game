@@ -24,7 +24,7 @@ protected:
 
 public:
 	UFUNCTION()
-	void OnChangeHP(float CurrentHP, float MaxHP);
+	void OnChangeValue(float CurrentValue, float MaxValue);
 
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
@@ -37,6 +37,9 @@ private:
 	UImage* EffectImage;
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UTextBlock* ValueText;
+
+	UPROPERTY(EditAnywhere)
+	FLinearColor ProgressTintColor;
 
 public:
 	UProgressBar* GetProgressBar() const { return ProgressBar; }
