@@ -7,6 +7,7 @@
 #include "BaseCharacter.h"
 #include "EnemyDamageWidget.h"
 #include "DefenseBase.h"
+#include "Item.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
@@ -146,11 +147,32 @@ void AEnemy::KillObject()
 	{
 		GetWorld()->DestroyActor(this);
 	}
+	DropItem();
 }
 
 void AEnemy::DestoryEnemy()
 {
 	GetWorld()->DestroyActor(this);
+}
+
+void AEnemy::DropItem()
+{
+	if (DropItems.IsEmpty()) return;
+	if (ItemDropProbability == 0) return;
+	if (ItemDropProbability < FMath::RandRange(0, 100)) return;
+
+	TArray<TSubclassOf<AItem>> ItemArray;
+	for (const auto& [ItemClass, Count] : DropItems)
+	{
+		for (int i = 0; i < Count; ++i) ItemArray.Add(ItemClass);
+	}
+
+	TSubclassOf<AActor> SelectItemClass = ItemArray[FMath::RandRange(0, ItemArray.Num() - 1)];
+	AItem* DropItem = Cast<AItem>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, SelectItemClass, FTransform(GetActorLocation())));
+	if (DropItem != nullptr)
+	{
+		UGameplayStatics::FinishSpawningActor(DropItem, FTransform(GetActorLocation()));
+	}
 }
 
 void AEnemy::ChangeEnemyState(EEnemyState State)

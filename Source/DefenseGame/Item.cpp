@@ -7,7 +7,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 
-#include "Components/SphereComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 AItem::AItem()
@@ -15,13 +15,13 @@ AItem::AItem()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	PickupRange = CreateDefaultSubobject<USphereComponent>("Pickup Range");
+	PickupRange = CreateDefaultSubobject<UCapsuleComponent>("Pickup Range");
 	SetRootComponent(PickupRange);
 	
-	PickupRange->SetSphereRadius(200.f);
+	PickupRange->SetCapsuleRadius(50.0f);
+	PickupRange->SetCapsuleHalfHeight(100.f);
 	PickupRange->SetCollisionProfileName("Item");
-
-	PickupRange->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnOverlapEvent);
+	PickupRange->SetSimulatePhysics(true);
 }
 
 // Called when the game starts or when spawned
@@ -31,9 +31,12 @@ void AItem::BeginPlay()
 	
 	if (ItemEffect != nullptr)
 	{
-		Effect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ItemEffect, GetActorLocation());
+		Effect = UNiagaraFunctionLibrary::SpawnSystemAttached(ItemEffect, PickupRange, "None",
+			FVector(0.0f, 0.0f, -PickupRange->GetScaledCapsuleHalfHeight()), FRotator(), EAttachLocation::KeepRelativeOffset, true);
 		Effect->SetRelativeScale3D(ItemEffectScale);
 	}
+
+	PickupRange->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnOverlapEvent);
 }
 
 // Called every frame

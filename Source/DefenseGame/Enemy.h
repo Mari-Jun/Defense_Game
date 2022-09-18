@@ -10,6 +10,7 @@ class UEnemyStatusWidget;
 class UEnemyDamageWidget;
 class AEnemyController;
 class ABaseCharacter;
+class AItem;
 
 class UBlendSpace1D;
 class UWidgetComponent;
@@ -69,6 +70,7 @@ public:
 private:
 	virtual void KillObject() override;
 	virtual void DestoryEnemy();
+	virtual void DropItem();
 
 protected:
 	virtual void ChangeEnemyState(EEnemyState State);
@@ -146,6 +148,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	USphereComponent* AttackRangeSphereComponent;
+
+	/** 0% ~ 100%*/
+	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 100, UIMin = 0, UIMax = 100))
+	int32 ItemDropProbability = 50;
+	/** 아이템, 아이템 확률 (숫자가 크면 클수록 확률이 높음)*/
+	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
+	TMap<TSubclassOf<AItem>, int32> DropItems;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	UAnimSequence* IdleAnimSequence;

@@ -10,7 +10,7 @@ class ABaseCharacter;
 
 class UNiagaraSystem;
 class UNiagaraComponent;
-class USphereComponent;
+class UCapsuleComponent;
 
 UCLASS()
 class DEFENSEGAME_API AItem : public AActor
@@ -53,7 +53,7 @@ private:
 	FVector PickupItemEffectScale = FVector(1.f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pickup", meta = (AllowPrivateAccess = "true"))
-	USphereComponent* PickupRange;
+	UCapsuleComponent* PickupRange;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Status", meta = (AllowPrivateAccess = "true"))
 	int32 ItemLevel = 1;
