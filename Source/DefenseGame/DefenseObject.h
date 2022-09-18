@@ -56,4 +56,9 @@ protected:
 
 public:
 	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }
+
+	UFUNCTION(BlueprintCallable)
+	void ChangeCombatStatusCurrentHP(float DeltaCurrentHP);
+	UFUNCTION(BlueprintCallable)
+	void ChangeCombatStatusMaxHP(float DeltaMaxHP);
 };

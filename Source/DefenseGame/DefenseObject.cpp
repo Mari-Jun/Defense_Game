@@ -76,8 +76,7 @@ void ADefenseObject::TakeDamage(float Attack, float Critical, float HitYaw)
 
 	if (HPDamage > 0.0f)
 	{
-		CombatStatus.CurrentHP = UKismetMathLibrary::FClamp(CombatStatus.CurrentHP - HPDamage, 0.0f, CombatStatus.MaxHP);
-		ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
+		ChangeCombatStatusCurrentHP(-HPDamage);
 
 		CombatStatus.CurrentReactionValue += HPDamage;
 		ChangeReactionDelegate.Broadcast(CombatStatus.CurrentReactionValue, CombatStatus.ReactionValue);
@@ -155,4 +154,16 @@ void ADefenseObject::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void ADefenseObject::ChangeCombatStatusCurrentHP(float DeltaCurrentHP)
+{
+	CombatStatus.CurrentHP = UKismetMathLibrary::FClamp(CombatStatus.CurrentHP + DeltaCurrentHP, 0.0f, CombatStatus.MaxHP);
+	ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
+}
+
+void ADefenseObject::ChangeCombatStatusMaxHP(float DeltaMaxHP)
+{
+	CombatStatus.MaxHP = FMath::Max(0.0f, CombatStatus.MaxHP + DeltaMaxHP);
+	ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
 }
