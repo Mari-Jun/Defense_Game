@@ -61,4 +61,8 @@ public:
 	void ChangeCombatStatusCurrentHP(float DeltaCurrentHP);
 	UFUNCTION(BlueprintCallable)
 	void ChangeCombatStatusMaxHP(float DeltaMaxHP);
+	UFUNCTION(BlueprintCallable)
+	void ChangeCombatStatusCurrentShield(float DeltaCurrentShield);
+	UFUNCTION(BlueprintCallable)
+	void ChangeCombatStatusMaxShield(float DeltaMaxShield);
 };

@@ -69,9 +69,8 @@ void ADefenseObject::TakeDamage(float Attack, float Critical, float HitYaw)
 	{
 		ShieldDamage = FMath::Min(DamageAmount, CombatStatus.CurrentShield);
 		HPDamage -= ShieldDamage;
-
-		CombatStatus.CurrentShield -= ShieldDamage;
-		ChangeShieldDelegate.Broadcast(CombatStatus.CurrentShield, CombatStatus.MaxShield);
+		
+		ChangeCombatStatusCurrentShield(-ShieldDamage);
 	}
 
 	if (HPDamage > 0.0f)
@@ -166,4 +165,16 @@ void ADefenseObject::ChangeCombatStatusMaxHP(float DeltaMaxHP)
 {
 	CombatStatus.MaxHP = FMath::Max(0.0f, CombatStatus.MaxHP + DeltaMaxHP);
 	ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
+}
+
+void ADefenseObject::ChangeCombatStatusCurrentShield(float DeltaCurrentShield)
+{
+	CombatStatus.CurrentShield = UKismetMathLibrary::FClamp(CombatStatus.CurrentShield + DeltaCurrentShield, 0.0f, CombatStatus.MaxShield);
+	ChangeShieldDelegate.Broadcast(CombatStatus.CurrentShield, CombatStatus.MaxShield);
+}
+
+void ADefenseObject::ChangeCombatStatusMaxShield(float DeltaMaxShield)
+{
+	CombatStatus.MaxShield = FMath::Max(0.0f, CombatStatus.MaxShield + DeltaMaxShield);
+	ChangeShieldDelegate.Broadcast(CombatStatus.CurrentShield, CombatStatus.MaxShield);
 }
