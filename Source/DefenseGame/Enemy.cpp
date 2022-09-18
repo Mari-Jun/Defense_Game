@@ -311,6 +311,7 @@ void AEnemy::AddDamageNumber(float HPDamage, float ShieldDamage, bool IsCritical
 			FVector Location = GetActorLocation() + FVector(0.0f, 100.0, CapsuleHalfHeight);
 			DamageNumbers.Add(DamageWidget, Location);
 			DamageWidget->AddToViewport();
+			DamageWidget->SetVisibility(ESlateVisibility::Hidden);
 
 			FTimerHandle DamageNumberTimerHandle;
 			FTimerDelegate DamageNumberTimerDelegate;
@@ -338,7 +339,12 @@ void AEnemy::RenderHitNumbers()
 		FVector2D ScreenPosition;
 		if (UGameplayStatics::ProjectWorldToScreen(GetWorld()->GetFirstPlayerController(), HitLocation, ScreenPosition))
 		{
+			DamageNumberWidget->SetVisibility(ESlateVisibility::Visible);
 			DamageNumberWidget->SetPositionInViewport(ScreenPosition);
+		}
+		else
+		{
+			DamageNumberWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
