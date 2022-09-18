@@ -10,6 +10,7 @@
 #include "Internationalization/Text.h"
 #include "Components/Image.h"
 #include "Curves/CurveLinearColor.h"
+#include "Components/TextBlock.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Engine/PostProcessVolume.h"
@@ -106,6 +107,11 @@ void UCharacterStatusWidget::SetRespawnWidgetVisibility(bool IsVisible)
 void UCharacterStatusWidget::SetRespawnTime(float Time, float MaxTime)
 {
 	RespawnWidget->SetRespawnTime(Time, MaxTime);
+}
+
+void UCharacterStatusWidget::OnChangeCoin(int32 CoinValue)
+{
+	CoinText->SetText(FText::FromString(FString::FromInt(CoinValue)));
 }
 
 void UCharacterStatusWidget::SetBaseCharacter(ABaseCharacter* Character)

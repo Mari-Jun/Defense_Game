@@ -108,10 +108,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float RespawnTime = 10.0f;
 	FTimerHandle RespawnTimerHandle;
+
+	int32 Coin = 0;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangeCooldownTimeDelegate, float, Time);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHitShakeCameraDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangeCoinDelegate, int32, CoinValue);
 
 UCLASS()
 class DEFENSEGAME_API ABaseCharacter : public ADefenseObject
@@ -215,6 +218,7 @@ public:
 
 	UPROPERTY()
 	FHitShakeCameraDelegate HitShakeCameraDelegate;
+	FChangeCoinDelegate ChangeCoinDelegate;
 
 public:
 	USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
@@ -223,4 +227,6 @@ public:
 	void SetCharacterState(ECharacterState State);
 
 	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }
+
+	void ChangeCoin(int32 DeltaCoin);
 };

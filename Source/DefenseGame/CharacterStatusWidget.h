@@ -15,7 +15,7 @@ class UCanvasPanel;
 class UCanvasPanelSlot;
 class UImage;
 class UProgressBar;
-class UTextLayoutWidget;
+class UTextBlock;
 class APostProcessVolume;
 /**
  * 
@@ -43,6 +43,9 @@ public:
 	void SetRespawnWidgetVisibility(bool IsVisible);
 	void SetRespawnTime(float Time, float MaxTime);
 
+	UFUNCTION()
+	void OnChangeCoin(int32 CoinValue);
+
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UCanvasPanel* CanvasPanel;
@@ -69,6 +72,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UCharacterRespawnWidget* RespawnWidget;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UTextBlock* CoinText;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	ABaseCharacter* BaseCharacter;

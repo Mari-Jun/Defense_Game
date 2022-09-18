@@ -9,6 +9,9 @@
 #include "DefenseBase.h"
 #include "Item.h"
 
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
@@ -48,6 +51,9 @@ AEnemy::AEnemy()
 
 	DamageWidgetSpawnPoint = CreateDefaultSubobject<USceneComponent>("DamageWidgetSpawnPoint");
 	DamageWidgetSpawnPoint->SetupAttachment(GetRootComponent());
+
+	DropCoinEffect = Cast<UNiagaraSystem>(StaticLoadObject(UNiagaraSystem::StaticClass(), nullptr,
+		TEXT("NiagaraSystem'/Game/sA_PickupSet_1/Fx/NiagaraSystems/NS_CoinBurst.NS_CoinBurst'")));
 }
 
 // Called when the game starts or when spawned
@@ -173,6 +179,22 @@ void AEnemy::DropItem()
 	{
 		UGameplayStatics::FinishSpawningActor(DropItem, FTransform(GetActorLocation()));
 	}
+
+	if (DropCoinEffect != nullptr)
+	{
+		UNiagaraComponent* Effect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, DropCoinEffect, GetActorLocation());
+		Effect->SetRelativeScale3D(DropCoinEffectScale);
+	}
+
+	if (EnemyController != nullptr && EnemyController->GetLastDamageCauser() != nullptr)
+	{
+		ABaseCharacter* DamageCauserCharacter = Cast<ABaseCharacter>(EnemyController->GetLastDamageCauser());
+		if (DamageCauserCharacter != nullptr)
+		{
+			DamageCauserCharacter->ChangeCoin(2);
+		}
+	}
+
 }
 
 void AEnemy::ChangeEnemyState(EEnemyState State)

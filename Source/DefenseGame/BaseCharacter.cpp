@@ -99,6 +99,9 @@ void ABaseCharacter::BeginPlay()
 				ChangeShieldDelegate.AddDynamic(StatusWidget, &UCharacterStatusWidget::OnChangeShield);
 				ChangeHPDelegate.Broadcast(CombatStatus.CurrentHP, CombatStatus.MaxHP);
 				ChangeShieldDelegate.Broadcast(CombatStatus.CurrentShield, CombatStatus.MaxShield);
+
+				ChangeCoinDelegate.AddDynamic(StatusWidget, &UCharacterStatusWidget::OnChangeCoin);
+				ChangeCoinDelegate.Broadcast(CharacterStatusData.Coin);
 			}
 		}
 	}
@@ -351,4 +354,10 @@ void ABaseCharacter::SetCharacterState(ECharacterState State)
 	}
 
 	CharacterState = State;
+}
+
+void ABaseCharacter::ChangeCoin(int32 DeltaCoin)
+{
+	CharacterStatusData.Coin += DeltaCoin;
+	ChangeCoinDelegate.Broadcast(CharacterStatusData.Coin);
 }

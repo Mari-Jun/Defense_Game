@@ -123,6 +123,8 @@ float AEnemyController::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		TriggerDamageEvent(DamageAmount, DamageCauser);
 	}
 
+	LastDamageCauser = DamageCauser;
+
 	return DamageAmount;
 }
 

@@ -17,6 +17,8 @@ class UWidgetComponent;
 class UBehaviorTree;
 class USphereComponent;
 
+class UNiagaraSystem;
+
 UENUM(BlueprintType)
 enum class EEnemyState : uint8
 {
@@ -155,6 +157,9 @@ protected:
 	/** 아이템, 아이템 확률 (숫자가 크면 클수록 확률이 높음)*/
 	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
 	TMap<TSubclassOf<AItem>, int32> DropItems;
+	UNiagaraSystem* DropCoinEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
+	FVector DropCoinEffectScale = FVector(1.f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	UAnimSequence* IdleAnimSequence;

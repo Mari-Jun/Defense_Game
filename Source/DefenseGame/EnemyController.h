@@ -86,10 +86,13 @@ private:
 	ABaseCharacter* TargetCharacter = nullptr;
 	FVector TargetLocation;
 
+	AActor* LastDamageCauser = nullptr;
+
 protected:
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 
 public:
 	ADefenseBase* GetTargetDefenseBase() const { return TargetDefenseBase; }
 	ABaseCharacter* GetTargetCharacter() const { return TargetCharacter; }
+	AActor* GetLastDamageCauser() const { return LastDamageCauser; }
 };
