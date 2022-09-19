@@ -29,6 +29,11 @@ float ADefenseObject::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	if (Controller != nullptr)
+	{
+		Controller->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	}
+
 	float HitYaw = 0.f;
 
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
@@ -49,11 +54,6 @@ float ADefenseObject::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	}
 
 	TakeDamage(DamageAmount, Critical, HitYaw);
-
-	if (Controller != nullptr)
-	{
-		Controller->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	}
 
 	return DamageAmount;
 }
