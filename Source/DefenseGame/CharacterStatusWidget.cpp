@@ -114,6 +114,24 @@ void UCharacterStatusWidget::OnChangeCoin(int32 CoinValue)
 	CoinText->SetText(FText::FromString(FString::FromInt(CoinValue)));
 }
 
+void UCharacterStatusWidget::OnChangeAttack(float AttackValue)
+{
+	int32 IntAttack = FMath::RoundToInt(AttackValue);
+	AttackText->SetText(FText::FromString(FString::FromInt(IntAttack)));
+}
+
+void UCharacterStatusWidget::OnChangeDefense(float DefenseValue)
+{
+	int32 IntDefense = FMath::RoundToInt(DefenseValue);
+	DefenseText->SetText(FText::FromString(FString::FromInt(IntDefense)));
+}
+
+void UCharacterStatusWidget::OnChangeCritical(float CriticalValue)
+{
+	int32 IntCritical = FMath::RoundToInt(CriticalValue * 100.0f);
+	CriticalText->SetText(FText::FromString(FString::Printf(TEXT("%d%%"), IntCritical)));
+}
+
 void UCharacterStatusWidget::SetBaseCharacter(ABaseCharacter* Character)
 {
 	BaseCharacter = Character;

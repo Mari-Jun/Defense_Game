@@ -51,6 +51,9 @@ protected:
 	FChangeShieldDelegate ChangeShieldDelegate;
 	FChangeReactionDelegate ChangeReactionDelegate;
 	FBroadcastDamageInfo BroadcastDamageInfoDelegate;
+	FChangeAttackDelegate ChangeAttackDelegate;
+	FChangeDefenseDelegate ChangeDefenseDelegate;
+	FChangeCriticalDelegate ChangeCriticalDelegate;
 
 	FGenericTeamId TeamId{ 0 };
 
@@ -65,4 +68,10 @@ public:
 	void ChangeCombatStatusCurrentShield(float DeltaCurrentShield);
 	UFUNCTION(BlueprintCallable)
 	void ChangeCombatStatusMaxShield(float DeltaMaxShield);
+	UFUNCTION(BlueprintCallable)
+	void ChangeCombatStatusAttack(float DeltaAttack);
+	UFUNCTION(BlueprintCallable)
+	void ChangeCombatStatusDefense(float DeltaDefense);
+	UFUNCTION(BlueprintCallable)
+	void ChangeCombatStatusCritical(float DeltaCritical);
 };

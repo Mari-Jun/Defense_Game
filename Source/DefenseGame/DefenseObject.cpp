@@ -178,3 +178,21 @@ void ADefenseObject::ChangeCombatStatusMaxShield(float DeltaMaxShield)
 	CombatStatus.MaxShield = FMath::Max(0.0f, CombatStatus.MaxShield + DeltaMaxShield);
 	ChangeShieldDelegate.Broadcast(CombatStatus.CurrentShield, CombatStatus.MaxShield);
 }
+
+void ADefenseObject::ChangeCombatStatusAttack(float DeltaAttack)
+{
+	CombatStatus.Attack += DeltaAttack;
+	ChangeAttackDelegate.Broadcast(CombatStatus.Attack);
+}
+
+void ADefenseObject::ChangeCombatStatusDefense(float DeltaDefense)
+{
+	CombatStatus.Defense += DeltaDefense;
+	ChangeDefenseDelegate.Broadcast(CombatStatus.Defense);
+}
+
+void ADefenseObject::ChangeCombatStatusCritical(float DeltaCritical)
+{
+	CombatStatus.Critical += DeltaCritical;
+	ChangeCriticalDelegate.Broadcast(CombatStatus.Critical);
+}

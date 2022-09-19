@@ -45,6 +45,12 @@ public:
 
 	UFUNCTION()
 	void OnChangeCoin(int32 CoinValue);
+	UFUNCTION()
+	void OnChangeAttack(float AttackValue);
+	UFUNCTION()
+	void OnChangeDefense(float DefenseValue);
+	UFUNCTION()
+	void OnChangeCritical(float CriticalValue);
 
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
@@ -75,6 +81,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UTextBlock* CoinText;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UTextBlock* AttackText;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UTextBlock* DefenseText;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UTextBlock* CriticalText;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	ABaseCharacter* BaseCharacter;

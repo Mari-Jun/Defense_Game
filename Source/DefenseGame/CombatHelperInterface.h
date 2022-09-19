@@ -45,11 +45,13 @@ struct FReactionCombatStatus : public FAttackCombatStatus
 	float ReactionValue = 50.f;
 };
 
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeHPDelegate, float, CurrentHP, float, MaxHP);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeShieldDelegate, float, CurrentShield, float, MaxShield);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FChangeReactionDelegate, float, CurrentReaction, float, MaxReaction);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FBroadcastDamageInfo, float, HPDamage, float, ShieldDamage, bool, IsCritical);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangeAttackDelegate, float, Attack);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangeDefenseDelegate, float, Defense);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangeCriticalDelegate, float, Critical);
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)

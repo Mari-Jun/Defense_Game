@@ -102,6 +102,13 @@ void ABaseCharacter::BeginPlay()
 
 				ChangeCoinDelegate.AddDynamic(StatusWidget, &UCharacterStatusWidget::OnChangeCoin);
 				ChangeCoinDelegate.Broadcast(CharacterStatusData.Coin);
+
+				ChangeAttackDelegate.AddDynamic(StatusWidget, &UCharacterStatusWidget::OnChangeAttack);
+				ChangeAttackDelegate.Broadcast(CombatStatus.Attack);
+				ChangeDefenseDelegate.AddDynamic(StatusWidget, &UCharacterStatusWidget::OnChangeDefense);
+				ChangeDefenseDelegate.Broadcast(CombatStatus.Defense);
+				ChangeCriticalDelegate.AddDynamic(StatusWidget, &UCharacterStatusWidget::OnChangeCritical);
+				ChangeCriticalDelegate.Broadcast(CombatStatus.Critical);
 			}
 		}
 	}
