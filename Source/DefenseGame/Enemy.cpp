@@ -67,7 +67,6 @@ void AEnemy::BeginPlay()
 		FEnemyStatusTable* EnemyDataRow = EnemyStatusTable->FindRow<FEnemyStatusTable>(FName(*RowName), "");
 		if (EnemyDataRow != nullptr)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, "Hello");
 			CombatStatus.Attack = EnemyDataRow->Attack;
 			CombatStatus.Defense = EnemyDataRow->Defense;
 			CombatStatus.CurrentHP = CombatStatus.MaxHP = EnemyDataRow->HP;

@@ -3,7 +3,7 @@
 
 #include "EnemySpawner.h"
 
-#include "EnemyDino.h"
+#include "Enemy.h"
 #include "EnemyController.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -21,7 +21,7 @@ void AEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AEnemySpawner::SpawnEnemy, 10.0f, true);
+	SpawnEnemys(1);
 }
 
 void AEnemySpawner::Tick(float DeltaTime)
@@ -30,11 +30,19 @@ void AEnemySpawner::Tick(float DeltaTime)
 
 }
 
-void AEnemySpawner::SpawnEnemy()
+void AEnemySpawner::SpawnEnemys(int WaveLevel)
 {
-	if (EnemyDinoClass != nullptr)
+	FString RowName = FString::Printf(TEXT("Wave%d"), WaveLevel);
+	FEnemySpawnTable* SpawnDataRow = EnemySpawnTable->FindRow<FEnemySpawnTable>(FName(*RowName), "");
+	if (SpawnDataRow != nullptr)
 	{
-		GetWorld()->SpawnActor<AEnemyDino>(EnemyDinoClass, GetActorTransform());
+		for (const auto& SpawnInfo : SpawnDataRow->SpawnEnemys)
+		{
+			for (int num = 0; num < SpawnInfo.NumOfEnemys; ++num)
+			{
+				GetWorld()->SpawnActor<AEnemy>(SpawnInfo.EnemyClass, GetActorTransform());
+			}
+		}
 	}
 }
 
