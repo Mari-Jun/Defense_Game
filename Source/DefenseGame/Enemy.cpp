@@ -60,6 +60,23 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (EnemyStatusTable != nullptr)
+	{
+		FString RowName = FString::Printf(TEXT("Level%d"), EnemyStatusData.Level);
+		FEnemyStatusTable* EnemyDataRow = EnemyStatusTable->FindRow<FEnemyStatusTable>(FName(*RowName), "");
+		if (EnemyDataRow != nullptr)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, "Hello");
+			CombatStatus.Attack = EnemyDataRow->Attack;
+			CombatStatus.Defense = EnemyDataRow->Defense;
+			CombatStatus.CurrentHP = CombatStatus.MaxHP = EnemyDataRow->HP;
+			CombatStatus.CurrentShield = CombatStatus.MaxShield = EnemyDataRow->Shield;
+			CombatStatus.ReactionValue = EnemyDataRow->ReactionValue;
+			DropCoin = EnemyDataRow->DropCoin;
+		}
+
+	}
 	
 	if (EnemyStatusWidgetComponent != nullptr)
 	{
@@ -94,6 +111,13 @@ void AEnemy::BeginPlay()
 	}
 
 	GetCharacterMovement()->MaxWalkSpeed = EnemyStatusData.DefaultSpeed;
+}
+
+void AEnemy::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	
 }
 
 // Called every frame
@@ -191,7 +215,7 @@ void AEnemy::DropItem()
 		ABaseCharacter* DamageCauserCharacter = Cast<ABaseCharacter>(EnemyController->GetLastDamageCauser());
 		if (DamageCauserCharacter != nullptr)
 		{
-			DamageCauserCharacter->ChangeCoin(2);
+			DamageCauserCharacter->ChangeCoin(DropCoin);
 		}
 	}
 

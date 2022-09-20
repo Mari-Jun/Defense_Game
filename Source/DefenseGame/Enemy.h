@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "DefenseObject.h"
+#include "Engine/DataTable.h"
 #include "Enemy.generated.h"
 
 class UEnemyStatusWidget;
@@ -42,6 +43,30 @@ public:
 	float AttackSpeed = 350.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float ReactionSpeed = 250.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = 1, ClampMax = 20, UIMin = 1, UIMax = 20))
+	int32 Level = 1;
+};
+
+USTRUCT(BlueprintType)
+struct FEnemyStatusTable : public FTableRowBase
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0))
+	float HP;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0))
+	float Shield;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0))
+	float Attack;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0))
+	float Defense;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0))
+	float ReactionValue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 1, ClampMax = 20))
+	int32 DropItemLevel = 1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 1))
+	int32 DropCoin = 1;
 };
 
 UCLASS()
@@ -56,6 +81,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 public:	
 	// Called every frame
@@ -123,6 +150,10 @@ protected:
 	EEnemyState EnemyState = EEnemyState::ENone;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	FEnemyStatusData EnemyStatusData;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UDataTable* EnemyStatusTable;
+	int32 DropCoin = 0;
 
 	TSet<AActor*> InAttackRangeActors;
 
