@@ -177,6 +177,7 @@ void AEnemy::KillObject()
 		GetWorld()->DestroyActor(this);
 	}
 	DropItem();
+	KillEnemyEventDelegate.Broadcast();
 }
 
 void AEnemy::DestoryEnemy()

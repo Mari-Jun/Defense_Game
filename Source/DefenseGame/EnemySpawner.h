@@ -32,6 +32,8 @@ struct FEnemySpawnTable : public FTableRowBase
 	TArray<FSpawnEnemyInfo> SpawnEnemys;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEmptySpawnedEnemyDelegate, AEnemySpawner*, EnemySpawner);
+
 UCLASS()
 class DEFENSEGAME_API AEnemySpawner : public AActor
 {
@@ -50,9 +52,17 @@ public:
 
 	void SpawnEnemys(int WaveLevel);
 
+	UFUNCTION()
+	void OnEnemyDead();
+
 private:
 	FTimerHandle SpawnTimerHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawner", meta = (AllowPrivateAccess = "true"))
 	UDataTable* EnemySpawnTable;
+
+	int32 WaveNumOfEnemy = 0;
+
+public:
+	FEmptySpawnedEnemyDelegate EmptySpawnedEnemyDelegate;
 };

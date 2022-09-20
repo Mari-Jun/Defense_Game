@@ -69,6 +69,8 @@ struct FEnemyStatusTable : public FTableRowBase
 	int32 DropCoin = 1;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FKillEnemyEventDelegate);
+
 UCLASS()
 class DEFENSEGAME_API AEnemy : public ADefenseObject
 {
@@ -209,6 +211,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	TArray<UAnimMontage*> AttackAnimMontange;
+
+public:
+	FKillEnemyEventDelegate KillEnemyEventDelegate;
 
 public:
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
