@@ -37,6 +37,8 @@ void AItem::BeginPlay()
 	}
 
 	PickupRange->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnOverlapEvent);
+
+	GetWorldTimerManager().SetTimer(LifeTimerHandle, this, &AItem::DestroyItem, LifeTime);
 }
 
 // Called every frame
@@ -63,5 +65,10 @@ void AItem::OnOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 	}
 	GetWorld()->DestroyActor(this);
 	Effect->DestroyComponent();
+}
+
+void AItem::DestroyItem()
+{
+	GetWorld()->DestroyActor(this);
 }
 

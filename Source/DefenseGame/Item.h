@@ -40,6 +40,8 @@ private:
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult);
 
+	void DestroyItem();
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Niagara", meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* ItemEffect;
@@ -57,4 +59,8 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Status", meta = (AllowPrivateAccess = "true"))
 	int32 ItemLevel = 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Status", meta = (AllowPrivateAccess = "true"))
+	float LifeTime = 15.f;
+	FTimerHandle LifeTimerHandle;
 };

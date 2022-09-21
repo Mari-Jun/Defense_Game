@@ -32,8 +32,6 @@ void AEnemyController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	UE_LOG(LogTemp, Error, TEXT("Possess Pawn!!"));
-
 	if (InPawn == nullptr) return;
 	
 	Enemy = Cast<AEnemy>(InPawn);
