@@ -21,8 +21,6 @@ public:
 	void UpgradeComplete();
 	
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Status", meta = (AllowPrivateAccess = "true"))
-	int32 MaxUpgradeLevel = 20;
 	int32 CurrentUpgradeLevel = 1;
 	int32 CurrentFee = 0;
 
@@ -34,7 +32,6 @@ private:
 	UButton* UpgradeButton;
 
 public:
-	int32 GetMaxLevel() const { return MaxUpgradeLevel; }
 	int32 GetCurrentLevel() const { return CurrentUpgradeLevel; }
 	int32 GetCurrentFee() const { return CurrentFee; }
 

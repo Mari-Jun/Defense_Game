@@ -63,12 +63,9 @@ protected:
 	UGameResultWidget* GameResultWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Upgrade", meta = (AllowPrivateAccess = "true"))
-	UDataTable* UpgradeStatusDataTable;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Upgrade", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UCharacterUpgradeWidget> UpgradeWidgetClass;
 	UCharacterUpgradeWidget* UpgradeWidget;
 
 public:
 	ABaseCharacter* GetBaseCharacter() const { return BaseCharacter; }
-	UDataTable* GetUpgradeStatusDataTable() const { return UpgradeStatusDataTable; }
 };

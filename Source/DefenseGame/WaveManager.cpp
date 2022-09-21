@@ -26,7 +26,7 @@ void AWaveManager::BeginPlay()
 		WaveInfoWidget = CreateWidget<UWaveInfoWidget>(GetWorld()->GetFirstPlayerController(), WaveInfoWidgetClass);
 		if (WaveInfoWidget != nullptr)
 		{
-			WaveInfoWidget->AddToPlayerScreen();
+			WaveInfoWidget->AddToViewport(1);
 		}
 	}
 

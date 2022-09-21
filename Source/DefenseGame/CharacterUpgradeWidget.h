@@ -13,13 +13,7 @@ struct FCharacterUpgradeTable : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0))
-	int32 AttackUpgradeFee;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0))
-	int32 DefenseUpgradeFee;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0))
-	int32 HPUpgradeFee;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0))
-	int32 ShieldUpgradeFee;
+	int32 UpgradeFee;
 };
 
 class ABasePlayerController;
@@ -45,6 +39,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UUpgradeStatusWidget* AttackWidget;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Upgrade", meta = (AllowPrivateAccess = "true"))
+	UDataTable* UpgradeAttackDataTable;
 
 public:
 	void SetPlayerController(ABasePlayerController* Controller);

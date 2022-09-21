@@ -23,18 +23,17 @@ void UCharacterUpgradeWidget::NativeOnInitialized()
 
 void UCharacterUpgradeWidget::InitializeAtatckWidget()
 {
-	if (PlayerController != nullptr && AttackWidget != nullptr)
+	if (AttackWidget != nullptr)
 	{
 		int32 CurrentLevel = AttackWidget->GetCurrentLevel();
-		UDataTable* DataTable = PlayerController->GetUpgradeStatusDataTable();
 
 		FString RowName = FString::Printf(TEXT("Level%d"), CurrentLevel);
-		FCharacterUpgradeTable* UpgradeTable = DataTable->FindRow<FCharacterUpgradeTable>(FName(RowName), "");
+		FCharacterUpgradeTable* UpgradeTable = UpgradeAttackDataTable->FindRow<FCharacterUpgradeTable>(FName(RowName), "");
 
 		if (UpgradeTable != nullptr)
 		{
 			GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Red, TEXT("Hello World"));
-			AttackWidget->Upgrade(CurrentLevel, UpgradeTable->AttackUpgradeFee);
+			AttackWidget->Upgrade(CurrentLevel, UpgradeTable->UpgradeFee);
 		}
 	}
 }
@@ -44,7 +43,6 @@ void UCharacterUpgradeWidget::OnUpgradeAttack()
 	if (PlayerController != nullptr && AttackWidget != nullptr)
 	{	
 		int32 CurrentLevel = AttackWidget->GetCurrentLevel();
-		UDataTable* DataTable = PlayerController->GetUpgradeStatusDataTable();
 
 		ABaseCharacter* BaseCharacter = PlayerController->GetBaseCharacter();
 		if (BaseCharacter != nullptr)
@@ -56,10 +54,10 @@ void UCharacterUpgradeWidget::OnUpgradeAttack()
 				BaseCharacter->ChangeCombatStatusAttack(5);
 
 				FString RowName = FString::Printf(TEXT("Level%d"), CurrentLevel + 1);
-				FCharacterUpgradeTable* UpgradeTable = DataTable->FindRow<FCharacterUpgradeTable>(FName(RowName), "");
+				FCharacterUpgradeTable* UpgradeTable = UpgradeAttackDataTable->FindRow<FCharacterUpgradeTable>(FName(RowName), "");
 				if (UpgradeTable != nullptr)
 				{
-					AttackWidget->Upgrade(CurrentLevel + 1, UpgradeTable->AttackUpgradeFee);
+					AttackWidget->Upgrade(CurrentLevel + 1, UpgradeTable->UpgradeFee);
 				}
 				else
 				{
