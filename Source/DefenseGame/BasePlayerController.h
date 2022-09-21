@@ -9,6 +9,9 @@
 class ABaseCharacter;
 class UGameInterfaceWidget;
 class UGameResultWidget;
+class UCharacterUpgradeWidget;
+
+class UDataTable;
 
 /**
  * 
@@ -38,6 +41,7 @@ private:
 	virtual void Jump();
 	void ResetCameraZoom();
 	void ShowGameInterface();
+	void ShowUpgradeWindow();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
@@ -57,4 +61,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interface", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameResultWidget> GameResultWidgetClass;
 	UGameResultWidget* GameResultWidget;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Upgrade", meta = (AllowPrivateAccess = "true"))
+	UDataTable* UpgradeStatusDataTable;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Upgrade", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UCharacterUpgradeWidget> UpgradeWidgetClass;
+	UCharacterUpgradeWidget* UpgradeWidget;
+
+public:
+	ABaseCharacter* GetBaseCharacter() const { return BaseCharacter; }
+	UDataTable* GetUpgradeStatusDataTable() const { return UpgradeStatusDataTable; }
 };

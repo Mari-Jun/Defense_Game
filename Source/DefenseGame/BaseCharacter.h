@@ -109,6 +109,7 @@ public:
 	float RespawnTime = 10.0f;
 	FTimerHandle RespawnTimerHandle;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 Coin = 0;
 };
 
@@ -229,4 +230,5 @@ public:
 	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }
 
 	void ChangeCoin(int32 DeltaCoin);
+	int32 GetCoin() const;
 };

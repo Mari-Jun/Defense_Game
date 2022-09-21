@@ -368,3 +368,8 @@ void ABaseCharacter::ChangeCoin(int32 DeltaCoin)
 	CharacterStatusData.Coin += DeltaCoin;
 	ChangeCoinDelegate.Broadcast(CharacterStatusData.Coin);
 }
+
+int32 ABaseCharacter::GetCoin() const
+{
+	return CharacterStatusData.Coin;
+}

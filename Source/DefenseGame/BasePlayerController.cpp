@@ -5,6 +5,7 @@
 #include "BaseCharacter.h"
 #include "GameInterfaceWidget.h"
 #include "GameResultWidget.h"
+#include "CharacterUpgradeWidget.h"
 
 #include "GameFramework/SpringArmComponent.h"
 
@@ -16,6 +17,12 @@ void ABasePlayerController::BeginPlay()
 	if (GameInterfaceWidgetClass != nullptr)
 	{
 		GameInterfaceWidget = CreateWidget<UGameInterfaceWidget>(this, GameInterfaceWidgetClass);
+	}
+
+	if (UpgradeWidgetClass != nullptr)
+	{
+		UpgradeWidget = CreateWidget<UCharacterUpgradeWidget>(this, UpgradeWidgetClass);
+		UpgradeWidget->SetPlayerController(this);
 	}
 }
 
@@ -46,6 +53,7 @@ void ABasePlayerController::SetupInputComponent()
 	FInputActionBinding& InputGameInterface = 
 		InputComponent->BindAction("GameInterface", EInputEvent::IE_Pressed, this, &ABasePlayerController::ShowGameInterface);
 	InputGameInterface.bExecuteWhenPaused = true;
+	InputComponent->BindAction("UpgradeWindow", EInputEvent::IE_Pressed, this, &ABasePlayerController::ShowUpgradeWindow);
 }
 
 void ABasePlayerController::MoveForward(float AxisValue)
@@ -76,6 +84,24 @@ void ABasePlayerController::ZoomCamera(float AxisValue)
 	float NewTargetArmLength = BaseCharacter->GetCameraBoom()->TargetArmLength + ChangeValue;
 	NewTargetArmLength = UKismetMathLibrary::FClamp(NewTargetArmLength, ZoomCameraMinMaxValue.X, ZoomCameraMinMaxValue.Y);
 	BaseCharacter->GetCameraBoom()->TargetArmLength = NewTargetArmLength;
+}
+
+void ABasePlayerController::ShowUpgradeWindow()
+{
+	if (UpgradeWidget->IsInViewport())
+	{
+		SetInputMode(FInputModeGameOnly{});
+		SetShowMouseCursor(false);
+		UpgradeWidget->RemoveFromParent();
+	}
+	else
+	{
+		auto InputMode = FInputModeGameAndUI{};
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+		SetInputMode(InputMode);
+		SetShowMouseCursor(true);
+		UpgradeWidget->AddToViewport();
+	}
 }
 
 void ABasePlayerController::Jump()
