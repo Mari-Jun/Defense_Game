@@ -7,6 +7,7 @@
 #include "WaveManager.generated.h"
 
 class AEnemySpawner;
+class UWaveInfoWidget;
 
 enum class ESpawnerEmptyState : uint8
 {
@@ -47,6 +48,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wave", meta = (AllowPrivateAccess = "true"))
 	int32 MaxWave = 1;
 	FTimerHandle WaveTimerHandle;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UWaveInfoWidget> WaveInfoWidgetClass;
+	UWaveInfoWidget* WaveInfoWidget;
 
 	/*bool 값은 이번 Wave에 소환한 Enemy들이 모두 죽었는지 여부*/
 	TMap<AEnemySpawner*, ESpawnerEmptyState> EnemySpawners;

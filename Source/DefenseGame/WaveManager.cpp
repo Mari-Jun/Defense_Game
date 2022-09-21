@@ -1,8 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "WaveManager.h"
 #include "EnemySpawner.h"
+#include "WaveInfoWidget.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -19,6 +20,15 @@ void AWaveManager::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (WaveInfoWidgetClass != nullptr)
+	{
+		WaveInfoWidget = CreateWidget<UWaveInfoWidget>(GetWorld()->GetFirstPlayerController(), WaveInfoWidgetClass);
+		if (WaveInfoWidget != nullptr)
+		{
+			WaveInfoWidget->AddToPlayerScreen();
+		}
+	}
+
 	GetEnemySpawner();
 
 	WaitNextWave();
@@ -29,6 +39,11 @@ void AWaveManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (WaveTimerHandle.IsValid() && WaveInfoWidget != nullptr)
+	{
+		float ElapsedTime = GetWorldTimerManager().GetTimerElapsed(WaveTimerHandle);
+		WaveInfoWidget->SetNextWaveRemainingTime(WaveWaitTime - ElapsedTime);
+	}
 }
 
 void AWaveManager::GetEnemySpawner()
@@ -49,16 +64,26 @@ void AWaveManager::GetEnemySpawner()
 
 void AWaveManager::WaitNextWave()
 {
-	++CurrentWave;
 	GetWorldTimerManager().SetTimer(WaveTimerHandle, this, &AWaveManager::StartWave, WaveWaitTime);
+	if (WaveInfoWidget != nullptr)
+	{
+		WaveInfoWidget->SetNextWaveWidgetVisibility(true);
+	}
 }
 
 void AWaveManager::StartWave()
 {
+	++CurrentWave;
+	GetWorldTimerManager().ClearTimer(WaveTimerHandle);
 	for (auto& [EnemySpanwer, EmptyEnemy] : EnemySpawners)
 	{
 		EnemySpanwer->SpawnEnemys(CurrentWave);
 		EmptyEnemy = ESpawnerEmptyState::ENotEmpty;
+	}
+	if (WaveInfoWidget != nullptr)
+	{
+		WaveInfoWidget->SetCurrentWaveText(CurrentWave);
+		WaveInfoWidget->SetNextWaveWidgetVisibility(false);
 	}
 }
 
