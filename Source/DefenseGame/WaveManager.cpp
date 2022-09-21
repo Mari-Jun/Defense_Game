@@ -4,6 +4,7 @@
 #include "WaveManager.h"
 #include "EnemySpawner.h"
 #include "WaveInfoWidget.h"
+#include "BasePlayerController.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -104,7 +105,11 @@ void AWaveManager::OnEmptySpawnedEnemy(AEnemySpawner* EnemySpawner)
 	{
 		if (CurrentWave == MaxWave)
 		{
-			GEngine->AddOnScreenDebugMessage(0, 5.0f, FColor::Magenta, TEXT("Finish Game!!!"));
+			ABasePlayerController* PlayerController = Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
+			if (PlayerController != nullptr)
+			{
+				PlayerController->ShowGameResult(true);
+			}
 		}
 		else
 		{
