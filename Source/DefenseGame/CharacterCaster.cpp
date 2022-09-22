@@ -211,6 +211,6 @@ void ACharacterCaster::AbilityQTickDamage(AEnemy* Enemy)
 	}
 	else
 	{
-		ApplyDamage(Enemy, CombatStatus.Attack * 0.05f);
+		ApplyDamage(Enemy, CombatStatus.Attack * 0.15f);
 	}
 }

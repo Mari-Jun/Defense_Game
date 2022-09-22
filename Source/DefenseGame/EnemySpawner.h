@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -26,12 +26,22 @@ struct FSpawnEnemyInfo
 };
 
 USTRUCT(BlueprintType)
+struct FSpawnTimeEnemyInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<FSpawnEnemyInfo> SpawnEnemys;
+};
+
+USTRUCT(BlueprintType)
 struct FEnemySpawnTable : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	/**Time과 그 시간에 나오는 Enemy들 웨이브 시작후 최대 시간은 30으로 설정해주세요.*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0))
-	TArray<FSpawnEnemyInfo> SpawnEnemys;
+	TMap<int32, FSpawnTimeEnemyInfo> SpawnEnemys;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEmptySpawnedEnemyDelegate, AEnemySpawner*, EnemySpawner);
@@ -59,9 +69,11 @@ public:
 
 private:
 	FTimerHandle SpawnTimerHandle;
+	int32 PreviousTime = -1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawner", meta = (AllowPrivateAccess = "true"))
 	UDataTable* EnemySpawnTable;
+	FEnemySpawnTable* CurrentWaveSpawnDataRow;
 
 	int32 WaveNumOfEnemy = 0;
 

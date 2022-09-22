@@ -15,7 +15,7 @@
 AEnemySpawner::AEnemySpawner()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	SpawnPoint = CreateDefaultSubobject<UBoxComponent>("Spawn Point");
 	SetRootComponent(SpawnPoint);
@@ -31,6 +31,44 @@ void AEnemySpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (SpawnTimerHandle.IsValid())
+	{
+		float ElapsedTime = GetWorldTimerManager().GetTimerElapsed(SpawnTimerHandle);
+		int32 IntElapsedTime = FMath::FloorToInt32(ElapsedTime);
+
+		if (CurrentWaveSpawnDataRow == nullptr) return;
+
+		if (PreviousTime + 1 == IntElapsedTime)
+		{
+			PreviousTime = IntElapsedTime;
+
+			if (CurrentWaveSpawnDataRow->SpawnEnemys.Contains(IntElapsedTime))
+			{
+				for (const auto& [Time, SpawnTimeInfo] : CurrentWaveSpawnDataRow->SpawnEnemys)
+				{
+					if (Time == IntElapsedTime)
+					{
+						for (const auto& SpawnInfo : SpawnTimeInfo.SpawnEnemys)
+						{
+							for (int num = 0; num < SpawnInfo.NumOfEnemys; ++num)
+							{
+								AEnemy* SpawnedEnemy = nullptr;
+								while (SpawnedEnemy == nullptr)
+								{
+									FVector NewLocation = UKismetMathLibrary::RandomPointInBoundingBox(SpawnPoint->GetCenterOfMass(), SpawnPoint->GetScaledBoxExtent());
+									SpawnedEnemy = GetWorld()->SpawnActor<AEnemy>(SpawnInfo.EnemyClass, FTransform{ NewLocation });
+									if (SpawnedEnemy != nullptr)
+									{
+										SpawnedEnemy->KillEnemyEventDelegate.AddDynamic(this, &AEnemySpawner::OnEnemyDead);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void AEnemySpawner::SpawnEnemys(int WaveLevel)
@@ -38,27 +76,22 @@ void AEnemySpawner::SpawnEnemys(int WaveLevel)
 	if (EnemySpawnTable != nullptr)
 	{
 		FString RowName = FString::Printf(TEXT("Wave%d"), WaveLevel);
-		FEnemySpawnTable* SpawnDataRow = EnemySpawnTable->FindRow<FEnemySpawnTable>(FName(*RowName), "");
-		if (SpawnDataRow != nullptr)
+		CurrentWaveSpawnDataRow = EnemySpawnTable->FindRow<FEnemySpawnTable>(FName(*RowName), "");
+
+		PreviousTime = -1;
+		GetWorldTimerManager().SetTimer(SpawnTimerHandle, 31.0f, false);
+
+		if (CurrentWaveSpawnDataRow != nullptr)
 		{
-			for (const auto& SpawnInfo : SpawnDataRow->SpawnEnemys)
+			for (const auto& [Time, SpawnTimeInfo] : CurrentWaveSpawnDataRow->SpawnEnemys)
 			{
-				WaveNumOfEnemy += SpawnInfo.NumOfEnemys;
-				for (int num = 0; num < SpawnInfo.NumOfEnemys; ++num)
+				for (const auto& SpawnInfo : SpawnTimeInfo.SpawnEnemys)
 				{
-					AEnemy* SpawnedEnemy = nullptr;
-					while (SpawnedEnemy == nullptr)
-					{
-						FVector NewLocation = UKismetMathLibrary::RandomPointInBoundingBox(SpawnPoint->GetCenterOfMass(), SpawnPoint->GetScaledBoxExtent());
-						SpawnedEnemy = GetWorld()->SpawnActor<AEnemy>(SpawnInfo.EnemyClass, FTransform{ NewLocation });
-						if (SpawnedEnemy != nullptr)
-						{
-							SpawnedEnemy->KillEnemyEventDelegate.AddDynamic(this, &AEnemySpawner::OnEnemyDead);
-						}
-					}
+					WaveNumOfEnemy += SpawnInfo.NumOfEnemys;
 				}
 			}
 		}
+		
 	}
 	else
 	{
