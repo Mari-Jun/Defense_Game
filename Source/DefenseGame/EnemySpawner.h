@@ -10,6 +10,8 @@
 class AEnemyDino;
 class AEnemy;
 
+class UBoxComponent;
+
 USTRUCT(BlueprintType)
 struct FSpawnEnemyInfo
 {
@@ -62,6 +64,9 @@ private:
 	UDataTable* EnemySpawnTable;
 
 	int32 WaveNumOfEnemy = 0;
+
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "Spawner", meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* SpawnPoint;
 
 public:
 	FEmptySpawnedEnemyDelegate EmptySpawnedEnemyDelegate;

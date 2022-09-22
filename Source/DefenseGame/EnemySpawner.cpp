@@ -6,7 +6,10 @@
 #include "Enemy.h"
 #include "EnemyController.h"
 
+#include "Components/BoxComponent.h"
+
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AEnemySpawner::AEnemySpawner()
@@ -14,6 +17,8 @@ AEnemySpawner::AEnemySpawner()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
+	SpawnPoint = CreateDefaultSubobject<UBoxComponent>("Spawn Point");
+	SetRootComponent(SpawnPoint);
 }
 
 // Called when the game starts or when spawned
@@ -41,8 +46,16 @@ void AEnemySpawner::SpawnEnemys(int WaveLevel)
 				WaveNumOfEnemy += SpawnInfo.NumOfEnemys;
 				for (int num = 0; num < SpawnInfo.NumOfEnemys; ++num)
 				{
-					auto Enemy = GetWorld()->SpawnActor<AEnemy>(SpawnInfo.EnemyClass, GetActorTransform());
-					Enemy->KillEnemyEventDelegate.AddDynamic(this, &AEnemySpawner::OnEnemyDead);
+					AEnemy* SpawnedEnemy = nullptr;
+					while (SpawnedEnemy == nullptr)
+					{
+						FVector NewLocation = UKismetMathLibrary::RandomPointInBoundingBox(SpawnPoint->GetCenterOfMass(), SpawnPoint->GetScaledBoxExtent());
+						SpawnedEnemy = GetWorld()->SpawnActor<AEnemy>(SpawnInfo.EnemyClass, FTransform{ NewLocation });
+						if (SpawnedEnemy != nullptr)
+						{
+							SpawnedEnemy->KillEnemyEventDelegate.AddDynamic(this, &AEnemySpawner::OnEnemyDead);
+						}
+					}
 				}
 			}
 		}
