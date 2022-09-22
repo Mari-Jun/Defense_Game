@@ -88,6 +88,8 @@ void ABasePlayerController::ZoomCamera(float AxisValue)
 
 void ABasePlayerController::ShowUpgradeWindow()
 {
+	if (bCanUseUpgradeWidget == false || UpgradeWidget == nullptr) return;
+
 	if (UpgradeWidget->IsInViewport())
 	{
 		SetInputMode(FInputModeGameOnly{});
@@ -102,6 +104,21 @@ void ABasePlayerController::ShowUpgradeWindow()
 		SetShowMouseCursor(true);
 		UpgradeWidget->AddToViewport(5);
 	}
+}
+
+void ABasePlayerController::SetCaneUseUpgradeWidget(bool Use)
+{
+	if (UpgradeWidget != nullptr)
+	{
+		if (Use == false && UpgradeWidget->IsInViewport())
+		{
+			SetInputMode(FInputModeGameOnly{});
+			SetShowMouseCursor(false);
+			UpgradeWidget->RemoveFromParent();
+		}
+	}
+	
+	bCanUseUpgradeWidget = Use;
 }
 
 void ABasePlayerController::Jump()

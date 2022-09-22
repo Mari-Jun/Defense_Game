@@ -51,6 +51,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UWaveInfoWidget> WaveInfoWidgetClass;
+	UPROPERTY()
 	UWaveInfoWidget* WaveInfoWidget;
 
 	/*bool 값은 이번 Wave에 소환한 Enemy들이 모두 죽었는지 여부*/

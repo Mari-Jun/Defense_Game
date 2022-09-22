@@ -69,6 +69,12 @@ void AWaveManager::WaitNextWave()
 	if (WaveInfoWidget != nullptr)
 	{
 		WaveInfoWidget->SetNextWaveWidgetVisibility(true);
+		WaveInfoWidget->SetUseCharacterUpgrade(true);
+		ABasePlayerController* PlayerController = Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
+		if (PlayerController != nullptr)
+		{
+			PlayerController->SetCaneUseUpgradeWidget(true);
+		}
 	}
 }
 
@@ -85,6 +91,12 @@ void AWaveManager::StartWave()
 	{
 		WaveInfoWidget->SetCurrentWaveText(CurrentWave);
 		WaveInfoWidget->SetNextWaveWidgetVisibility(false);
+		WaveInfoWidget->SetUseCharacterUpgrade(false);
+		ABasePlayerController* PlayerController = Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
+		if (PlayerController != nullptr)
+		{
+			PlayerController->SetCaneUseUpgradeWidget(false);
+		}
 	}
 }
 

@@ -31,3 +31,18 @@ void UWaveInfoWidget::SetCurrentWaveText(int32 CurrentWave)
 	FText Text = FText::FromString(L"현재 웨이브 : " + FString::FromInt(CurrentWave));
 	CurrentWaveText->SetText(Text);
 }
+
+void UWaveInfoWidget::SetUseCharacterUpgrade(bool bUse)
+{
+	FText Text;
+	if (bUse)
+	{
+		Text = FText::FromString(L"상점 이용이 가능합니다.");
+	}
+	else
+	{
+		Text = FText::FromString(L"상점 이용이 불가능합니다.");
+	}
+
+	UpgradeInfoText->SetText(Text);
+}

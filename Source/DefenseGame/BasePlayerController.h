@@ -56,16 +56,21 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interface", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameInterfaceWidget> GameInterfaceWidgetClass;
+	UPROPERTY()
 	UGameInterfaceWidget* GameInterfaceWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interface", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameResultWidget> GameResultWidgetClass;
+	UPROPERTY()
 	UGameResultWidget* GameResultWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Upgrade", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UCharacterUpgradeWidget> UpgradeWidgetClass;
+	UPROPERTY()
 	UCharacterUpgradeWidget* UpgradeWidget;
+	bool bCanUseUpgradeWidget = true;
 
 public:
 	ABaseCharacter* GetBaseCharacter() const { return BaseCharacter; }
+	void SetCaneUseUpgradeWidget(bool Use);
 };

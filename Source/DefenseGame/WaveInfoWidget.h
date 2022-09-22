@@ -20,10 +20,16 @@ private:
 	UTextBlock* NextWaveRemainingTimeText;
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UTextBlock* CurrentWaveText;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UTextBlock* UpgradeKeyText;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UTextBlock* UpgradeInfoText;
+
 
 public:
 	void SetNextWaveWidgetVisibility(bool Visible);
 
 	void SetNextWaveRemainingTime(float RemainingTime);
 	void SetCurrentWaveText(int32 CurrentWave);
+	void SetUseCharacterUpgrade(bool bUse);
 };
