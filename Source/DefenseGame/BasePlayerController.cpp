@@ -147,7 +147,9 @@ void ABasePlayerController::ShowGameInterface()
 		{
 			GameInterfaceWidget->AddToViewport(10);
 			UGameplayStatics::SetGamePaused(GetWorld(), true);
-			SetInputMode(FInputModeGameAndUI());
+			auto InputMode = FInputModeGameAndUI{};
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+			SetInputMode(InputMode);
 			SetShowMouseCursor(true);
 		}
 	}
@@ -162,8 +164,10 @@ void ABasePlayerController::ShowGameResult(bool IsWin)
 		{
 			IsWin ? GameResultWidget->ShowWinResult() : GameResultWidget->ShowDefeatResult();
 			GameResultWidget->AddToViewport(100);
-			GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
-			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+			auto InputMode = FInputModeGameAndUI{};
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+			SetInputMode(InputMode);
+			SetShowMouseCursor(true);
 		}
 
 		if (GameInterfaceWidget != nullptr && GameInterfaceWidget->IsInViewport())
