@@ -17,23 +17,27 @@ class DEFENSEGAME_API UUpgradeStatusWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	void Upgrade(int32 NewLevel, int32 NewFee);
+	void Upgrade(int32 NewLevel, int32 NewFee, float NewValue);
 	void UpgradeComplete();
 	
 private:
-	int32 CurrentUpgradeLevel = 1;
-	int32 CurrentFee = 0;
+	int32 UpgradeLevel = 1;
+	int32 UpgradeFee = 0;
+	float UpgradeValue = 0;
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UTextBlock* UpgradeLevelText;
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UTextBlock* UpgradeFeeText;
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	UTextBlock* UpgradeValueText;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	UButton* UpgradeButton;
 
 public:
-	int32 GetCurrentLevel() const { return CurrentUpgradeLevel; }
-	int32 GetCurrentFee() const { return CurrentFee; }
+	int32 GetUpgradeLevel() const { return UpgradeLevel; }
+	int32 GetUpgradeFee() const { return UpgradeFee; }
+	float GetUpgradeValue() const { return UpgradeValue; }
 
 	UButton* GetUpgradeButton() const { return UpgradeButton; }
 };
