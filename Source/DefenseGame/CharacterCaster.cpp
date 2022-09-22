@@ -3,6 +3,7 @@
 
 #include "CharacterCaster.h"
 #include "Projectile.h"
+#include "Enemy.h"
 
 #include "Animation/BlendSpace1D.h"
 
@@ -13,6 +14,10 @@ ACharacterCaster::ACharacterCaster()
 	USkeletalMesh* caster_skeletal_mesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr,
 		TEXT("SkeletalMesh'/Game/ParagonPhase/Characters/Heroes/Phase/Skins/Tier_1_5/Pandapack/Meshes/Phase_Pandapack_GDC.Phase_Pandapack_GDC'")));
 	GetMesh()->SetSkeletalMesh(caster_skeletal_mesh);
+
+	AbilityQMagicShield = CreateDefaultSubobject<UStaticMeshComponent>("Ability Q Magic Shield");
+	AbilityQMagicShield->SetupAttachment(GetRootComponent());
+	AbilityQMagicShield->SetCollisionProfileName("NoCollision");
 
 	CharacterAnimationData.IdleAnimSequence = Cast<UAnimSequence>(StaticLoadObject(UAnimSequence::StaticClass(), nullptr,
 		TEXT("AnimSequence'/Game/_Game/Characters/Caster/Animations/Caster_Idle.Caster_Idle'")));
@@ -65,6 +70,15 @@ ACharacterCaster::ACharacterCaster()
 
 	CharacterAnimationData.DeathMontage = Cast<UAnimMontage>(StaticLoadObject(UAnimMontage::StaticClass(), nullptr,
 		TEXT("AnimMontage'/Game/_Game/Characters/Caster/Animations/Caster_Death_Montage.Caster_Death_Montage'")));
+}
+
+void ACharacterCaster::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AbilityQMagicShield->SetVisibility(false);
+	AbilityQMagicShield->OnComponentBeginOverlap.AddDynamic(this, &ACharacterCaster::OnMagicShieldBeginOverlap);
+	AbilityQMagicShield->OnComponentEndOverlap.AddDynamic(this, &ACharacterCaster::OnMagicShieldEndOverlap);
 }
 
 void ACharacterCaster::AbilityR(int32 AbilityIndex)
@@ -138,6 +152,9 @@ void ACharacterCaster::AttackLMBHit()
 
 void ACharacterCaster::AbilityQHit()
 {
+	GetWorldTimerManager().SetTimer(AbilityQDurationTimerHandle, this, &ACharacterCaster::FinishAbilityQShield, AbilityQDuration);
+	AbilityQMagicShield->SetCollisionProfileName("CharacterAttack");
+	AbilityQMagicShield->SetVisibility(true);
 }
 
 void ACharacterCaster::AbilityEHit()
@@ -150,4 +167,50 @@ void ACharacterCaster::AbilityRHit()
 
 void ACharacterCaster::AbilityRMBHit()
 {
+}
+
+void ACharacterCaster::FinishAbilityQShield()
+{
+	AbilityQMagicShield->SetCollisionProfileName("NoCollision");
+	AbilityQMagicShield->SetVisibility(false);
+	AbilityQOverlapActors.Reset();
+}
+
+void ACharacterCaster::OnMagicShieldBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	AEnemy* Enemy = Cast<AEnemy>(OtherActor);
+	if (Enemy == nullptr) return;
+
+	if (AbilityQOverlapActors.Contains(OtherActor))
+	{
+		GetWorldTimerManager().UnPauseTimer(AbilityQOverlapActors[OtherActor]);
+	}
+	else
+	{
+		FTimerHandle& TimerHandle = AbilityQOverlapActors.Add(OtherActor);
+		AbilityQTickDamage(Enemy);
+		FTimerDelegate AbilityQDamageTimerDelegate = FTimerDelegate::CreateUObject(this, &ACharacterCaster::AbilityQTickDamage, Enemy);
+		GetWorldTimerManager().SetTimer(TimerHandle, AbilityQDamageTimerDelegate, 0.25f, true);
+	}
+}
+
+void ACharacterCaster::OnMagicShieldEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (AbilityQOverlapActors.Contains(OtherActor))
+	{
+		GetWorldTimerManager().PauseTimer(AbilityQOverlapActors[OtherActor]);
+	}
+}
+
+void ACharacterCaster::AbilityQTickDamage(AEnemy* Enemy)
+{
+	if (Enemy->GetEnemyState() == EEnemyState::EDeath)
+	{
+		GetWorldTimerManager().ClearTimer(AbilityQOverlapActors[Enemy]);
+		AbilityQOverlapActors.Remove(Enemy);
+	}
+	else
+	{
+		ApplyDamage(Enemy, CombatStatus.Attack * 0.05f);
+	}
 }

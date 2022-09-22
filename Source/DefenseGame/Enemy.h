@@ -216,5 +216,6 @@ public:
 	FKillEnemyEventDelegate KillEnemyEventDelegate;
 
 public:
+	EEnemyState GetEnemyState() const { return EnemyState; }
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 };
