@@ -56,10 +56,13 @@ void AEnemySpawner::Tick(float DeltaTime)
 								while (SpawnedEnemy == nullptr)
 								{
 									FVector NewLocation = UKismetMathLibrary::RandomPointInBoundingBox(SpawnPoint->GetCenterOfMass(), SpawnPoint->GetScaledBoxExtent());
-									SpawnedEnemy = GetWorld()->SpawnActor<AEnemy>(SpawnInfo.EnemyClass, FTransform{ NewLocation });
+
+									SpawnedEnemy = Cast<AEnemy>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, SpawnInfo.EnemyClass, FTransform{ NewLocation }));
 									if (SpawnedEnemy != nullptr)
 									{
+										SpawnedEnemy->SetEnemyLevel(SpawnInfo.EnemyLevel);
 										SpawnedEnemy->KillEnemyEventDelegate.AddDynamic(this, &AEnemySpawner::OnEnemyDead);
+										UGameplayStatics::FinishSpawningActor(SpawnedEnemy, FTransform{ NewLocation });
 									}
 								}
 							}

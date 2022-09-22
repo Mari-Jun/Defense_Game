@@ -218,4 +218,5 @@ public:
 public:
 	EEnemyState GetEnemyState() const { return EnemyState; }
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
+	void SetEnemyLevel(int32 Level) { EnemyStatusData.Level = Level; }
 };
