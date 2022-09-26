@@ -6,6 +6,7 @@
 #include "Enemy.h"
 
 #include "Animation/BlendSpace1D.h"
+#include "Particles/ParticleSystemComponent.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -18,6 +19,10 @@ ACharacterCaster::ACharacterCaster()
 	AbilityQMagicShield = CreateDefaultSubobject<UStaticMeshComponent>("Ability Q Magic Shield");
 	AbilityQMagicShield->SetupAttachment(GetRootComponent());
 	AbilityQMagicShield->SetCollisionProfileName("NoCollision");
+
+	AbilityRMagicCylinder = CreateDefaultSubobject<UStaticMeshComponent>("Ability R Magic Cylinder");
+	AbilityRMagicCylinder->SetupAttachment(GetRootComponent());
+	AbilityRMagicCylinder->SetCollisionProfileName("NoCollision");
 
 	CharacterAnimationData.IdleAnimSequence = Cast<UAnimSequence>(StaticLoadObject(UAnimSequence::StaticClass(), nullptr,
 		TEXT("AnimSequence'/Game/_Game/Characters/Caster/Animations/Caster_Idle.Caster_Idle'")));
@@ -79,6 +84,10 @@ void ACharacterCaster::BeginPlay()
 	AbilityQMagicShield->SetVisibility(false);
 	AbilityQMagicShield->OnComponentBeginOverlap.AddDynamic(this, &ACharacterCaster::OnMagicShieldBeginOverlap);
 	AbilityQMagicShield->OnComponentEndOverlap.AddDynamic(this, &ACharacterCaster::OnMagicShieldEndOverlap);
+
+	AbilityRMagicCylinder->SetVisibility(false);
+	AbilityRMagicCylinder->OnComponentBeginOverlap.AddDynamic(this, &ACharacterCaster::OnAbilityRBeginOverlap);
+	AbilityRMagicCylinder->OnComponentEndOverlap.AddDynamic(this, &ACharacterCaster::OnAbilityREndOverlap);
 }
 
 void ACharacterCaster::AbilityR(int32 AbilityIndex)
@@ -163,6 +172,9 @@ void ACharacterCaster::AbilityEHit()
 
 void ACharacterCaster::AbilityRHit()
 {
+	GetWorldTimerManager().SetTimer(AbilityRDurationTimerHandle, this, &ACharacterCaster::FinishAbilityR, AbilityRDuration);
+	AbilityRMagicCylinder->SetCollisionProfileName("CharacterAttack");
+	AbilityRMagicCylinder->SetVisibility(true);
 }
 
 void ACharacterCaster::AbilityRMBHit()
@@ -212,5 +224,58 @@ void ACharacterCaster::AbilityQTickDamage(AEnemy* Enemy)
 	else
 	{
 		ApplyDamage(Enemy, CombatStatus.Attack * 0.15f);
+		if (AbilityQImpactEffect != nullptr)
+		{
+			UParticleSystemComponent* Particle = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AbilityQImpactEffect, FTransform{ Enemy->GetActorLocation() });
+			Particle->SetRelativeScale3D(FVector(3.0f));
+		}
+	}
+}
+
+void ACharacterCaster::FinishAbilityR()
+{
+	AbilityRMagicCylinder->SetCollisionProfileName("NoCollision");
+	AbilityRMagicCylinder->SetVisibility(false);
+	StopAnimMontage(CharacterAnimationData.AbilityRMontage);
+	AbilityROverlapActors.Reset();
+	AttackEnd();
+}
+
+void ACharacterCaster::OnAbilityRBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	AEnemy* Enemy = Cast<AEnemy>(OtherActor);
+	if (Enemy == nullptr) return;
+
+	if (AbilityROverlapActors.Contains(OtherActor))
+	{
+		GetWorldTimerManager().UnPauseTimer(AbilityROverlapActors[OtherActor]);
+	}
+	else
+	{
+		FTimerHandle& TimerHandle = AbilityROverlapActors.Add(OtherActor);
+		AbilityRTickDamage(Enemy);
+		FTimerDelegate AbilityRDamageTimerDelegate = FTimerDelegate::CreateUObject(this, &ACharacterCaster::AbilityRTickDamage, Enemy);
+		GetWorldTimerManager().SetTimer(TimerHandle, AbilityRDamageTimerDelegate, 0.5f, true);
+	}
+}
+
+void ACharacterCaster::OnAbilityREndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (AbilityROverlapActors.Contains(OtherActor))
+	{
+		GetWorldTimerManager().PauseTimer(AbilityROverlapActors[OtherActor]);
+	}
+}
+
+void ACharacterCaster::AbilityRTickDamage(AEnemy* Enemy)
+{
+	if (Enemy->GetEnemyState() == EEnemyState::EDeath)
+	{
+		GetWorldTimerManager().ClearTimer(AbilityROverlapActors[Enemy]);
+		AbilityROverlapActors.Remove(Enemy);
+	}
+	else
+	{
+		ApplyDamage(Enemy, CombatStatus.Attack * 1.0f);
 	}
 }
