@@ -4,11 +4,13 @@
 #include "CharacterCaster.h"
 #include "Projectile.h"
 #include "Enemy.h"
+#include "PenetraingProjectile.h"
 
 #include "Animation/BlendSpace1D.h"
 #include "Particles/ParticleSystemComponent.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ACharacterCaster::ACharacterCaster()
 {
@@ -137,8 +139,8 @@ void ACharacterCaster::AttackLMBHit()
 
 					FVector SpawnPoint = (AttackingHandValue > 0.0f) ? GetMesh()->GetBoneLocation("hand_l") : GetMesh()->GetBoneLocation("hand_r");
 
-					AProjectile* SpawnBall = AProjectile::SpawnProjectile(AttackMagicBall, { FRotator{}, SpawnPoint }, this, CombatStatus.Attack);
-					SpawnBall->ProjectileApplyDamageDelegate.AddDynamic(this, &ADefenseObject::ApplyPointDamage);
+					AProjectile* SpawnBall = AProjectile::SpawnProjectile(AttackMagicBall, { FRotator{}, SpawnPoint },
+						this, CombatStatus.Attack, GetDamageTypeClass());
 
 					const FVector Start{ CrosshairWorldPosition };
 					const FVector End{ Start + CrosshairWorldDirection * 50'000 };
@@ -152,7 +154,8 @@ void ACharacterCaster::AttackLMBHit()
 						ImpulseWorldDirection.Normalize();
 					}
 
-					SpawnBall->AddImpulse(ImpulseWorldDirection);
+					FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(SpawnPoint, SpawnPoint + ImpulseWorldDirection);
+					SpawnBall->SetActorRotation(NewRotation);
 				}
 			}
 		}
@@ -168,6 +171,20 @@ void ACharacterCaster::AbilityQHit()
 
 void ACharacterCaster::AbilityEHit()
 {
+	if (AbilityEActorClass != nullptr)
+	{
+		for (int i = 0; i < 3; ++i)
+		{
+			AProjectile* Projectile = AProjectile::SpawnProjectile(AbilityEActorClass, GetActorTransform(),
+				this, CombatStatus.Attack, GetDamageTypeClass());
+			if (Projectile != nullptr)
+			{
+				FQuat NewRot = FQuat{ UKismetMathLibrary::RotatorFromAxisAndAngle(FVector::ZAxisVector, -20.0f + i * 20.0f) };
+				Projectile->AddActorLocalRotation(NewRot);
+			}
+		}
+	
+	}
 }
 
 void ACharacterCaster::AbilityRHit()

@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FProjectileApplyDamageDelegate, AActor*, OtherActor, float, Damage, const FVector&, HitFromDirection, const FHitResult&, HitInfo);
+class ACharacter;
 
 UCLASS()
 class DEFENSEGAME_API AProjectile : public AActor
@@ -17,7 +17,8 @@ public:
 	// Sets default values for this actor's properties
 	AProjectile();
 
-	static AProjectile* SpawnProjectile(TSubclassOf<AProjectile> ActorClass, FTransform SpawnTransform, ACharacter* Character, float Damage);
+	static AProjectile* SpawnProjectile(TSubclassOf<AProjectile> ActorClass, FTransform SpawnTransform,
+		ACharacter* Character, float Damage, TSubclassOf<UDamageType> DamageType);
 
 protected:
 	// Called when the game starts or when spawned
@@ -31,15 +32,12 @@ private:
 	virtual void FinishLifeTime();
 
 protected:
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	virtual void OnOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult);
 
-public:
-	virtual void AddImpulse(FVector WorldDirection);
-
-private:
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* ProjectileMesh;
 
@@ -47,7 +45,7 @@ private:
 	float LifeTime = 5.0f;
 	FTimerHandle LifeTimerHandle;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	float ImpulseScale = 5000.f;
+	float MoveSpeed = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Particle", meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* SpawnParticle;
@@ -58,12 +56,14 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Particle", meta = (AllowPrivateAccess = "true"))
 	float ImpactParticleScale = 1.0f;
 
+	ACharacter* OwnerCharacter;
 	float AttackDamage = 0.f;
+	TSubclassOf<UDamageType> DamageType;
 
 public:
 	UStaticMeshComponent* GetProjectileMesh() const { return ProjectileMesh; }
+	void SetOwnerCharacter(ACharacter* OwnerChar) { OwnerCharacter = OwnerChar; }
+	void SetMoveSpeed(float Speed) { MoveSpeed = Speed; }
 	void SetAttackDamage(float Damage) { AttackDamage = Damage; }
-
-public:
-	FProjectileApplyDamageDelegate ProjectileApplyDamageDelegate;
+	void SetDamageType(TSubclassOf<UDamageType> Type) { DamageType = Type; }
 };

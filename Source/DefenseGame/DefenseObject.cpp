@@ -27,6 +27,8 @@ void ADefenseObject::BeginPlay()
 
 float ADefenseObject::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (CombatStatus.CurrentHP <= 0.0f) return 0.f;
+
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	if (Controller != nullptr)

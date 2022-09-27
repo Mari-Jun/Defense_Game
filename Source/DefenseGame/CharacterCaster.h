@@ -9,6 +9,7 @@
 class AProjectile;
 class ADefenseObject;
 class AEnemy;
+class APenetraingProjectile;
 
 /**
  * 
@@ -70,6 +71,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Particle", meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* AbilityQImpactEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<APenetraingProjectile> AbilityEActorClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* AbilityRMagicCylinder;

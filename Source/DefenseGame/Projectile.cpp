@@ -24,12 +24,15 @@ AProjectile::AProjectile()
 	ProjectileMesh->SetMassOverrideInKg(NAME_None, 1.0f, true);
 }
 
-AProjectile* AProjectile::SpawnProjectile(TSubclassOf<AProjectile> ActorClass, FTransform SpawnTransform, ACharacter* Character, float Damage)
+AProjectile* AProjectile::SpawnProjectile(TSubclassOf<AProjectile> ActorClass, FTransform SpawnTransform,
+	ACharacter* Character, float Damage, TSubclassOf<UDamageType> DamageType)
 {
 	AProjectile* Projectile = Cast<AProjectile>(UGameplayStatics::BeginDeferredActorSpawnFromClass(Character, ActorClass, SpawnTransform));
 	if (Projectile != nullptr)
 	{
 		Projectile->SetAttackDamage(Damage);
+		Projectile->SetOwnerCharacter(Character);
+		Projectile->SetDamageType(DamageType);
 		UGameplayStatics::FinishSpawningActor(Projectile, SpawnTransform);
 	}
 	return Projectile;
@@ -56,6 +59,9 @@ void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	FVector Location = GetActorLocation();
+	Location += GetActorForwardVector() * MoveSpeed * DeltaTime;
+	SetActorLocation(Location);
 }
 
 void AProjectile::FinishLifeTime()
@@ -67,7 +73,8 @@ void AProjectile::OnOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActo
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	ProjectileApplyDamageDelegate.Broadcast(OtherActor, AttackDamage, ProjectileMesh->GetComponentVelocity().GetSafeNormal(), SweepResult);
+	UGameplayStatics::ApplyPointDamage(OtherActor, AttackDamage, ProjectileMesh->GetComponentVelocity().GetSafeNormal(),
+		SweepResult, OwnerCharacter->GetController(), this, DamageType);
 
 	if (ImpactParticle != nullptr)
 	{
@@ -77,9 +84,3 @@ void AProjectile::OnOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActo
 
 	GetWorld()->DestroyActor(this);
 }
-
-void AProjectile::AddImpulse(FVector WorldDirection)
-{
-	ProjectileMesh->AddImpulse(WorldDirection * ImpulseScale);
-}
-
