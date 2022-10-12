@@ -15,7 +15,7 @@ UCLASS()
 class DEFENSEGAME_API AEnemyFly : public AEnemy
 {
 	GENERATED_BODY()
-	
+
 public:
 	AEnemyFly();
 
@@ -23,9 +23,11 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	virtual void AttackHitStart() override;
 	virtual void KillObject() override;
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AProjectile> AttackProjectile;
+
 };

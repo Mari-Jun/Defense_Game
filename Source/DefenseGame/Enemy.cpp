@@ -331,7 +331,6 @@ void AEnemy::AddDamageNumber(float HPDamage, float ShieldDamage, bool IsCritical
 			DamageWidget->SetDamageText(HPDamage, ShieldDamage, IsCritical);
 			DamageWidget->SetTextAlpha(ShowDamageWidgetTime);
 
-			float CapsuleHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 			FVector Location = GetActorLocation();
 			DamageNumbers.Add(DamageWidget, Location);
 			DamageWidget->AddToViewport();
