@@ -40,7 +40,7 @@ AEnemy::AEnemy()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	EnemyStatusWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("status widget");
-	EnemyStatusWidgetComponent->SetupAttachment(GetRootComponent());
+	EnemyStatusWidgetComponent->SetupAttachment(GetMesh());
 	EnemyStatusWidgetComponent->SetDrawSize({ 200.f, 35.f });
 	HideStatusWidget();
 
@@ -50,7 +50,7 @@ AEnemy::AEnemy()
 	AttackRangeSphereComponent->SetCollisionProfileName("EnemyAttack");
 
 	DamageWidgetSpawnPoint = CreateDefaultSubobject<USceneComponent>("DamageWidgetSpawnPoint");
-	DamageWidgetSpawnPoint->SetupAttachment(GetRootComponent());
+	DamageWidgetSpawnPoint->SetupAttachment(GetMesh());
 
 	DropCoinEffect = Cast<UNiagaraSystem>(StaticLoadObject(UNiagaraSystem::StaticClass(), nullptr,
 		TEXT("NiagaraSystem'/Game/sA_PickupSet_1/Fx/NiagaraSystems/NS_CoinBurst.NS_CoinBurst'")));
@@ -332,7 +332,7 @@ void AEnemy::AddDamageNumber(float HPDamage, float ShieldDamage, bool IsCritical
 			DamageWidget->SetTextAlpha(ShowDamageWidgetTime);
 
 			float CapsuleHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-			FVector Location = GetActorLocation() + FVector(0.0f, 100.0, CapsuleHalfHeight);
+			FVector Location = GetActorLocation();
 			DamageNumbers.Add(DamageWidget, Location);
 			DamageWidget->AddToViewport();
 			DamageWidget->SetVisibility(ESlateVisibility::Hidden);

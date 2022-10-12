@@ -98,7 +98,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void FinishDeath();
 
-private:
+protected:
 	virtual void KillObject() override;
 	virtual void DestoryEnemy();
 	virtual void DropItem();
