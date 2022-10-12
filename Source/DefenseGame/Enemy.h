@@ -98,6 +98,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void FinishDeath();
 
+	virtual void GetNewTarget();
+	virtual void LoseTarget();
+
 protected:
 	virtual void KillObject() override;
 	virtual void DestoryEnemy();
@@ -184,6 +187,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	USphereComponent* AttackRangeSphereComponent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float AttackRange = 100.0f;
 
 	/** 0% ~ 100%*/
 	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 100, UIMin = 0, UIMax = 100))

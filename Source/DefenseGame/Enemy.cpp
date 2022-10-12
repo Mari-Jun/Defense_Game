@@ -163,6 +163,19 @@ void AEnemy::FinishDeath()
 	GetWorldTimerManager().SetTimer(DestoryActorTimerHandle, this, &AEnemy::DestoryEnemy, DeathTime, false);
 }
 
+void AEnemy::GetNewTarget()
+{
+	//공격 범위 충돌 O
+	AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void AEnemy::LoseTarget()
+{
+	//공격 범위 충돌 X
+	AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	InAttackRangeActors.Reset();
+}
+
 void AEnemy::KillObject()
 {
 	EnemyController->KilledControlledPawn();
@@ -293,12 +306,15 @@ void AEnemy::PlayHitReaction(float HitYaw)
 
 bool AEnemy::CheckAttack()
 {
+	if (EnemyController == nullptr) return false;
+	if (EnemyController->HasTarget() == false) return false;
+
 	if (InAttackRangeActors.IsEmpty()) return false;
 	if (EnemyState != EEnemyState::ENone) return false;
-	if (EnemyController == nullptr) return false;
 
 	ABaseCharacter* TargetCharacter = EnemyController->GetTargetCharacter();
 	ADefenseBase* TargetBase = EnemyController->GetTargetDefenseBase();
+
 	if (InAttackRangeActors.Find(TargetCharacter) || (InAttackRangeActors.Find(TargetBase) && TargetCharacter == nullptr))
 	{
 		return true;

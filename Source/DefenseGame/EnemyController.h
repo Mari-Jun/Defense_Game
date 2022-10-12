@@ -51,6 +51,9 @@ protected:
 	void LoseSense();
 	
 	void SetTargetCharacter(ABaseCharacter* Target);
+	void SetTargetDefenseBase(ADefenseBase* Target);
+	void GetNewTarget();
+	void LoseTarget();
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))

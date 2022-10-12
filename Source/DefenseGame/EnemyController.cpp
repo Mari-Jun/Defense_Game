@@ -49,7 +49,6 @@ void AEnemyController::OnPossess(APawn* InPawn)
 	{
 		FindNearestDefenseBaseLocation();
 		BlackboardComponent->SetValueAsBool("LoseSense", true);
-		BlackboardComponent->SetValueAsVector("BaseTargetLocation", TargetDefenseBase->GetActorLocation());
 	}
 
 	PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
@@ -92,7 +91,7 @@ void AEnemyController::FindNearestDefenseBaseLocation()
 		}
 	}
 
-	TargetDefenseBase = Cast<ADefenseBase>(MinDefenseBase);
+	SetTargetDefenseBase(Cast<ADefenseBase>(MinDefenseBase));
 }
 
 void AEnemyController::Tick(float DeltaTime)
@@ -105,7 +104,6 @@ void AEnemyController::Tick(float DeltaTime)
 		SetTargetCharacter(nullptr);
 
 		FindNearestDefenseBaseLocation();
-		BlackboardComponent->SetValueAsVector("BaseTargetLocation", TargetDefenseBase->GetActorLocation());
 		BlackboardComponent->SetValueAsBool("LoseSense", true);
 	}
 }
@@ -239,7 +237,6 @@ void AEnemyController::LoseSense()
 	if (!SuccessDamageSense && !SuccessSightSense && !SuccessTeamSense)
 	{
 		FindNearestDefenseBaseLocation();
-		BlackboardComponent->SetValueAsVector("BaseTargetLocation", TargetDefenseBase->GetActorLocation());
 		BlackboardComponent->SetValueAsBool("LoseSense", true);
 	}
 }
@@ -249,6 +246,28 @@ void AEnemyController::SetTargetCharacter(ABaseCharacter* Target)
 	TargetCharacter = Target;
 	BlackboardComponent->SetValueAsObject("TargetCharacter", TargetCharacter);
 	SetFocus(TargetCharacter);
+	if (TargetCharacter != nullptr) GetNewTarget();
+	else if (TargetCharacter == nullptr && TargetDefenseBase == nullptr) LoseTarget();
+}
+
+void AEnemyController::SetTargetDefenseBase(ADefenseBase* Target)
+{
+	TargetDefenseBase = Target;
+	BlackboardComponent->SetValueAsVector("BaseTargetLocation", TargetDefenseBase->GetActorLocation());
+	if (TargetDefenseBase != nullptr) GetNewTarget();
+	else if (TargetCharacter == nullptr && TargetDefenseBase == nullptr) LoseTarget();
+}
+
+void AEnemyController::GetNewTarget()
+{
+	if (Enemy == nullptr) return;
+	Enemy->GetNewTarget();
+}
+
+void AEnemyController::LoseTarget()
+{
+	if (Enemy == nullptr) return;
+	Enemy->LoseTarget();
 }
 
 ETeamAttitude::Type AEnemyController::GetTeamAttitudeTowards(const AActor& Other) const
