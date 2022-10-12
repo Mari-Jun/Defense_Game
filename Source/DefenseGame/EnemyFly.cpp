@@ -5,6 +5,7 @@
 #include "Projectile.h"
 #include "EnemyController.h"
 #include "BaseCharacter.h"
+#include "DefenseBase.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -31,12 +32,12 @@ void AEnemyFly::AttackHitStart()
 	//BiteAttackSphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	if (AttackProjectile != nullptr)
 	{
-		ABaseCharacter* Target = EnemyController->GetTargetCharacter();
-		if (Target != nullptr)
+		if (EnemyController->HasTarget())
 		{
 			FVector Location = GetMesh()->GetBoneLocation("jaw");
-			FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(Location, Target->GetActorLocation());
+			FVector TargetLocation = EnemyController->GetAttackTargetLocation();
 
+			FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(Location, TargetLocation);
 			AProjectile* Spit = AProjectile::SpawnProjectile(AttackProjectile, FTransform{ Rotation, Location },
 				this, CombatStatus.Attack, GetDamageTypeClass());
 			Spit->SetActorScale3D(FVector(2.0f));

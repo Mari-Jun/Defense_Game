@@ -49,6 +49,8 @@ protected:
 	void TriggerDamageEvent(float DamageAmount, AActor* DamageCauser);
 	void TriggerTeamEvent(AActor* Actor);
 	void LoseSense();
+	
+	void SetTargetCharacter(ABaseCharacter* Target);
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
@@ -92,6 +94,8 @@ protected:
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 
 public:
+	bool HasTarget() const { return TargetCharacter != nullptr || TargetDefenseBase != nullptr; }
+	FVector GetAttackTargetLocation() const;
 	ADefenseBase* GetTargetDefenseBase() const { return TargetDefenseBase; }
 	ABaseCharacter* GetTargetCharacter() const { return TargetCharacter; }
 	AActor* GetLastDamageCauser() const { return LastDamageCauser; }

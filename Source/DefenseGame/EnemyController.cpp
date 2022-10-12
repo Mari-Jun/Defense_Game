@@ -102,9 +102,7 @@ void AEnemyController::Tick(float DeltaTime)
 
 	if (TargetCharacter != nullptr && TargetCharacter->GetCharacterState() == ECharacterState::EDeath)
 	{
-		TargetCharacter = nullptr;
-		BlackboardComponent->SetValueAsObject("TargetCharacter", TargetCharacter);
-		SetFocus(nullptr);
+		SetTargetCharacter(nullptr);
 
 		FindNearestDefenseBaseLocation();
 		BlackboardComponent->SetValueAsVector("BaseTargetLocation", TargetDefenseBase->GetActorLocation());
@@ -186,14 +184,7 @@ void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 
 		if (TargetCharacter == nullptr)
 		{
-			/*TArray<AActor*> Threats;
-			PerceptionComponent->GetHostileActors(Threats);
-			if (Threats.Num() <= 0) return;
-			const int32 i = Threats.Find(Actor);
-			if (i < 0) return;*/
-
-			TargetCharacter = BaseCharacter;
-			SetFocus(BaseCharacter);
+			SetTargetCharacter(BaseCharacter);
 		}
 	}
 	else
@@ -218,11 +209,10 @@ void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 				TargetLocation = TargetCharacter->GetActorLocation();
 			}
 			GetWorldTimerManager().SetTimer(LoseSenseTimerHandle, this, &AEnemyController::LoseSense, LoseSenseTime, false);
-			TargetCharacter = nullptr;
+			SetTargetCharacter(nullptr);
 			SetFocus(nullptr);
 		}
 	}
-	BlackboardComponent->SetValueAsObject("TargetCharacter", TargetCharacter);
 }
 
 void AEnemyController::TriggerDamageEvent(float DamageAmount, AActor* DamageCauser)
@@ -252,6 +242,13 @@ void AEnemyController::LoseSense()
 		BlackboardComponent->SetValueAsVector("BaseTargetLocation", TargetDefenseBase->GetActorLocation());
 		BlackboardComponent->SetValueAsBool("LoseSense", true);
 	}
+}
+
+void AEnemyController::SetTargetCharacter(ABaseCharacter* Target)
+{
+	TargetCharacter = Target;
+	BlackboardComponent->SetValueAsObject("TargetCharacter", TargetCharacter);
+	SetFocus(TargetCharacter);
 }
 
 ETeamAttitude::Type AEnemyController::GetTeamAttitudeTowards(const AActor& Other) const
@@ -290,4 +287,11 @@ ETeamAttitude::Type AEnemyController::GetTeamAttitudeTowards(const AActor& Other
 	{
 		return ETeamAttitude::Hostile;
 	}
+}
+
+FVector AEnemyController::GetAttackTargetLocation() const
+{
+	if (TargetCharacter != nullptr) return TargetCharacter->GetActorLocation();
+	if (TargetDefenseBase != nullptr) return TargetDefenseBase->GetActorLocation();
+	return Enemy->GetActorLocation();
 }
