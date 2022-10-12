@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
+class UShapeComponent;
 class ACharacter;
 
 UCLASS()
@@ -38,9 +39,6 @@ protected:
 		bool bFromSweep, const FHitResult& SweepResult);
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* ProjectileMesh;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float LifeTime = 5.0f;
 	FTimerHandle LifeTimerHandle;
@@ -61,7 +59,6 @@ protected:
 	TSubclassOf<UDamageType> DamageType;
 
 public:
-	UStaticMeshComponent* GetProjectileMesh() const { return ProjectileMesh; }
 	void SetOwnerCharacter(ACharacter* OwnerChar) { OwnerCharacter = OwnerChar; }
 	void SetMoveSpeed(float Speed) { MoveSpeed = Speed; }
 	void SetAttackDamage(float Damage) { AttackDamage = Damage; }

@@ -3,6 +3,7 @@
 
 #include "Projectile.h"
 #include "GameFramework/Character.h"
+#include "Components/ShapeComponent.h"
 
 #include "Particles/ParticleSystemComponent.h"
 
@@ -14,14 +15,6 @@ AProjectile::AProjectile()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>("projectile mesh");
-	SetRootComponent(ProjectileMesh);
-
-	ProjectileMesh->SetSimulatePhysics(true);
-	ProjectileMesh->SetEnableGravity(false);
-	ProjectileMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-
-	ProjectileMesh->SetMassOverrideInKg(NAME_None, 1.0f, true);
 }
 
 AProjectile* AProjectile::SpawnProjectile(TSubclassOf<AProjectile> ActorClass, FTransform SpawnTransform,
@@ -50,8 +43,6 @@ void AProjectile::BeginPlay()
 		UParticleSystemComponent* SpawnedSpawnParticle = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SpawnParticle, GetActorTransform());
 		SpawnedSpawnParticle->SetRelativeScale3D(FVector{ SpawnParticleScale });
 	}
-
-	ProjectileMesh->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnOverlapEvent);
 }
 
 // Called every frame
@@ -73,7 +64,7 @@ void AProjectile::OnOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActo
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	UGameplayStatics::ApplyPointDamage(OtherActor, AttackDamage, ProjectileMesh->GetComponentVelocity().GetSafeNormal(),
+	UGameplayStatics::ApplyPointDamage(OtherActor, AttackDamage, GetActorForwardVector(),
 		SweepResult, OwnerCharacter->GetController(), this, DamageType);
 
 	if (ImpactParticle != nullptr)
