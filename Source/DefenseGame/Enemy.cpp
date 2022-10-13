@@ -111,6 +111,13 @@ void AEnemy::BeginPlay()
 		AttackRangeSphereComponent->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnAttackRangeEndOverlap);
 	}
 
+	for (const auto& [Name, Data] : AbilityMap)
+	{
+		Data.AbilityEnableRange->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Data.AbilityEnableRange->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnAbilityRangeBeginOverlap);
+		Data.AbilityEnableRange->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnAbilityRangeEndOverlap);
+	}
+
 	GetCharacterMovement()->MaxWalkSpeed = EnemyStatusData.DefaultSpeed;
 }
 
@@ -167,17 +174,14 @@ void AEnemy::FinishDeath()
 
 void AEnemy::GetNewTarget()
 {
-	//공격 범위 충돌 O
-	AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	AttackRangeSphereComponent->SetGenerateOverlapEvents(true);
+	SetAttackCollision(true);
+	SetAbilityCollision(true);
 }
 
 void AEnemy::LoseTarget()
 {
-	//공격 범위 충돌 X
-	AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	AttackRangeSphereComponent->SetGenerateOverlapEvents(false);
-	InAttackRangeActors.Reset();
+	SetAttackCollision(false);
+	SetAbilityCollision(false);
 }
 
 void AEnemy::KillObject()
@@ -338,6 +342,91 @@ void AEnemy::Attack()
 	}
 }
 
+void AEnemy::SetAttackCollision(bool bEnable)
+{
+	if (bEnable)
+	{
+		AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		AttackRangeSphereComponent->SetGenerateOverlapEvents(true);
+	}
+	else
+	{
+		AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		AttackRangeSphereComponent->SetGenerateOverlapEvents(false);
+		InAttackRangeActors.Reset();
+	}
+}
+
+void AEnemy::SetAbilityCollision(bool bEnable)
+{
+	for (auto& [Name, Data] : AbilityMap)
+	{
+		if (Data.AbilityEnableRange != nullptr)
+		{
+			if (bEnable)
+			{
+				Data.AbilityEnableRange->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+				Data.AbilityEnableRange->SetGenerateOverlapEvents(true);
+			}
+			else
+			{
+				Data.AbilityEnableRange->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				Data.AbilityEnableRange->SetGenerateOverlapEvents(false);
+			}
+		}
+	}
+}
+
+void AEnemy::OnAttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (EnemyController != nullptr)
+	{
+		InAttackRangeActors.Add(OtherActor);
+	}
+}
+
+void AEnemy::OnAttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (EnemyController != nullptr)
+	{
+		InAttackRangeActors.Remove(OtherActor);
+	}
+}
+
+void AEnemy::OnAbilityRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	for (auto& [Name, Data] : AbilityMap)
+	{
+		if (Data.AbilityEnableRange != nullptr && Data.AbilityEnableRange == OverlappedComponent)
+		{
+			Data.CanCastAbility = true;
+			break;
+		}
+	}
+}
+
+void AEnemy::OnAbilityRangeEndOverlap(UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	for (auto& [Name, Data] : AbilityMap)
+	{
+		if (Data.AbilityEnableRange != nullptr && Data.AbilityEnableRange == OverlappedComponent)
+		{
+			Data.CanCastAbility = false;
+			break;
+		}
+	}
+}
+
+void AEnemy::DisableCollision()
+{
+	Super::DisableCollision();
+	AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
 void AEnemy::AddDamageNumber(float HPDamage, float ShieldDamage, bool IsCritical)
 {
 	if (DamageNumberWidgetClass != nullptr)
@@ -390,30 +479,6 @@ void AEnemy::RenderHitNumbers()
 			DamageNumberWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
-}
-
-void AEnemy::OnAttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (EnemyController != nullptr)
-	{
-		InAttackRangeActors.Add(OtherActor);
-	}
-}
-
-void AEnemy::OnAttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (EnemyController != nullptr)
-	{
-		InAttackRangeActors.Remove(OtherActor);
-	}
-}
-
-void AEnemy::DisableCollision()
-{
-	Super::DisableCollision();
-	AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AEnemy::AttackEnd()

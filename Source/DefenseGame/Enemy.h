@@ -17,6 +17,7 @@ class UBlendSpace1D;
 class UWidgetComponent;
 class UBehaviorTree;
 class USphereComponent;
+class UShapeComponent;
 
 class UNiagaraSystem;
 
@@ -69,6 +70,21 @@ struct FEnemyStatusTable : public FTableRowBase
 	int32 DropCoin = 1;
 };
 
+USTRUCT(BlueprintType)
+struct FEnemyAbilityData
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float AbilityTime = 10.0f;
+	FTimerHandle AbilityTimerHandle;
+
+	bool CanCastAbility = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UShapeComponent* AbilityEnableRange;
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FKillEnemyEventDelegate);
 
 UCLASS()
@@ -113,21 +129,35 @@ protected:
 	virtual void HideStatusWidget();
 	virtual void PlayHitReaction(float HitYaw) override;
 
+	//Attack & Ability
 	virtual bool CheckAttack();
 	virtual void Attack();
 
+	virtual void SetAttackCollision(bool bEnable);
+	virtual void SetAbilityCollision(bool bEnable);
+
+	UFUNCTION()
+	virtual void OnAttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	virtual void OnAttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UFUNCTION()
+	virtual void OnAbilityRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	virtual void OnAbilityRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	//DamageUI
 	UFUNCTION()
 	void AddDamageNumber(float HPDamage, float ShieldDamage, bool IsCritical);
 	UFUNCTION()
 	void DestoryDamageNumber(UEnemyDamageWidget* DamageWidget);
 	void RenderHitNumbers();
 
-	UFUNCTION()
-	virtual void OnAttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-	virtual void OnAttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 
 	virtual void DisableCollision() override;
 
@@ -188,6 +218,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	USphereComponent* AttackRangeSphereComponent;
 
+	//Item
 	/** 0% ~ 100%*/
 	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 100, UIMin = 0, UIMax = 100))
 	int32 ItemDropProbability = 50;
@@ -198,6 +229,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
 	FVector DropCoinEffectScale = FVector(1.f);
 
+	//Ability
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
+	TMap<FString, FEnemyAbilityData> AbilityMap;
+
+
+
+	//Animation
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	UAnimSequence* IdleAnimSequence;
 
