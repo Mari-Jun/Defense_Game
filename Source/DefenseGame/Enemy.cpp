@@ -40,7 +40,7 @@ AEnemy::AEnemy()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	EnemyStatusWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("status widget");
-	EnemyStatusWidgetComponent->SetupAttachment(GetMesh());
+	EnemyStatusWidgetComponent->SetupAttachment(GetRootComponent());
 	EnemyStatusWidgetComponent->SetDrawSize({ 200.f, 35.f });
 	HideStatusWidget();
 
@@ -51,7 +51,7 @@ AEnemy::AEnemy()
 	AttackRangeSphereComponent->SetGenerateOverlapEvents(false);
 
 	DamageWidgetSpawnPoint = CreateDefaultSubobject<USceneComponent>("DamageWidgetSpawnPoint");
-	DamageWidgetSpawnPoint->SetupAttachment(GetMesh());
+	DamageWidgetSpawnPoint->SetupAttachment(GetRootComponent());
 
 	DropCoinEffect = Cast<UNiagaraSystem>(StaticLoadObject(UNiagaraSystem::StaticClass(), nullptr,
 		TEXT("NiagaraSystem'/Game/sA_PickupSet_1/Fx/NiagaraSystems/NS_CoinBurst.NS_CoinBurst'")));

@@ -187,8 +187,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	USphereComponent* AttackRangeSphereComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	float AttackRange = 100.0f;
 
 	/** 0% ~ 100%*/
 	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 100, UIMin = 0, UIMax = 100))
