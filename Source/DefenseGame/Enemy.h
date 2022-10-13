@@ -133,15 +133,19 @@ protected:
 	virtual bool CheckAttack();
 	virtual void Attack();
 
-	virtual void SetAttackCollision(bool bEnable);
+	template <class Shape>
+	void AddNewAbility(FString AbilityName, float AbilityTime, int32 Order)
+	{
+		AbilityMap.Add(AbilityName);
+		AbilityOrder.Add(AbilityName, Order);
+		AbilityMap[AbilityName].AbilityTime = AbilityTime;
+		FString RangeName = AbilityName + "Range";
+		AbilityMap[AbilityName].AbilityEnableRange = CreateDefaultSubobject<Shape>(FName(*RangeName));
+		AbilityMap[AbilityName].AbilityEnableRange->SetupAttachment(GetRootComponent());
+		AbilityMap[AbilityName].AbilityEnableRange->SetCollisionProfileName("EnemyAttack");
+		AddInstanceComponent(AbilityMap[AbilityName].AbilityEnableRange);
+	}
 	virtual void SetAbilityCollision(bool bEnable);
-
-	UFUNCTION()
-	virtual void OnAttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-	virtual void OnAttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION()
 	virtual void OnAbilityRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -191,8 +195,6 @@ protected:
 	UDataTable* EnemyStatusTable;
 	int32 DropCoin = 0;
 
-	TSet<AActor*> InAttackRangeActors;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* EnemyStatusWidgetComponent;
 
@@ -202,6 +204,7 @@ protected:
 	float ShowStatusWidgetTime = 5.0f;
 	FTimerHandle ShowStatusWidgetTimerHandle;
 
+	//Damage Widget
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* DamageWidgetSpawnPoint;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
@@ -214,9 +217,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float DeathTime = 3.0f;
 	FTimerHandle DestoryActorTimerHandle;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	USphereComponent* AttackRangeSphereComponent;
 
 	//Item
 	/** 0% ~ 100%*/
@@ -232,7 +232,8 @@ protected:
 	//Ability
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
 	TMap<FString, FEnemyAbilityData> AbilityMap;
-
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
+	TMap<FString, int32> AbilityOrder;
 
 
 	//Animation

@@ -18,12 +18,7 @@ AEnemyWhiteWarrior::AEnemyWhiteWarrior()
 	AttackBoxComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "AttackSocket");
 	AttackBoxComponent->SetCollisionProfileName("EnemyAttack");
 
-	AbilityMap.Add("Strike");
-	AbilityMap["Strike"].AbilityTime = 10.0f;
-	AbilityMap["Strike"].AbilityEnableRange = CreateDefaultSubobject<UBoxComponent>("StrikeAbilityRange");
-	AbilityMap["Strike"].AbilityEnableRange->SetupAttachment(GetRootComponent());
-	AbilityMap["Strike"].AbilityEnableRange->SetCollisionProfileName("EnemyAttack");
-	AddInstanceComponent(AbilityMap["Strike"].AbilityEnableRange);
+	AddNewAbility<UBoxComponent>("Strike", 10.0f, 100);
 }
 
 void AEnemyWhiteWarrior::BeginPlay()

@@ -39,16 +39,12 @@ AEnemy::AEnemy()
 	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
+	AddNewAbility<USphereComponent>("DefaultAttack", 2.0f, 100'000);
+	
 	EnemyStatusWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("status widget");
 	EnemyStatusWidgetComponent->SetupAttachment(GetRootComponent());
 	EnemyStatusWidgetComponent->SetDrawSize({ 200.f, 35.f });
 	HideStatusWidget();
-
-	AttackRangeSphereComponent = CreateDefaultSubobject<USphereComponent>("AttackRangeSphere");
-	AttackRangeSphereComponent->SetupAttachment(GetRootComponent());
-	AttackRangeSphereComponent->SetSphereRadius(150.f);
-	AttackRangeSphereComponent->SetCollisionProfileName("EnemyAttack");
-	AttackRangeSphereComponent->SetGenerateOverlapEvents(false);
 
 	DamageWidgetSpawnPoint = CreateDefaultSubobject<USceneComponent>("DamageWidgetSpawnPoint");
 	DamageWidgetSpawnPoint->SetupAttachment(GetRootComponent());
@@ -104,19 +100,15 @@ void AEnemy::BeginPlay()
 		GetWorld()->DestroyActor(this);
 	}
 
-	if (AttackRangeSphereComponent != nullptr)
-	{
-		AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		AttackRangeSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnAttackRangeBeginOverlap);
-		AttackRangeSphereComponent->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnAttackRangeEndOverlap);
-	}
-
+	//Initialize AbilityMap
 	for (const auto& [Name, Data] : AbilityMap)
 	{
-		Data.AbilityEnableRange->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		Data.AbilityEnableRange->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnAbilityRangeBeginOverlap);
 		Data.AbilityEnableRange->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnAbilityRangeEndOverlap);
 	}
+	SetAbilityCollision(false);
+	AbilityOrder.ValueSort([](int32 A, int32 B) { return A < B; });
+
 
 	GetCharacterMovement()->MaxWalkSpeed = EnemyStatusData.DefaultSpeed;
 }
@@ -141,10 +133,7 @@ void AEnemy::Tick(float DeltaTime)
 		EnemyStatusWidgetComponent->SetWorldRotation({ 0.0f, NewRotation.Yaw, 0.0f });
 	}
 
-	if (CheckAttack())
-	{
-		Attack();
-	}
+	Attack();
 
 	RenderHitNumbers();
 }
@@ -174,13 +163,11 @@ void AEnemy::FinishDeath()
 
 void AEnemy::GetNewTarget()
 {
-	SetAttackCollision(true);
 	SetAbilityCollision(true);
 }
 
 void AEnemy::LoseTarget()
 {
-	SetAttackCollision(false);
 	SetAbilityCollision(false);
 }
 
@@ -316,44 +303,27 @@ bool AEnemy::CheckAttack()
 {
 	if (EnemyController == nullptr) return false;
 	if (EnemyController->HasTarget() == false) return false;
-
-	if (InAttackRangeActors.IsEmpty()) return false;
 	if (EnemyState != EEnemyState::ENone) return false;
 
-	ABaseCharacter* TargetCharacter = EnemyController->GetTargetCharacter();
-	ADefenseBase* TargetBase = EnemyController->GetTargetDefenseBase();
-
-	if (InAttackRangeActors.Find(TargetCharacter) || (InAttackRangeActors.Find(TargetBase) && TargetCharacter == nullptr))
-	{
-		return true;
-	}
-
-	return false;
+	return true;
 }
 
 void AEnemy::Attack()
 {
-	if (AttackAnimMontange.IsEmpty() == false)
-	{
-		int32 index = FMath::RandRange(0, AttackAnimMontange.Num() - 1);
-		const auto& attack_montage = AttackAnimMontange[index];
-		PlayAnimMontage(attack_montage);
-		ChangeEnemyState(EEnemyState::EAttack);
-	}
-}
+	if (CheckAttack() == false) return;
 
-void AEnemy::SetAttackCollision(bool bEnable)
-{
-	if (bEnable)
+	ABaseCharacter* TargetCharacter = EnemyController->GetTargetCharacter();
+	ADefenseBase* TargetBase = EnemyController->GetTargetDefenseBase();
+
+	if (AbilityMap["DefaultAttack"].CanCastAbility)
 	{
-		AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		AttackRangeSphereComponent->SetGenerateOverlapEvents(true);
-	}
-	else
-	{
-		AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		AttackRangeSphereComponent->SetGenerateOverlapEvents(false);
-		InAttackRangeActors.Reset();
+		if (AttackAnimMontange.IsEmpty() == false)
+		{
+			int32 index = FMath::RandRange(0, AttackAnimMontange.Num() - 1);
+			const auto& attack_montage = AttackAnimMontange[index];
+			PlayAnimMontage(attack_montage);
+			ChangeEnemyState(EEnemyState::EAttack);
+		}
 	}
 }
 
@@ -374,24 +344,6 @@ void AEnemy::SetAbilityCollision(bool bEnable)
 				Data.AbilityEnableRange->SetGenerateOverlapEvents(false);
 			}
 		}
-	}
-}
-
-void AEnemy::OnAttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (EnemyController != nullptr)
-	{
-		InAttackRangeActors.Add(OtherActor);
-	}
-}
-
-void AEnemy::OnAttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (EnemyController != nullptr)
-	{
-		InAttackRangeActors.Remove(OtherActor);
 	}
 }
 
@@ -424,7 +376,7 @@ void AEnemy::OnAbilityRangeEndOverlap(UPrimitiveComponent* OverlappedComponent,
 void AEnemy::DisableCollision()
 {
 	Super::DisableCollision();
-	AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SetAbilityCollision(false);
 }
 
 void AEnemy::AddDamageNumber(float HPDamage, float ShieldDamage, bool IsCritical)
