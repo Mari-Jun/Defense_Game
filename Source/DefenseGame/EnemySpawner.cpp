@@ -2,7 +2,7 @@
 
 
 #include "EnemySpawner.h"
-
+#include "WaveManager.h"
 #include "Enemy.h"
 #include "EnemyController.h"
 
@@ -57,12 +57,13 @@ void AEnemySpawner::Tick(float DeltaTime)
 								{
 									FVector NewLocation = UKismetMathLibrary::RandomPointInBoundingBox(SpawnPoint->GetCenterOfMass(), SpawnPoint->GetScaledBoxExtent());
 
-									SpawnedEnemy = Cast<AEnemy>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, SpawnInfo.EnemyClass, FTransform{ NewLocation }));
+									SpawnedEnemy = Cast<AEnemy>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, SpawnInfo.EnemyClass, FTransform{ NewLocation },
+										ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn));
 									if (SpawnedEnemy != nullptr)
 									{
 										SpawnedEnemy->SetEnemyLevel(SpawnInfo.EnemyLevel);
 										SpawnedEnemy->KillEnemyEventDelegate.AddDynamic(this, &AEnemySpawner::OnEnemyDead);
-										UGameplayStatics::FinishSpawningActor(SpawnedEnemy, FTransform{ NewLocation });
+										SpawnedEnemy = Cast<AEnemy>(UGameplayStatics::FinishSpawningActor(SpawnedEnemy, FTransform{ NewLocation }));
 									}
 								}
 							}
@@ -84,13 +85,13 @@ void AEnemySpawner::SpawnEnemys(int WaveLevel)
 		PreviousTime = -1;
 		GetWorldTimerManager().SetTimer(SpawnTimerHandle, 31.0f, false);
 
-		if (CurrentWaveSpawnDataRow != nullptr)
+		if (CurrentWaveSpawnDataRow != nullptr && WaveManager != nullptr)
 		{
 			for (const auto& [Time, SpawnTimeInfo] : CurrentWaveSpawnDataRow->SpawnEnemys)
 			{
 				for (const auto& SpawnInfo : SpawnTimeInfo.SpawnEnemys)
 				{
-					WaveNumOfEnemy += SpawnInfo.NumOfEnemys;
+					WaveManager->IncreaseEnemyCount(SpawnInfo.NumOfEnemys);
 				}
 			}
 		}
@@ -104,9 +105,8 @@ void AEnemySpawner::SpawnEnemys(int WaveLevel)
 
 void AEnemySpawner::OnEnemyDead()
 {
-	--WaveNumOfEnemy;
-	if (WaveNumOfEnemy == 0)
+	if (WaveManager != nullptr)
 	{
-		EmptySpawnedEnemyDelegate.Broadcast(this);
+		WaveManager->DecreaseEnemyCount(1);
 	}
 }

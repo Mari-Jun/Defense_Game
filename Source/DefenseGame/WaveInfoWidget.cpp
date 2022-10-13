@@ -20,6 +20,21 @@ void UWaveInfoWidget::SetNextWaveWidgetVisibility(bool Visible)
 	NextWaveRemainingTimeText->SetVisibility(NewVisibility);
 }
 
+void UWaveInfoWidget::SetCurrentWaveWidgetVisibility(bool Visible)
+{
+	ESlateVisibility NewVisibility;
+	if (Visible)
+	{
+		NewVisibility = ESlateVisibility::Visible;
+	}
+	else
+	{
+		NewVisibility = ESlateVisibility::Hidden;
+	}
+
+	CurrentWaveRemainingEnemyText->SetVisibility(NewVisibility);
+}
+
 void UWaveInfoWidget::SetNextWaveRemainingTime(float RemainingTime)
 {
 	FText Text = FText::FromString(L"다음 웨이브까지 : " + FString::FromInt(FMath::CeilToInt(RemainingTime)));
@@ -30,6 +45,12 @@ void UWaveInfoWidget::SetCurrentWaveText(int32 CurrentWave)
 {
 	FText Text = FText::FromString(L"현재 웨이브 : " + FString::FromInt(CurrentWave));
 	CurrentWaveText->SetText(Text);
+}
+
+void UWaveInfoWidget::SetCurrentWaveRemainingEnemy(int32 EnemyNums)
+{
+	FText Text = FText::FromString(L"남은 적의 수 : " + FString::FromInt(EnemyNums));
+	CurrentWaveRemainingEnemyText->SetText(Text);
 }
 
 void UWaveInfoWidget::SetUseCharacterUpgrade(bool bUse)

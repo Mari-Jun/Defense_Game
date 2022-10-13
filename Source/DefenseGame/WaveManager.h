@@ -9,11 +9,6 @@
 class AEnemySpawner;
 class UWaveInfoWidget;
 
-enum class ESpawnerEmptyState : uint8
-{
-	EEmpty, 
-	ENotEmpty
-};
 
 UCLASS()
 class DEFENSEGAME_API AWaveManager : public AActor
@@ -36,9 +31,7 @@ private:
 	void GetEnemySpawner();
 	void WaitNextWave();
 	void StartWave();
-
-	UFUNCTION()
-	void OnEmptySpawnedEnemy(AEnemySpawner* EnemySpawner);
+	void KilledAllSpawnedEnemy();
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wave", meta = (AllowPrivateAccess = "true"))
@@ -54,6 +47,11 @@ private:
 	UPROPERTY()
 	UWaveInfoWidget* WaveInfoWidget;
 
-	/*bool 값은 이번 Wave에 소환한 Enemy들이 모두 죽었는지 여부*/
-	TMap<AEnemySpawner*, ESpawnerEmptyState> EnemySpawners;
+	int32 WaveNumOfEnemys = 0;
+
+	TArray<AEnemySpawner*> EnemySpawners;
+
+public:
+	void IncreaseEnemyCount(int32 Value);
+	void DecreaseEnemyCount(int32 Value);
 };

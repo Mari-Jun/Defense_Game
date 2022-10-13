@@ -9,6 +9,7 @@
 
 class AEnemyDino;
 class AEnemy;
+class AWaveManager;
 
 class UBoxComponent;
 
@@ -44,8 +45,6 @@ struct FEnemySpawnTable : public FTableRowBase
 	TMap<int32, FSpawnTimeEnemyInfo> SpawnEnemys;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEmptySpawnedEnemyDelegate, AEnemySpawner*, EnemySpawner);
-
 UCLASS()
 class DEFENSEGAME_API AEnemySpawner : public AActor
 {
@@ -68,6 +67,9 @@ public:
 	void OnEnemyDead();
 
 private:
+	UPROPERTY()
+	AWaveManager* WaveManager;
+
 	FTimerHandle SpawnTimerHandle;
 	int32 PreviousTime = -1;
 
@@ -75,11 +77,9 @@ private:
 	UDataTable* EnemySpawnTable;
 	FEnemySpawnTable* CurrentWaveSpawnDataRow;
 
-	int32 WaveNumOfEnemy = 0;
-
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "Spawner", meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* SpawnPoint;
 
 public:
-	FEmptySpawnedEnemyDelegate EmptySpawnedEnemyDelegate;
+	void SetWaveManager(AWaveManager* Manager) { WaveManager = Manager; }
 };

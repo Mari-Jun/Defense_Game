@@ -57,8 +57,8 @@ void AWaveManager::GetEnemySpawner()
 		AEnemySpawner* EnemySpawner = Cast<AEnemySpawner>(Actor);
 		if (EnemySpawner != nullptr)
 		{
-			EnemySpawners.Add(EnemySpawner, ESpawnerEmptyState::ENotEmpty);
-			EnemySpawner->EmptySpawnedEnemyDelegate.AddDynamic(this, &AWaveManager::OnEmptySpawnedEnemy);
+			EnemySpawner->SetWaveManager(this);
+			EnemySpawners.Add(EnemySpawner);
 		}
 	}
 }
@@ -69,6 +69,7 @@ void AWaveManager::WaitNextWave()
 	if (WaveInfoWidget != nullptr)
 	{
 		WaveInfoWidget->SetNextWaveWidgetVisibility(true);
+		WaveInfoWidget->SetCurrentWaveWidgetVisibility(false);
 		WaveInfoWidget->SetUseCharacterUpgrade(true);
 		ABasePlayerController* PlayerController = Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
 		if (PlayerController != nullptr)
@@ -82,15 +83,16 @@ void AWaveManager::StartWave()
 {
 	++CurrentWave;
 	GetWorldTimerManager().ClearTimer(WaveTimerHandle);
-	for (auto& [EnemySpanwer, EmptyEnemy] : EnemySpawners)
+	for (const auto& EnemySpanwer : EnemySpawners)
 	{
 		EnemySpanwer->SpawnEnemys(CurrentWave);
-		EmptyEnemy = ESpawnerEmptyState::ENotEmpty;
 	}
+
 	if (WaveInfoWidget != nullptr)
 	{
 		WaveInfoWidget->SetCurrentWaveText(CurrentWave);
 		WaveInfoWidget->SetNextWaveWidgetVisibility(false);
+		WaveInfoWidget->SetCurrentWaveWidgetVisibility(true);
 		WaveInfoWidget->SetUseCharacterUpgrade(false);
 		ABasePlayerController* PlayerController = Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
 		if (PlayerController != nullptr)
@@ -100,33 +102,35 @@ void AWaveManager::StartWave()
 	}
 }
 
-void AWaveManager::OnEmptySpawnedEnemy(AEnemySpawner* EnemySpawner)
+void AWaveManager::KilledAllSpawnedEnemy()
 {
-	EnemySpawners[EnemySpawner] = ESpawnerEmptyState::EEmpty;
-	bool AllEmpty = true;
-	for (const auto& [EnemySpanwer, EmptyEnemy] : EnemySpawners)
+	if (CurrentWave == MaxWave)
 	{
-		if (EmptyEnemy == ESpawnerEmptyState::ENotEmpty)
+		ABasePlayerController* PlayerController = Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
+		if (PlayerController != nullptr)
 		{
-			AllEmpty = false;
-			break;
+			PlayerController->ShowGameResult(true);
 		}
 	}
-
-	if (AllEmpty)
+	else
 	{
-		if (CurrentWave == MaxWave)
-		{
-			ABasePlayerController* PlayerController = Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
-			if (PlayerController != nullptr)
-			{
-				PlayerController->ShowGameResult(true);
-			}
-		}
-		else
-		{
-			WaitNextWave();
-		}
+		WaitNextWave();
+	}
+}
+
+void AWaveManager::IncreaseEnemyCount(int32 Value)
+{
+	WaveNumOfEnemys += Value;
+	WaveInfoWidget->SetCurrentWaveRemainingEnemy(WaveNumOfEnemys);
+}
+
+void AWaveManager::DecreaseEnemyCount(int32 Value)
+{
+	WaveNumOfEnemys -= Value;
+	WaveInfoWidget->SetCurrentWaveRemainingEnemy(WaveNumOfEnemys);
+	if (WaveNumOfEnemys == 0)
+	{
+		KilledAllSpawnedEnemy();
 	}
 }
 
