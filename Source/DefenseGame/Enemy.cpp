@@ -48,6 +48,7 @@ AEnemy::AEnemy()
 	AttackRangeSphereComponent->SetupAttachment(GetRootComponent());
 	AttackRangeSphereComponent->SetSphereRadius(150.f);
 	AttackRangeSphereComponent->SetCollisionProfileName("EnemyAttack");
+	AttackRangeSphereComponent->SetGenerateOverlapEvents(false);
 
 	DamageWidgetSpawnPoint = CreateDefaultSubobject<USceneComponent>("DamageWidgetSpawnPoint");
 	DamageWidgetSpawnPoint->SetupAttachment(GetMesh());
@@ -60,7 +61,7 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	if (EnemyStatusTable != nullptr)
 	{
 		FString RowName = FString::Printf(TEXT("Level%d"), EnemyStatusData.Level);
@@ -105,6 +106,7 @@ void AEnemy::BeginPlay()
 
 	if (AttackRangeSphereComponent != nullptr)
 	{
+		AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		AttackRangeSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnAttackRangeBeginOverlap);
 		AttackRangeSphereComponent->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnAttackRangeEndOverlap);
 	}
@@ -167,12 +169,14 @@ void AEnemy::GetNewTarget()
 {
 	//공격 범위 충돌 O
 	AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	AttackRangeSphereComponent->SetGenerateOverlapEvents(true);
 }
 
 void AEnemy::LoseTarget()
 {
 	//공격 범위 충돌 X
 	AttackRangeSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	AttackRangeSphereComponent->SetGenerateOverlapEvents(false);
 	InAttackRangeActors.Reset();
 }
 

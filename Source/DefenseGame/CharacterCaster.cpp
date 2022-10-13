@@ -235,8 +235,11 @@ void ACharacterCaster::AbilityQTickDamage(AEnemy* Enemy)
 {
 	if (Enemy->GetEnemyState() == EEnemyState::EDeath)
 	{
-		GetWorldTimerManager().ClearTimer(AbilityQOverlapActors[Enemy]);
-		AbilityQOverlapActors.Remove(Enemy);
+		if (AbilityQOverlapActors.Contains(Enemy))
+		{
+			GetWorldTimerManager().ClearTimer(AbilityQOverlapActors[Enemy]);
+			AbilityQOverlapActors.Remove(Enemy);
+		}
 	}
 	else
 	{
@@ -288,8 +291,11 @@ void ACharacterCaster::AbilityRTickDamage(AEnemy* Enemy)
 {
 	if (Enemy->GetEnemyState() == EEnemyState::EDeath)
 	{
-		GetWorldTimerManager().ClearTimer(AbilityROverlapActors[Enemy]);
-		AbilityROverlapActors.Remove(Enemy);
+		if (AbilityROverlapActors.Contains(Enemy))
+		{
+			GetWorldTimerManager().ClearTimer(AbilityROverlapActors[Enemy]);
+			AbilityROverlapActors.Remove(Enemy);
+		}
 	}
 	else
 	{
