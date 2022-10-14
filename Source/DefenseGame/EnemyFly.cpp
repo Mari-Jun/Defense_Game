@@ -7,6 +7,7 @@
 #include "BaseCharacter.h"
 #include "DefenseBase.h"
 
+#include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 
@@ -18,6 +19,12 @@ AEnemyFly::AEnemyFly()
 	EnemyStatusData.DefaultSpeed = 400.f;
 	EnemyStatusData.AttackSpeed = 350.f;
 	EnemyStatusData.ReactionSpeed = 300.f;
+
+	AddNewAbility<USphereComponent>("DefaultAttack", 2.0f, 100'000, {
+		"AnimMontage'/Game/_Game/Enemys/Fly/Animation/Fly_Attack_A_Montage.Fly_Attack_A_Montage'",
+		"AnimMontage'/Game/_Game/Enemys/Fly/Animation/Fly_Attack_B_Montage.Fly_Attack_B_Montage'",
+		"AnimMontage'/Game/_Game/Enemys/Fly/Animation/Fly_Attack_C_Montage.Fly_Attack_C_Montage'"
+		});
 }
 
 void AEnemyFly::BeginPlay()

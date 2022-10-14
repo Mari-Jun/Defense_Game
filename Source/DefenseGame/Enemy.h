@@ -18,6 +18,7 @@ class UWidgetComponent;
 class UBehaviorTree;
 class USphereComponent;
 class UShapeComponent;
+class UBoxComponent;
 
 class UNiagaraSystem;
 
@@ -81,8 +82,11 @@ struct FEnemyAbilityData
 
 	bool CanCastAbility = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UShapeComponent* AbilityEnableRange;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<UAnimMontage*> AbilityAnimMontange;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FKillEnemyEventDelegate);
@@ -100,14 +104,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	virtual void OnConstruction(const FTransform& Transform) override;
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
@@ -134,7 +133,7 @@ protected:
 	virtual void Attack();
 
 	template <class Shape>
-	void AddNewAbility(FString AbilityName, float AbilityTime, int32 Order)
+	void AddNewAbility(FString AbilityName, float AbilityTime, int32 Order, TArray<FString>&& AnimationNames = {})
 	{
 		AbilityMap.Add(AbilityName);
 		AbilityOrder.Add(AbilityName, Order);
@@ -144,8 +143,15 @@ protected:
 		AbilityMap[AbilityName].AbilityEnableRange->SetupAttachment(GetRootComponent());
 		AbilityMap[AbilityName].AbilityEnableRange->SetCollisionProfileName("EnemyAttack");
 		AddInstanceComponent(AbilityMap[AbilityName].AbilityEnableRange);
+		for (const FString& Name : AnimationNames)
+		{
+			AbilityMap[AbilityName].AbilityAnimMontange.Add(Cast<UAnimMontage>(StaticLoadObject(UAnimMontage::StaticClass(), nullptr,
+				*FString::Printf(TEXT("%s"), *Name))));
+		}
 	}
 	virtual void SetAbilityCollision(bool bEnable);
+	virtual void StartAbilityCooldown(FString AbilityName);
+	virtual void ResetAbilityTimer(FString AbilityName);
 
 	UFUNCTION()
 	virtual void OnAbilityRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -234,6 +240,7 @@ protected:
 	TMap<FString, FEnemyAbilityData> AbilityMap;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
 	TMap<FString, int32> AbilityOrder;
+	FString CurrentAbilityName;
 
 
 	//Animation
@@ -251,9 +258,6 @@ protected:
 	UAnimMontage* HitReactionLeftAnimMontage;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* HitReactionBWDAnimMontage;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
-	TArray<UAnimMontage*> AttackAnimMontange;
 
 public:
 	FKillEnemyEventDelegate KillEnemyEventDelegate;

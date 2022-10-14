@@ -3,6 +3,7 @@
 
 #include "EnemyWhiteWarrior.h"
 #include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -18,7 +19,14 @@ AEnemyWhiteWarrior::AEnemyWhiteWarrior()
 	AttackBoxComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "AttackSocket");
 	AttackBoxComponent->SetCollisionProfileName("EnemyAttack");
 
-	AddNewAbility<UBoxComponent>("Strike", 10.0f, 100);
+	AddNewAbility<USphereComponent>("DefaultAttack", 2.0f, 100'000, {
+		"AnimMontage'/Game/_Game/Enemys/WhiteWarrior/Animations/WhiteWarrior_Attack_A_Montage.WhiteWarrior_Attack_A_Montage'",
+		"AnimMontage'/Game/_Game/Enemys/WhiteWarrior/Animations/WhiteWarrior_Attack_B_Montage.WhiteWarrior_Attack_B_Montage'",
+		"AnimMontage'/Game/_Game/Enemys/WhiteWarrior/Animations/WhiteWarrior_Attack_D_Montage.WhiteWarrior_Attack_D_Montage'"
+		});
+	AddNewAbility<UBoxComponent>("Strike", 10.0f, 100, {
+		"AnimMontage'/Game/_Game/Enemys/WhiteWarrior/Animations/WhiteWarrior_Strike_Montage.WhiteWarrior_Strike_Montage'"
+		});
 }
 
 void AEnemyWhiteWarrior::BeginPlay()

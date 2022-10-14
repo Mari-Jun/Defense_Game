@@ -15,6 +15,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -38,8 +39,6 @@ AEnemy::AEnemy()
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-
-	AddNewAbility<USphereComponent>("DefaultAttack", 2.0f, 100'000);
 	
 	EnemyStatusWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("status widget");
 	EnemyStatusWidgetComponent->SetupAttachment(GetRootComponent());
@@ -103,21 +102,17 @@ void AEnemy::BeginPlay()
 	//Initialize AbilityMap
 	for (const auto& [Name, Data] : AbilityMap)
 	{
-		Data.AbilityEnableRange->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnAbilityRangeBeginOverlap);
-		Data.AbilityEnableRange->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnAbilityRangeEndOverlap);
+		if (Data.AbilityEnableRange != nullptr)
+		{
+			Data.AbilityEnableRange->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnAbilityRangeBeginOverlap);
+			Data.AbilityEnableRange->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnAbilityRangeEndOverlap);
+		}
 	}
 	SetAbilityCollision(false);
 	AbilityOrder.ValueSort([](int32 A, int32 B) { return A < B; });
 
 
 	GetCharacterMovement()->MaxWalkSpeed = EnemyStatusData.DefaultSpeed;
-}
-
-void AEnemy::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-
-	
 }
 
 // Called every frame
@@ -136,13 +131,6 @@ void AEnemy::Tick(float DeltaTime)
 	Attack();
 
 	RenderHitNumbers();
-}
-
-// Called to bind functionality to input
-void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -315,14 +303,18 @@ void AEnemy::Attack()
 	ABaseCharacter* TargetCharacter = EnemyController->GetTargetCharacter();
 	ADefenseBase* TargetBase = EnemyController->GetTargetDefenseBase();
 
-	if (AbilityMap["DefaultAttack"].CanCastAbility)
+	for (const auto& [Name, Order] : AbilityOrder)
 	{
-		if (AttackAnimMontange.IsEmpty() == false)
+		if (AbilityMap[Name].AbilityTimerHandle.IsValid() == false && 
+			AbilityMap[Name].CanCastAbility && AbilityMap[Name].AbilityAnimMontange.IsEmpty() == false)
 		{
-			int32 index = FMath::RandRange(0, AttackAnimMontange.Num() - 1);
-			const auto& attack_montage = AttackAnimMontange[index];
+			CurrentAbilityName = Name;
+			StartAbilityCooldown(Name);
+			int32 index = FMath::RandRange(0, AbilityMap[Name].AbilityAnimMontange.Num() - 1);
+			const auto& attack_montage = AbilityMap[Name].AbilityAnimMontange[index];
 			PlayAnimMontage(attack_montage);
 			ChangeEnemyState(EEnemyState::EAttack);
+			break;
 		}
 	}
 }
@@ -345,6 +337,18 @@ void AEnemy::SetAbilityCollision(bool bEnable)
 			}
 		}
 	}
+}
+
+void AEnemy::StartAbilityCooldown(FString AbilityName)
+{
+	FTimerDelegate TimerDelegate = FTimerDelegate::CreateUObject(this, &AEnemy::ResetAbilityTimer, AbilityName);
+	GetWorldTimerManager().SetTimer(AbilityMap[AbilityName].AbilityTimerHandle,
+		TimerDelegate, AbilityMap[AbilityName].AbilityTime, false);
+}
+
+void AEnemy::ResetAbilityTimer(FString AbilityName)
+{
+	GetWorldTimerManager().ClearTimer(AbilityMap[AbilityName].AbilityTimerHandle);
 }
 
 void AEnemy::OnAbilityRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
