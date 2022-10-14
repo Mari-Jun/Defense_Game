@@ -108,7 +108,7 @@ void AEnemy::BeginPlay()
 			Data.AbilityEnableRange->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnAbilityRangeEndOverlap);
 		}
 	}
-	SetAbilityCollision(false);
+	SetAbilitysCollision(false);
 	AbilityOrder.ValueSort([](int32 A, int32 B) { return A < B; });
 
 
@@ -151,17 +151,18 @@ void AEnemy::FinishDeath()
 
 void AEnemy::GetNewTarget()
 {
-	SetAbilityCollision(true);
+	SetAbilitysCollision(true);
 }
 
 void AEnemy::LoseTarget()
 {
-	SetAbilityCollision(false);
+	SetAbilitysCollision(false);
 }
 
 void AEnemy::KillObject()
 {
 	EnemyController->KilledControlledPawn();
+	AbilityMap.Reset();
 	DisableCollision();
 	ChangeEnemyState(EEnemyState::EDeath);
 	if (DeadAnimMontage != nullptr)
@@ -300,35 +301,63 @@ void AEnemy::Attack()
 {
 	if (CheckAttack() == false) return;
 
-	ABaseCharacter* TargetCharacter = EnemyController->GetTargetCharacter();
-	ADefenseBase* TargetBase = EnemyController->GetTargetDefenseBase();
-
 	for (const auto& [Name, Order] : AbilityOrder)
 	{
-		if (AbilityMap[Name].AbilityTimerHandle.IsValid() == false && 
-			AbilityMap[Name].CanCastAbility && AbilityMap[Name].AbilityAnimMontange.IsEmpty() == false)
+		if (AbilityMap[Name].AbilityTimerHandle.IsValid() == false && AbilityMap[Name].AbilityAnimMontange.IsEmpty() == false)
 		{
-			CurrentAbilityName = Name;
-			StartAbilityCooldown(Name);
-			int32 index = FMath::RandRange(0, AbilityMap[Name].AbilityAnimMontange.Num() - 1);
-			const auto& attack_montage = AbilityMap[Name].AbilityAnimMontange[index];
-			PlayAnimMontage(attack_montage);
-			ChangeEnemyState(EEnemyState::EAttack);
-			break;
+			ABaseCharacter* TargetCharacter = EnemyController->GetTargetCharacter();
+			ADefenseBase* TargetBase = EnemyController->GetTargetDefenseBase();
+
+			if (AbilityMap[Name].InAttackRangeActors.Find(TargetCharacter) ||
+				(TargetCharacter == nullptr && AbilityMap[Name].CanTowerAttack && AbilityMap[Name].InAttackRangeActors.Find(TargetBase)))
+			{
+				CurrentAbilityName = Name;
+				StartAbilityCooldown(Name);
+				int32 index = FMath::RandRange(0, AbilityMap[Name].AbilityAnimMontange.Num() - 1);
+				const auto& attack_montage = AbilityMap[Name].AbilityAnimMontange[index];
+				PlayAnimMontage(attack_montage);
+				ChangeEnemyState(EEnemyState::EAttack);
+				break;
+			}
 		}
 	}
 }
 
-void AEnemy::SetAbilityCollision(bool bEnable)
+//AbilityTimer가 유효한지 검사하기 때문에 true의 경우 Timer를 실행하고 설정 바람
+void AEnemy::SetAbilitysCollision(bool bEnable)
 {
 	for (auto& [Name, Data] : AbilityMap)
 	{
 		if (Data.AbilityEnableRange != nullptr)
 		{
-			if (bEnable)
+			if (bEnable && Data.AbilityTimerHandle.IsValid() == false)
 			{
 				Data.AbilityEnableRange->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 				Data.AbilityEnableRange->SetGenerateOverlapEvents(true);
+				Data.AbilityEnableRange->UpdateOverlaps();
+			}
+			else
+			{
+				Data.AbilityEnableRange->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				Data.AbilityEnableRange->SetGenerateOverlapEvents(false);
+			}
+		}
+	}
+}
+
+//AbilityTimer가 유효한지 검사하기 때문에 true의 경우 Timer를 실행하고 설정 바람
+void AEnemy::SetAbilityCollision(FString AbilityName, bool bEnable)
+{
+	if (AbilityMap.Contains(AbilityName))
+	{
+		FEnemyAbilityData& Data = AbilityMap[AbilityName];
+		if (Data.AbilityEnableRange != nullptr)
+		{
+			if (bEnable && Data.AbilityTimerHandle.IsValid() == false)
+			{
+				Data.AbilityEnableRange->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+				Data.AbilityEnableRange->SetGenerateOverlapEvents(true);
+				Data.AbilityEnableRange->UpdateOverlaps();
 			}
 			else
 			{
@@ -344,11 +373,13 @@ void AEnemy::StartAbilityCooldown(FString AbilityName)
 	FTimerDelegate TimerDelegate = FTimerDelegate::CreateUObject(this, &AEnemy::ResetAbilityTimer, AbilityName);
 	GetWorldTimerManager().SetTimer(AbilityMap[AbilityName].AbilityTimerHandle,
 		TimerDelegate, AbilityMap[AbilityName].AbilityTime, false);
+	SetAbilityCollision(AbilityName, false);
 }
 
 void AEnemy::ResetAbilityTimer(FString AbilityName)
 {
 	GetWorldTimerManager().ClearTimer(AbilityMap[AbilityName].AbilityTimerHandle);
+	SetAbilityCollision(AbilityName, true);
 }
 
 void AEnemy::OnAbilityRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -358,7 +389,8 @@ void AEnemy::OnAbilityRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent
 	{
 		if (Data.AbilityEnableRange != nullptr && Data.AbilityEnableRange == OverlappedComponent)
 		{
-			Data.CanCastAbility = true;
+			//Character와 기지 모두 충돌이 가능하니 Set으로 관리한다.
+			Data.InAttackRangeActors.Add(OtherActor);
 			break;
 		}
 	}
@@ -371,7 +403,7 @@ void AEnemy::OnAbilityRangeEndOverlap(UPrimitiveComponent* OverlappedComponent,
 	{
 		if (Data.AbilityEnableRange != nullptr && Data.AbilityEnableRange == OverlappedComponent)
 		{
-			Data.CanCastAbility = false;
+			Data.InAttackRangeActors.Remove(OtherActor);
 			break;
 		}
 	}
@@ -380,7 +412,7 @@ void AEnemy::OnAbilityRangeEndOverlap(UPrimitiveComponent* OverlappedComponent,
 void AEnemy::DisableCollision()
 {
 	Super::DisableCollision();
-	SetAbilityCollision(false);
+	SetAbilitysCollision(false);
 }
 
 void AEnemy::AddDamageNumber(float HPDamage, float ShieldDamage, bool IsCritical)

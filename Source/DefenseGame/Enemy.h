@@ -80,7 +80,8 @@ struct FEnemyAbilityData
 	float AbilityTime = 10.0f;
 	FTimerHandle AbilityTimerHandle;
 
-	bool CanCastAbility = false;
+	TSet<AActor*> InAttackRangeActors;
+	bool CanTowerAttack = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UShapeComponent* AbilityEnableRange;
@@ -149,7 +150,8 @@ protected:
 				*FString::Printf(TEXT("%s"), *Name))));
 		}
 	}
-	virtual void SetAbilityCollision(bool bEnable);
+	virtual void SetAbilitysCollision(bool bEnable);
+	virtual void SetAbilityCollision(FString AbilityName, bool bEnable);
 	virtual void StartAbilityCooldown(FString AbilityName);
 	virtual void ResetAbilityTimer(FString AbilityName);
 
