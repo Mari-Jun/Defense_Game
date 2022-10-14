@@ -80,6 +80,9 @@ struct FEnemyAbilityData
 	float AbilityTime = 10.0f;
 	FTimerHandle AbilityTimerHandle;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float AttackRatio = 1.0f;
+
 	TSet<AActor*> InAttackRangeActors;
 	bool CanTowerAttack = true;
 
@@ -110,6 +113,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	virtual void ApplyDamage(AActor* OtherActor, float Damage) override;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void FinishDeath();
@@ -134,11 +138,12 @@ protected:
 	virtual void Attack();
 
 	template <class Shape>
-	void AddNewAbility(FString AbilityName, float AbilityTime, int32 Order, TArray<FString>&& AnimationNames = {})
+	void AddNewAbility(FString AbilityName, float AbilityTime, float AttackRatio, int32 Order, TArray<FString>&& AnimationNames = {})
 	{
 		AbilityMap.Add(AbilityName);
 		AbilityOrder.Add(AbilityName, Order);
 		AbilityMap[AbilityName].AbilityTime = AbilityTime;
+		AbilityMap[AbilityName].AttackRatio = AttackRatio;
 		FString RangeName = AbilityName + "Range";
 		AbilityMap[AbilityName].AbilityEnableRange = CreateDefaultSubobject<Shape>(FName(*RangeName));
 		AbilityMap[AbilityName].AbilityEnableRange->SetupAttachment(GetRootComponent());

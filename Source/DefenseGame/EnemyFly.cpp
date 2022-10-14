@@ -20,7 +20,7 @@ AEnemyFly::AEnemyFly()
 	EnemyStatusData.AttackSpeed = 350.f;
 	EnemyStatusData.ReactionSpeed = 300.f;
 
-	AddNewAbility<USphereComponent>("DefaultAttack", 2.0f, 100'000, {
+	AddNewAbility<USphereComponent>("DefaultAttack", 2.0f, 1.0f, 100'000, {
 		"AnimMontage'/Game/_Game/Enemys/Fly/Animation/Fly_Attack_A_Montage.Fly_Attack_A_Montage'",
 		"AnimMontage'/Game/_Game/Enemys/Fly/Animation/Fly_Attack_B_Montage.Fly_Attack_B_Montage'",
 		"AnimMontage'/Game/_Game/Enemys/Fly/Animation/Fly_Attack_C_Montage.Fly_Attack_C_Montage'"

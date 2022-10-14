@@ -142,6 +142,16 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	return DamageAmount;
 }
 
+void AEnemy::ApplyDamage(AActor* OtherActor, float Damage)
+{
+	float AttackRatio = 1.0f;
+	if (AbilityMap.Contains(CurrentAbilityName))
+	{
+		AttackRatio = AbilityMap[CurrentAbilityName].AttackRatio;
+	}
+	Super::ApplyDamage(OtherActor, Damage * AttackRatio);
+}
+
 void AEnemy::FinishDeath()
 {
 	GetMesh()->GlobalAnimRateScale = 0.0f;
