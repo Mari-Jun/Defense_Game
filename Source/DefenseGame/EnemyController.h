@@ -42,6 +42,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	//Perception
 	void InitializePerception();
 	UFUNCTION()
 	virtual void OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus);
@@ -49,6 +50,10 @@ protected:
 	void TriggerDamageEvent(float DamageAmount, AActor* DamageCauser);
 	void TriggerTeamEvent(AActor* Actor);
 	void LoseSense();
+
+
+	//Target
+	void FaceToTarget();
 	
 	void SetTargetCharacter(ABaseCharacter* Target);
 	void SetTargetDefenseBase(ADefenseBase* Target);

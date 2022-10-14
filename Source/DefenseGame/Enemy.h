@@ -159,6 +159,7 @@ protected:
 	virtual void SetAbilityCollision(FString AbilityName, bool bEnable);
 	virtual void StartAbilityCooldown(FString AbilityName);
 	virtual void ResetAbilityTimer(FString AbilityName);
+	virtual void ClearAbilityMap();
 
 	UFUNCTION()
 	virtual void OnAbilityRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

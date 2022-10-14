@@ -172,7 +172,7 @@ void AEnemy::LoseTarget()
 void AEnemy::KillObject()
 {
 	EnemyController->KilledControlledPawn();
-	AbilityMap.Reset();
+	ClearAbilityMap();
 	DisableCollision();
 	ChangeEnemyState(EEnemyState::EDeath);
 	if (DeadAnimMontage != nullptr)
@@ -390,6 +390,15 @@ void AEnemy::ResetAbilityTimer(FString AbilityName)
 {
 	GetWorldTimerManager().ClearTimer(AbilityMap[AbilityName].AbilityTimerHandle);
 	SetAbilityCollision(AbilityName, true);
+}
+
+void AEnemy::ClearAbilityMap()
+{
+	for (auto& [Name, Data] : AbilityMap)
+	{
+		GetWorldTimerManager().ClearTimer(Data.AbilityTimerHandle);
+	}
+	AbilityMap.Reset();
 }
 
 void AEnemy::OnAbilityRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

@@ -98,6 +98,10 @@ void AEnemyController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (HasTarget())
+	{
+		FaceToTarget();
+	}
 
 	if (TargetCharacter != nullptr && TargetCharacter->GetCharacterState() == ECharacterState::EDeath)
 	{
@@ -208,7 +212,6 @@ void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 			}
 			GetWorldTimerManager().SetTimer(LoseSenseTimerHandle, this, &AEnemyController::LoseSense, LoseSenseTime, false);
 			SetTargetCharacter(nullptr);
-			SetFocus(nullptr);
 		}
 	}
 }
@@ -239,6 +242,34 @@ void AEnemyController::LoseSense()
 		FindNearestDefenseBaseLocation();
 		BlackboardComponent->SetValueAsBool("LoseSense", true);
 	}
+}
+
+void AEnemyController::FaceToTarget()
+{
+	if (Enemy == nullptr) return;
+
+	FVector BaseTargetLocation;
+	if (TargetCharacter != nullptr)
+	{
+		BaseTargetLocation = TargetCharacter->GetActorLocation();
+	}
+	else if (TargetDefenseBase != nullptr)
+	{
+		BaseTargetLocation = TargetDefenseBase->GetActorLocation();
+	}
+	else { return; }
+
+
+	FRotator ActorRotation = Enemy->GetActorRotation();
+	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(Enemy->GetActorLocation(), BaseTargetLocation);
+
+
+	auto NewRotation = FMath::RInterpTo(ActorRotation, LookAtRotation, GetWorld()->GetDeltaSeconds(), 20.0);
+	NewRotation.Pitch = NewRotation.Roll = 0.0f;
+
+	//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString::Printf(TEXT("LookAt : %s"), *NewRotation.ToString()));
+	//SetControlRotation(NewRotation);
+	Enemy->SetActorRotation(NewRotation);
 }
 
 void AEnemyController::SetTargetCharacter(ABaseCharacter* Target)
