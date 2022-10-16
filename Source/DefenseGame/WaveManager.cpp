@@ -6,6 +6,9 @@
 #include "WaveInfoWidget.h"
 #include "BasePlayerController.h"
 
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
+
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -65,6 +68,10 @@ void AWaveManager::GetEnemySpawner()
 
 void AWaveManager::WaitNextWave()
 {
+	++CurrentWave;
+	GetWaveSoundData();
+	PlayWaitWaveSound();
+
 	GetWorldTimerManager().SetTimer(WaveTimerHandle, this, &AWaveManager::StartWave, WaveWaitTime);
 	if (WaveInfoWidget != nullptr)
 	{
@@ -81,7 +88,8 @@ void AWaveManager::WaitNextWave()
 
 void AWaveManager::StartWave()
 {
-	++CurrentWave;
+	PlayBattleSound();
+
 	GetWorldTimerManager().ClearTimer(WaveTimerHandle);
 	for (const auto& EnemySpanwer : EnemySpawners)
 	{
@@ -115,6 +123,37 @@ void AWaveManager::KilledAllSpawnedEnemy()
 	else
 	{
 		WaitNextWave();
+	}
+}
+
+void AWaveManager::GetWaveSoundData()
+{
+	if (WaveSoundTable != nullptr)
+	{
+		FString RowName = FString::Printf(TEXT("Wave%d"), CurrentWave);
+		CurrentWaveSoundData = WaveSoundTable->FindRow<FWaveSoundTable>(FName(*RowName), "");
+	}
+}
+
+void AWaveManager::PlayWaitWaveSound()
+{
+	if (CurrentWaveSoundData != nullptr && CurrentWaveSoundData->WaitWaveSound != nullptr)
+	{
+		if (CurrentBGM != nullptr)
+			CurrentBGM->Stop();
+		CurrentBGM = UGameplayStatics::SpawnSound2D(this, CurrentWaveSoundData->WaitWaveSound);
+		CurrentBGM->Play();
+	}
+}
+
+void AWaveManager::PlayBattleSound()
+{
+	if (CurrentWaveSoundData != nullptr && CurrentWaveSoundData->BattleSound != nullptr)
+	{
+		if (CurrentBGM != nullptr)
+			CurrentBGM->Stop();
+		CurrentBGM = UGameplayStatics::SpawnSound2D(this, CurrentWaveSoundData->BattleSound);
+		CurrentBGM->Play();
 	}
 }
 

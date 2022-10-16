@@ -263,12 +263,8 @@ void AEnemyController::FaceToTarget()
 	FRotator ActorRotation = Enemy->GetActorRotation();
 	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(Enemy->GetActorLocation(), BaseTargetLocation);
 
-
 	auto NewRotation = FMath::RInterpTo(ActorRotation, LookAtRotation, GetWorld()->GetDeltaSeconds(), 20.0);
 	NewRotation.Pitch = NewRotation.Roll = 0.0f;
-
-	//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString::Printf(TEXT("LookAt : %s"), *NewRotation.ToString()));
-	//SetControlRotation(NewRotation);
 	Enemy->SetActorRotation(NewRotation);
 }
 

@@ -4,11 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Engine/DataTable.h"
 #include "WaveManager.generated.h"
 
 class AEnemySpawner;
 class UWaveInfoWidget;
+class UAudioComponent;
+class USoundCue;
 
+USTRUCT(BlueprintType)
+struct FWaveSoundTable : public FTableRowBase
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	USoundCue* WaitWaveSound;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	USoundCue* BattleSound;
+};
 
 UCLASS()
 class DEFENSEGAME_API AWaveManager : public AActor
@@ -33,6 +46,13 @@ private:
 	void StartWave();
 	void KilledAllSpawnedEnemy();
 
+
+	//Sound
+	void GetWaveSoundData();
+	void PlayWaitWaveSound();
+	void PlayBattleSound();
+	
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wave", meta = (AllowPrivateAccess = "true"))
 	int32 WaveWaitTime = 10;
@@ -50,6 +70,13 @@ private:
 	int32 WaveNumOfEnemys = 0;
 
 	TArray<AEnemySpawner*> EnemySpawners;
+
+	//Sound
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound", meta = (AllowPrivateAccess = "true"))
+	UDataTable* WaveSoundTable;
+	FWaveSoundTable* CurrentWaveSoundData;
+	UPROPERTY()
+	UAudioComponent* CurrentBGM;
 
 public:
 	void IncreaseEnemyCount(int32 Value);
