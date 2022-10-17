@@ -64,8 +64,11 @@ void AProjectile::OnOverlapEvent(UPrimitiveComponent* OverlappedComponent, AActo
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	UGameplayStatics::ApplyPointDamage(OtherActor, AttackDamage, GetActorForwardVector(),
-		SweepResult, OwnerCharacter->GetController(), this, DamageType);
+	if (OwnerCharacter != nullptr)
+	{
+		UGameplayStatics::ApplyPointDamage(OtherActor, AttackDamage, GetActorForwardVector(),
+			SweepResult, OwnerCharacter->GetController(), OwnerCharacter, DamageType);
+	}
 
 	if (ImpactParticle != nullptr)
 	{

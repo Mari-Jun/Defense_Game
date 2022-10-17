@@ -41,6 +41,6 @@ void APenetraingProjectile::TickDamage(AActor* OtherActor)
 {
 	if (OwnerCharacter != nullptr)
 	{
-		UGameplayStatics::ApplyDamage(OtherActor, AttackDamage, OwnerCharacter->GetController(), this, DamageType);	
+		UGameplayStatics::ApplyDamage(OtherActor, AttackDamage, OwnerCharacter->GetController(), OwnerCharacter, DamageType);	
 	}
 }
