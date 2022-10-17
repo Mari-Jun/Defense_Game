@@ -50,6 +50,10 @@ AEnemy::AEnemy()
 
 	DropCoinEffect = Cast<UNiagaraSystem>(StaticLoadObject(UNiagaraSystem::StaticClass(), nullptr,
 		TEXT("NiagaraSystem'/Game/sA_PickupSet_1/Fx/NiagaraSystems/NS_CoinBurst.NS_CoinBurst'")));
+
+	//Custom Depth Stencil
+	GetMesh()->bRenderCustomDepth = true;
+	GetMesh()->CustomDepthStencilValue = 1;
 }
 
 // Called when the game starts or when spawned

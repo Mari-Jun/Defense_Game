@@ -246,7 +246,7 @@ protected:
 	//Ability
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
 	TMap<FString, FEnemyAbilityData> AbilityMap;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
 	TMap<FString, int32> AbilityOrder;
 	FString CurrentAbilityName;
 
