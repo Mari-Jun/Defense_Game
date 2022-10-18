@@ -124,11 +124,6 @@ void AEnemyController::InitializePerception()
 	SenseDamage->SetMaxAge(5.0f);
 
 	GetPerceptionComponent()->ConfigureSense(*SenseDamage);
-
-	SenseTeam = CreateDefaultSubobject<UAISenseConfig_Team>("sense team");
-	SenseTeam->SetMaxAge(5.0f);
-
-	GetPerceptionComponent()->ConfigureSense(*SenseTeam);
 }
 
 void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
@@ -144,16 +139,10 @@ void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 		if (SenseName == UAISense_Damage::StaticClass()->GetName())
 		{
 			SuccessDamageSense = true;
-			TriggerTeamEvent(Actor);
 		}
 		else if (SenseName == UAISense_Sight::StaticClass()->GetName())
 		{
 			SuccessSightSense = true;
-			TriggerTeamEvent(Actor);
-		}
-		else if (SenseName == UAISense_Team::StaticClass()->GetName())
-		{
-			SuccessTeamSense = true;
 		}
 
 		BlackboardComponent->SetValueAsBool("LoseSense", false);
@@ -173,12 +162,8 @@ void AEnemyController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 		{
 			SuccessSightSense = false;
 		}
-		else if (SenseName == UAISense_Team::StaticClass()->GetName())
-		{
-			SuccessTeamSense = false;
-		}
 
-		if (!SuccessDamageSense && !SuccessSightSense && !SuccessTeamSense && TargetCharacter != nullptr)
+		if (!SuccessDamageSense && !SuccessSightSense && TargetCharacter != nullptr)
 		{
 			if (SenseName == UAISense_Sight::StaticClass()->GetName())
 			{
@@ -200,18 +185,9 @@ void AEnemyController::TriggerDamageEvent(float DamageAmount, AActor* DamageCaus
 	}
 }
 
-void AEnemyController::TriggerTeamEvent(AActor* Actor)
-{
-	if (PerceptionSystem != nullptr)
-	{
-		FAITeamStimulusEvent Event = FAITeamStimulusEvent(this, Actor, Actor->GetActorLocation(), TeamSenseRange);
-		PerceptionSystem->OnEvent(Event);
-	}
-}
-
 void AEnemyController::LoseSense()
 {
-	if (!SuccessDamageSense && !SuccessSightSense && !SuccessTeamSense)
+	if (!SuccessDamageSense && !SuccessSightSense)
 	{
 		BlackboardComponent->SetValueAsBool("LoseSense", true);
 	}

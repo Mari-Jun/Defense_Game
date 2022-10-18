@@ -47,7 +47,6 @@ protected:
 	virtual void OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus);
 
 	void TriggerDamageEvent(float DamageAmount, AActor* DamageCauser);
-	void TriggerTeamEvent(AActor* Actor);
 	void LoseSense();
 
 
@@ -75,16 +74,16 @@ private:
 	float LoseSightRadius = 4500.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
 	float VisionAngle = 120.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
-	float TeamSenseRange = 1000.f;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
+	//float TeamSenseRange = 1000.f;
 
 	bool SuccessSightSense = false;
 	bool SuccessDamageSense = false;
-	bool SuccessTeamSense = false;
+	//bool SuccessTeamSense = false;
 
 	UAISenseConfig_Sight* SenseSight;
 	UAISenseConfig_Damage* SenseDamage;
-	UAISenseConfig_Team* SenseTeam;
+	//UAISenseConfig_Team* SenseTeam;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
 	float LoseSenseTime = 5.0f;
