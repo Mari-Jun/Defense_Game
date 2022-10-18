@@ -49,10 +49,6 @@ protected:
 	void TriggerDamageEvent(float DamageAmount, AActor* DamageCauser);
 	void LoseSense();
 
-
-	//Target
-	void FaceToTarget();
-	
 	void SetTargetCharacter(ABaseCharacter* Target);
 	void GetNewTarget();
 	void LoseTarget();
@@ -74,16 +70,12 @@ private:
 	float LoseSightRadius = 4500.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
 	float VisionAngle = 120.f;
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
-	//float TeamSenseRange = 1000.f;
 
 	bool SuccessSightSense = false;
 	bool SuccessDamageSense = false;
-	//bool SuccessTeamSense = false;
 
 	UAISenseConfig_Sight* SenseSight;
 	UAISenseConfig_Damage* SenseDamage;
-	//UAISenseConfig_Team* SenseTeam;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
 	float LoseSenseTime = 5.0f;
