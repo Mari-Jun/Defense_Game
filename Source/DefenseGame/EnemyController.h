@@ -33,7 +33,6 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 
 	virtual void KilledControlledPawn();
-	virtual void FindNearestDefenseBaseLocation();
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -56,7 +55,6 @@ protected:
 	void FaceToTarget();
 	
 	void SetTargetCharacter(ABaseCharacter* Target);
-	void SetTargetDefenseBase(ADefenseBase* Target);
 	void GetNewTarget();
 	void LoseTarget();
 
@@ -105,6 +103,7 @@ public:
 	bool HasTarget() const { return TargetCharacter != nullptr || TargetDefenseBase != nullptr; }
 	FVector GetAttackTargetLocation() const;
 	ADefenseBase* GetTargetDefenseBase() const { return TargetDefenseBase; }
+	void SetTargetDefenseBase(ADefenseBase* Target);
 	ABaseCharacter* GetTargetCharacter() const { return TargetCharacter; }
 	AActor* GetLastDamageCauser() const { return LastDamageCauser; }
 };

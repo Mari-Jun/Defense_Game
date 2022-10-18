@@ -47,7 +47,6 @@ void AEnemyController::OnPossess(APawn* InPawn)
 
 	if (BlackboardComponent != nullptr)
 	{
-		FindNearestDefenseBaseLocation();
 		BlackboardComponent->SetValueAsBool("LoseSense", true);
 	}
 
@@ -70,30 +69,6 @@ void AEnemyController::KilledControlledPawn()
 	}
 }
 
-void AEnemyController::FindNearestDefenseBaseLocation()
-{
-	if (Enemy == nullptr) return;
-	
-	TArray<AActor*> BaseActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADefenseBase::StaticClass(), BaseActors);
-
-	FVector EnemyLocation = Enemy->GetActorLocation();
-	AActor* MinDefenseBase = nullptr;
-	float MinLength = FLT_MAX;	
-
-	for (AActor* BaseActor : BaseActors)
-	{
-		float Length = (BaseActor->GetActorLocation() - EnemyLocation).Length();
-		if (MinLength > Length)
-		{
-			MinDefenseBase = BaseActor;
-			MinLength = Length;
-		}
-	}
-
-	SetTargetDefenseBase(Cast<ADefenseBase>(MinDefenseBase));
-}
-
 void AEnemyController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -107,7 +82,6 @@ void AEnemyController::Tick(float DeltaTime)
 	{
 		SetTargetCharacter(nullptr);
 
-		FindNearestDefenseBaseLocation();
 		BlackboardComponent->SetValueAsBool("LoseSense", true);
 	}
 }
@@ -239,7 +213,6 @@ void AEnemyController::LoseSense()
 {
 	if (!SuccessDamageSense && !SuccessSightSense && !SuccessTeamSense)
 	{
-		FindNearestDefenseBaseLocation();
 		BlackboardComponent->SetValueAsBool("LoseSense", true);
 	}
 }
