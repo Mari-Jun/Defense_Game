@@ -11,7 +11,9 @@
 
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "AssetRegistryModule.h"
 
+#include "BehaviorTree/BehaviorTree.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
@@ -32,7 +34,6 @@ AEnemy::AEnemy()
 
 	GetMesh()->SetCollisionProfileName("Enemy");
 	GetMesh()->SetGenerateOverlapEvents(true);
-
 	bUseControllerRotationYaw = false;
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
@@ -43,10 +44,23 @@ AEnemy::AEnemy()
 	EnemyStatusWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("status widget");
 	EnemyStatusWidgetComponent->SetupAttachment(GetRootComponent());
 	EnemyStatusWidgetComponent->SetDrawSize({ 200.f, 35.f });
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> StatusWidget(TEXT("/Game/_Game/HUD/BP_EnemyStatusWidget"));
+	if (StatusWidget.Succeeded())
+	{
+		EnemyStatusWidgetComponent->SetWidgetClass(StatusWidget.Class);
+	}
+
 	HideStatusWidget();
 
 	DamageWidgetSpawnPoint = CreateDefaultSubobject<USceneComponent>("DamageWidgetSpawnPoint");
 	DamageWidgetSpawnPoint->SetupAttachment(GetRootComponent());
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> DamageWidget(TEXT("/Game/_Game/HUD/BP_DamageWidget"));
+	if (DamageWidget.Succeeded())
+	{
+		DamageNumberWidgetClass = DamageWidget.Class;
+	}
 
 	DropCoinEffect = Cast<UNiagaraSystem>(StaticLoadObject(UNiagaraSystem::StaticClass(), nullptr,
 		TEXT("NiagaraSystem'/Game/sA_PickupSet_1/Fx/NiagaraSystems/NS_CoinBurst.NS_CoinBurst'")));
@@ -117,6 +131,26 @@ void AEnemy::BeginPlay()
 
 
 	GetCharacterMovement()->MaxWalkSpeed = EnemyStatusData.DefaultSpeed;
+}
+
+void AEnemy::SetBehaviorTree(const TCHAR* FileName)
+{
+	BehaviorTree = Cast<UBehaviorTree>(StaticLoadObject(UBehaviorTree::StaticClass(), nullptr, FileName));
+}
+
+void AEnemy::SetStatusTable(const TCHAR* FileName)
+{
+	EnemyStatusTable = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, FileName));
+}
+
+void AEnemy::SetAnimationInstanceClass(const TCHAR* FileName)
+{
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstance(FileName);
+	if (AnimInstance.Succeeded())
+	{
+		GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		GetMesh()->SetAnimInstanceClass(AnimInstance.Class);
+	}
 }
 
 // Called every frame
@@ -500,4 +534,34 @@ void AEnemy::AttackEnd()
 void AEnemy::ReactionEnd()
 {
 	ChangeEnemyState(EEnemyState::ENone);
+}
+
+void AEnemy::SetIdleAnimSequence(const TCHAR* FileName)
+{
+	IdleAnimSequence = Cast<UAnimSequence>(StaticLoadObject(UAnimSequence::StaticClass(), nullptr, FileName));
+}
+
+void AEnemy::SetDeadAnimMontage(const TCHAR* FileName)
+{
+	DeadAnimMontage = Cast<UAnimMontage>(StaticLoadObject(UAnimMontage::StaticClass(), nullptr, FileName));
+}
+
+void AEnemy::SetHitReactionFwdAnimMontage(const TCHAR* FileName)
+{
+	HitReactionFWDAnimMontage = Cast<UAnimMontage>(StaticLoadObject(UAnimMontage::StaticClass(), nullptr, FileName));
+}
+
+void AEnemy::SetHitReactionRightAnimMontage(const TCHAR* FileName)
+{
+	HitReactionRightAnimMontage = Cast<UAnimMontage>(StaticLoadObject(UAnimMontage::StaticClass(), nullptr, FileName));
+}
+
+void AEnemy::SetHitReactionLeftAnimMontage(const TCHAR* FileName)
+{
+	HitReactionLeftAnimMontage = Cast<UAnimMontage>(StaticLoadObject(UAnimMontage::StaticClass(), nullptr, FileName));
+}
+
+void AEnemy::SetHitReactionBwdAnimMontage(const TCHAR* FileName)
+{
+	HitReactionBWDAnimMontage = Cast<UAnimMontage>(StaticLoadObject(UAnimMontage::StaticClass(), nullptr, FileName));
 }

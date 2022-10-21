@@ -19,6 +19,17 @@ AEnemyWhiteWarrior::AEnemyWhiteWarrior()
 	AttackBoxComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "AttackSocket");
 	AttackBoxComponent->SetCollisionProfileName("EnemyAttack");
 
+	SetStatusTable(TEXT("/Game/_Game/Enemys/WhiteWarrior/WhiteWarriorStatusTable"));
+	SetBehaviorTree(TEXT("/Game/_Game/Enemys/WhiteWarrior/BT_WhiteWarrior"));
+	SetAnimationInstanceClass(TEXT("/Game/_Game/Enemys/WhiteWarrior/BP_WhiteWarriorAnim"));
+
+	SetIdleAnimSequence(TEXT("AnimSequence'/Game/_Game/Enemys/WhiteWarrior/Animations/WhiteWarrior_Idle.WhiteWarrior_Idle'"));
+	SetDeadAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/WhiteWarrior/Animations/WhiteWarrior_Death_Montage.WhiteWarrior_Death_Montage'"));
+	SetHitReactionFwdAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/WhiteWarrior/Animations/WhiteWarrior_Hit_Fwd_Montage.WhiteWarrior_Hit_Fwd_Montage'"));
+	SetHitReactionRightAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/WhiteWarrior/Animations/WhiteWarrior_Hit_Right_Montage.WhiteWarrior_Hit_Right_Montage'"));
+	SetHitReactionLeftAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/WhiteWarrior/Animations/WhiteWarrior_Hit_Left_Montage.WhiteWarrior_Hit_Left_Montage'"));
+	SetHitReactionBwdAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/WhiteWarrior/Animations/WhiteWarrior_Hit_Bwd_Montage.WhiteWarrior_Hit_Bwd_Montage'"));
+
 	AddNewAbility<USphereComponent>("DefaultAttack", 2.0f, 1.0f, 100'000, {
 		"AnimMontage'/Game/_Game/Enemys/WhiteWarrior/Animations/WhiteWarrior_Attack_A_Montage.WhiteWarrior_Attack_A_Montage'",
 		"AnimMontage'/Game/_Game/Enemys/WhiteWarrior/Animations/WhiteWarrior_Attack_B_Montage.WhiteWarrior_Attack_B_Montage'",

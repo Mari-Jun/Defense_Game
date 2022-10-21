@@ -8,7 +8,8 @@ public class DefenseGame : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AIModule", "GameplayTasks", "NavigationSystem", "Niagara" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AIModule",
+			"GameplayTasks", "NavigationSystem", "Niagara", "AssetRegistry" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

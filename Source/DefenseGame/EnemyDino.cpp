@@ -16,6 +16,17 @@ AEnemyDino::AEnemyDino()
 	BiteAttackSphereComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "BiteAttackSocket");
 	BiteAttackSphereComponent->SetCollisionProfileName("EnemyAttack");
 
+	SetStatusTable(TEXT("/Game/_Game/Enemys/Dino/DinoStatusTable"));
+	SetBehaviorTree(TEXT("/Game/_Game/Enemys/Dino/BT_Dino"));
+	SetAnimationInstanceClass(TEXT("/Game/_Game/Enemys/Dino/BP_DinoAnim"));
+
+	SetIdleAnimSequence(TEXT("AnimSequence'/Game/_Game/Enemys/Dino/Animations/Dino_Idle.Dino_Idle'"));
+	SetDeadAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/Dino/Animations/Dino_DeathMontage.Dino_DeathMontage'"));
+	SetHitReactionFwdAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/Dino/Animations/Dino_HitFWDMontage.Dino_HitFWDMontage'"));
+	SetHitReactionRightAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/Dino/Animations/Dino_HitRightMontage.Dino_HitRightMontage'"));
+	SetHitReactionLeftAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/Dino/Animations/Dino_HitLeftMontage.Dino_HitLeftMontage'"));
+	SetHitReactionBwdAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/Dino/Animations/Dino_HitBWDMontage.Dino_HitBWDMontage'"));
+
 	AddNewAbility<USphereComponent>("DefaultAttack", 2.0f, 1.0f, 100'000, {
 		"AnimMontage'/Game/_Game/Enemys/Dino/Animation/Dino_Attack_A_Montage.Dino_Attack_A_Montage'",
 		"AnimMontage'/Game/_Game/Enemys/Dino/Animation/Dino_Attack_B_Montage.Dino_Attack_B_Montage'",

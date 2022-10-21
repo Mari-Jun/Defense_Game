@@ -108,6 +108,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void SetBehaviorTree(const TCHAR* FileName);
+	void SetStatusTable(const TCHAR* FileName);
+	void SetAnimationInstanceClass(const TCHAR* FileName);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -192,12 +196,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void ReactionEnd();
 
-private:
+protected:
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
 	UBehaviorTree* BehaviorTree;
 
-
-protected:
 	AEnemyController* EnemyController;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
@@ -274,4 +276,11 @@ public:
 	EEnemyState GetEnemyState() const { return EnemyState; }
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 	void SetEnemyLevel(int32 Level) { EnemyStatusData.Level = Level; }
+
+	void SetIdleAnimSequence(const TCHAR* FileName);
+	void SetDeadAnimMontage(const TCHAR* FileName);
+	void SetHitReactionFwdAnimMontage(const TCHAR* FileName);
+	void SetHitReactionRightAnimMontage(const TCHAR* FileName);
+	void SetHitReactionLeftAnimMontage(const TCHAR* FileName);
+	void SetHitReactionBwdAnimMontage(const TCHAR* FileName);
 };

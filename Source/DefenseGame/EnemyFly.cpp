@@ -20,6 +20,17 @@ AEnemyFly::AEnemyFly()
 	EnemyStatusData.AttackSpeed = 350.f;
 	EnemyStatusData.ReactionSpeed = 300.f;
 
+	SetStatusTable(TEXT("/Game/_Game/Enemys/Fly/FlyStatusTable"));
+	SetBehaviorTree(TEXT("/Game/_Game/Enemys/Fly/BT_Fly"));
+	SetAnimationInstanceClass(TEXT("/Game/_Game/Enemys/Fly/BP_FlyAnim"));
+
+	SetIdleAnimSequence(TEXT("AnimSequence'/Game/_Game/Enemys/Fly/Animations/Fly_Idle.Fly_Idle'"));
+	SetDeadAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/Fly/Animations/Fly_Death_Montage.Fly_Death_Montage'"));
+	SetHitReactionFwdAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/Fly/Animations/Fly_HitFWDMontage.Fly_HitFWDMontage'"));
+	SetHitReactionRightAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/Fly/Animations/Fly_HitRightMontage.Fly_HitRightMontage'"));
+	SetHitReactionLeftAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/Fly/Animations/Fly_HitLeftMontage.Fly_HitLeftMontage'"));
+	SetHitReactionBwdAnimMontage(TEXT("AnimMontage'/Game/_Game/Enemys/Fly/Animations/Fly_HitBWDMontage.Fly_HitBWDMontage'"));
+
 	AddNewAbility<USphereComponent>("DefaultAttack", 2.0f, 1.0f, 100'000, {
 		"AnimMontage'/Game/_Game/Enemys/Fly/Animation/Fly_Attack_A_Montage.Fly_Attack_A_Montage'",
 		"AnimMontage'/Game/_Game/Enemys/Fly/Animation/Fly_Attack_B_Montage.Fly_Attack_B_Montage'",
