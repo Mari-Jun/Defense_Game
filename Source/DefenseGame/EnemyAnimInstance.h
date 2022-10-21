@@ -21,6 +21,18 @@ public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+protected:
+	UFUNCTION()
+	virtual void AnimNotify_FinishDeath();
+	UFUNCTION()
+	virtual void AnimNotify_ReactionEnd();
+	UFUNCTION()
+	virtual void AnimNotify_AttackHitStart();
+	UFUNCTION()
+	virtual void AnimNotify_AttackHitEnd();
+	UFUNCTION()
+	virtual void AnimNotify_AttackEnd();
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 	AEnemy* Enemy = nullptr;

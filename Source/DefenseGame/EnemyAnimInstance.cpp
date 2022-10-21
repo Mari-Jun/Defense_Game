@@ -30,3 +30,43 @@ void UEnemyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		Speed = Enemy->GetVelocity().Length();
 	}
 }
+
+void UEnemyAnimInstance::AnimNotify_FinishDeath()
+{
+	if (Enemy != nullptr)
+	{
+		Enemy->FinishDeath();
+	}
+}
+
+void UEnemyAnimInstance::AnimNotify_ReactionEnd()
+{
+	if (Enemy != nullptr)
+	{
+		Enemy->ReactionEnd();
+	}
+}
+
+void UEnemyAnimInstance::AnimNotify_AttackHitStart()
+{
+	if (Enemy != nullptr)
+	{
+		Enemy->AttackHitStart();
+	}
+}
+
+void UEnemyAnimInstance::AnimNotify_AttackHitEnd()
+{
+	if (Enemy != nullptr)
+	{
+		Enemy->AttackHitEnd();
+	}
+}
+
+void UEnemyAnimInstance::AnimNotify_AttackEnd()
+{
+	if (Enemy != nullptr)
+	{
+		Enemy->AttackEnd();
+	}
+}
